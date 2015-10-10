@@ -8,6 +8,7 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include "scanner.h"
 
 int main(int argc, char **argv)
@@ -28,14 +29,13 @@ int main(int argc, char **argv)
 		return 99;
 	}
 	
-
 	do
 	{
 		token = getToken(input,&attr);
-		if(token == T_Error) printf("Chyba: ");
+		if(token == T_Error) exit(1);
 		printf("%s %d\n",attr.str,token);
 	}while(token != 35);	//T_EOF
-
+	
 	fclose(input);		// zavre vstupny subor
 	strFree(&attr);		// uvolni string z pamete
 	return 0;

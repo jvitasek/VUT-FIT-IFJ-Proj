@@ -1,14 +1,11 @@
+/* Program : Vypocet faktorialu (iterativne) */
 int main()
 {
-	//s
-	int a=0;
-	/*dasdas
-	dasdasd
-	*/
+	int a;
 	int vysl;
 	cout << "Zadajte_cislo_pro_vypocet_faktorialu:_";
 	cin >> a;
-	if (a < 0)
+	if (a < 0)	// cin nacitani zaporneho cisla nemusi podporovat
 	{
 		cout << "Faktorial_nelze_spocitat!\n";
 	}

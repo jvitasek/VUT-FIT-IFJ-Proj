@@ -30,6 +30,7 @@ typedef enum
 	S_RightBeak,// (pravy zobak) > alebo >= alebo >>
 	S_EqOrAss,	// rovnost == alebo priradenie =
 	S_NotEqual,	// nerovnost !=
+	S_EscSeq,	// escape sekvence
 } S_State;
 
 // Typy tokenov

@@ -12,7 +12,39 @@
 #include <string.h>
 #include "scanner.h"
 
+/*
+ * Funkcia, ktora nam kontroluje ci bola zadana platna escape sekvencia.
+ * V pripade, ze ano, vracia jej integer hodnotu.
+ * V pripade, ze nie, vracia hodnotu -1
+ */
+int escapeSeq(FILE *myInput)
+{
+	string pom;				// pomocny string
+	strInit(&pom);			// inicializujem ho
+	strAppend(&pom,'0');	// escape sekvenci si ulozim v tvare 0xhex.cislo aby sa dalo lahko prekonvertovat do int
+	strAppend(&pom,'x');
+	char a = fgetc(myInput);		// nacitam prvy znak hexa cisla
+	if((isdigit(a)) || ((a >= 'a') && ( a <= 'f')) || ((a >= 'A') && ( a <= 'F')))	// kontrola ci je v danom rozsahu prva cifra hexa cisla
+	{
+		strAppend(&pom,a);	// pridam na koniec pom retazca
+	}else return -1;	// ak nie je, tak ide o neplatnu escape sekvenci => Error
+	a = fgetc(myInput);		// nacitam druhy znak hexa cisla
+	if((isdigit(a)) || ((a >= 'a') && ( a <= 'f')) || ((a >= 'A') && ( a <= 'F')))	// kontrola ci je v danom rozsahu druha cifra hexa cisla
+	{
+		strAppend(&pom,a);	// pridam na koniec pom retazca
+	}else return -1;	// ak nie je, tak ide o neplatnu escape sekvenci => Error
+	int es = (int)strtol(pom.str, NULL, 0);		// prekonvertujem hexa cislo na int
+	strFree(&pom);	// uvolnim pomocny string
+	if(es == 0)
+	{
+		return -1;	// \x00 je neplatna... az od \01
+	}else return es;	// int hodnota zadanej esc.sekvencie
+}
 
+/*
+ * Funkcia, ktora rozsekava vstupny subor na jednotlive lexemy.
+ * Konecny stavovy automat.
+ */
 T_Type getToken(FILE *input, string *attr)
 {
 	char c;						// premenna na nacitavanie znaku
@@ -25,7 +57,7 @@ T_Type getToken(FILE *input, string *attr)
 		if((c = fgetc(input)) == EOF)	// nacitanie prveho znaku
 		{
 			go = 0;		// koniec subora => ukoncenie cyklu
-			if((state == S_ComBlock) || (state == S_ComEnd))	// kontrolujem ci sme neboli v blokovom komentare ked sme prisli na koniec subora => komentar nebol ukonceny
+			if(state != S_Start)//(state == S_ComBlock) || (state == S_ComEnd) || (state == S_Str))	// kontrolujem ci sme neboli v blokovom komentare/retazci ked sme prisli na koniec subora => komentar/retazec nebol ukonceny
 			{
 				return T_Error;
 			}else return T_EOF;		// koniec subora
@@ -214,6 +246,9 @@ T_Type getToken(FILE *input, string *attr)
 					{
 						strAppend(attr,c);
 						return T_Str;
+					}else if(c == '\\')		// ide o escape sekvenci
+					{
+						state = S_EscSeq;	
 					}else 	// inak pridavam znaky do stringu
 					{
 						strAppend(attr,c);
@@ -295,6 +330,37 @@ T_Type getToken(FILE *input, string *attr)
 					{
 						return T_Error;		// inak ide o chybu
 					}
+					break;
+				case S_EscSeq:		// escape sekvencia
+					if(c == '"')	// ide o '\"'
+					{
+						strAppend(attr,'\"');	// az tu pridam aj spolu s '\' 
+						state = S_Str;			// vratim sa do stavu nacitavania retazca
+					}else if(c == 'n')	// ide o '\n'
+					{
+						strAppend(attr,'\n');	// az tu pridam aj spolu s '\' 
+						state = S_Str;			// vratim sa do stavu nacitavania retazca
+					}else if(c == '\\')	// ide o '\\'
+					{
+						strAppend(attr,'\\');	// az tu pridam aj spolu s '\' 
+						state = S_Str;			// vratim sa do stavu nacitavania retazca
+					}else if(c == 't')	// ide o '\t'
+					{
+						strAppend(attr,'\t');	// az tu pridam aj spolu s '\' 
+						state = S_Str;			// vratim sa do stavu nacitavania retazca
+					}else if(c == 'x')	// ide o obecnu escape sekvenci
+					{
+						
+						int esc = escapeSeq(input);		// volam funkciu, ktora mi vypocita int hodnotu danej sekvencie
+						if(esc == -1)
+						{
+							return T_Error;	// bola zadana neplatna escape sekvence
+						}else
+						{
+							strAppend(attr,esc);	// pridam uz vysledok escape sekvence do retazca
+							state = S_Str;	// dalej nacitavam retazec
+						}
+					}else return T_Error;	/////////////////// inak ide zrejme o error ???????????
 					break;
 				default:
 					break;
