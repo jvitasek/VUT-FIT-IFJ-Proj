@@ -28,6 +28,21 @@
 <type>			->		int
 <type>			->		double
 <type>			->		string
+<op>			->		+
+<op>			->		-
+<op>			->		*
+<op>			->		/
+<op>			->		=
+<op>			->		<
+<op>			->		>
+<op>			->		<<
+<op>			->		>>
+<op>			->		<=
+<op>			->		>=
+<op>			->		==
+int
+double
+string
 auto
 cin
 cout
