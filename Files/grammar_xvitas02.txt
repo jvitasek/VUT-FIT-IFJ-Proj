@@ -10,6 +10,9 @@
 <f_cycle>		->		for(<var>; <expr>; <assign>) <cmd_seq>
 <cmd_seq>		->		E
 <cmd_seq>		->		{<def_or_cmd> <def_or_cmd_n>}
+<def_or_cmd>	->		E
+<def_or_cmd>	->		<var>
+<def_or_cmd>	->		<cmd>
 <def_or_cmd_n>	->		<def_or_cmd> <def_or_cmd_n>
 <def_or_cmd_n>	->		E
 <cmd>			->		<assign>
