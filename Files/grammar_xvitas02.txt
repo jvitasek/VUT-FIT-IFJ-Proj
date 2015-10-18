@@ -1,29 +1,31 @@
-<assign>	->		id = id;
-<var>		->		<type> id = <expr>;
-<func_def>	->		<type> id(<params>) <cmd_seq>
-<params>	->		<type> id <params_n>
-<params>	->		E
-<params_n>	->		, <type> id <params_n>
-<params_n>	->		E
-<func_dec>	->		<type> id(<params>);
-<cond>		->		if(<expr>) <cmd_seq> else <cmd_seq>
-<f_cycle>	->		for(<var>; <expr>; <assign>) <cmd_seq>
-<cmd_seq>	->		E
-<cmd_seq>	->		<cmd>;<cmd_seq>
-<cmd>		->		<assign>
-<cmd>		->		<cond>
-<cmd>		->		<cycle>
-<cmd>		->		<ret>
-<cin>		->		cin >> <id> <id_cin>;
-<id_cin>	->		>> <id> <id_cin>
-<id_cin>	->		E
-<cout>		->		cout << <id> <id_cout>;
-<id_cout>	->		<< <id> <id_cout>
-<id_cout>	->		E
-<ret>		->		return <expr>;
-<type>		->		int
-<type>		->		double
-<type>		->		string
+<assign>		->		id = id;
+<var>			->		<type> id = <expr>;
+<func_def>		->		<type> id(<params>) <cmd_seq>
+<params>		->		<type> id <params_n>
+<params>		->		E
+<params_n>		->		, <type> id <params_n>
+<params_n>		->		E
+<func_dec>		->		<type> id(<params>);
+<cond>			->		if(<expr>) <cmd_seq> else <cmd_seq>
+<f_cycle>		->		for(<var>; <expr>; <assign>) <cmd_seq>
+<cmd_seq>		->		E
+<cmd_seq>		->		{<def_or_cmd> <def_or_cmd_n>}
+<def_or_cmd_n>	->		<def_or_cmd> <def_or_cmd_n>
+<def_or_cmd_n>	->		E
+<cmd>			->		<assign>
+<cmd>			->		<cond>
+<cmd>			->		<cycle>
+<cmd>			->		<ret>
+<cin>			->		cin >> <id> <id_cin>;
+<id_cin>		->		>> <id> <id_cin>
+<id_cin>		->		E
+<cout>			->		cout << <id> <id_cout>;
+<id_cout>		->		<< <id> <id_cout>
+<id_cout>		->		E
+<ret>			->		return <expr>;
+<type>			->		int
+<type>			->		double
+<type>			->		string
 auto
 cin
 cout
