@@ -8,7 +8,6 @@
 <func_dec>		->		<type> id(<params>);
 <cond>			->		if(<expr>) <cmd_seq> else <cmd_seq>
 <f_cycle>		->		for(<var>; <expr>; <assign>) <cmd_seq>
-<cmd_seq>		->		E
 <cmd_seq>		->		{<def_or_cmd> <def_or_cmd_n>}
 <def_or_cmd>	->		E
 <def_or_cmd>	->		<var>
