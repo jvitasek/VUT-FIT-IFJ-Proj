@@ -1,0 +1,41 @@
+<var>		->	<type> ID = <expr>;	\ nebo dát auto
+<var>		->	auto ID = <expr>;	/ jako <type> ?
+<var>		->	<type> ID;
+<func_def>	->	<type> ID ( <params> ) <comm>
+<params>	->	<type> ID <params_n>
+<params>	->	E
+<params_n>	->	, <type> ID <params_n>
+<params_n>	->	E
+<comm>		->	...............
+<comm_seq>	->	{ <def_comm> <def_comm_n> }
+<def_comm>	->	E
+<def_comm>	->	<comm>
+<def_comm>	->	<var>
+<def_comm_n>	->	E
+<def_comm_n>	->	<def_comm> <def_comm_n>
+<func_dec>	->	<type> ID ( <params> );
+<call_func>	->	id = <func>	// mìlo by tu být?? protože jinak tu nikde
+<func>		->	ID ( <params> ); //nevidim nic, jak by se dalo volani sestavit
+<expr>		->	......termy, závorky, operátory.........
+<assign>	->	ID = <expr>;
+<assign>	->	ID = ID;
+<for_assign>	->	ID = ID		// protoze ve foru po pøiøazení není ;
+<for_assign>	->	ID = <expr>
+<cond>		->	if ( <expr> ) <comm_seq> else <comm_seq>
+<for>		->	for ( <var> <expr> <for_assign> ) <comm_seq>
+<return>	->	return <expr>;
+<cin>		->	
+<cout>		->
+<type>		->	int
+<type>		->	double
+<type>		->	string
+auto
+cin
+cout
+double
+else
+for
+if
+int
+return
+string
