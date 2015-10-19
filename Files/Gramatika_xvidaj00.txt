@@ -1,0 +1,92 @@
+	/*		Premenna 	*/
+<VarDef>		-> <Type> Id <Init> ;
+<VarDef>		-> auto Id <InitAuto> ;
+<Type>			-> int
+<Type>			-> double
+<Type> 			-> string
+<Init>			-> = <Exp>
+<Init>			-> E
+<InitAuto>		-> = <Exp>
+
+
+	/*		Definice funkce		*/
+<FuncDef>		-> <Type> Id ( <Params> ) <Com_Seq>
+<Params>		-> <Type> Id <Params_n>
+<Params>		-> E
+<Params_n>		-> , <Type> Id <Params_n>
+<Params_n>		-> E
+
+
+	/*		Deklarace funkce 	*/
+<FuncDec>		-> <Type> Id ( <Params> ) ;
+
+
+	/* 		Prikaz priradenia	*/
+<Assign>		-> Id = <Exp> ;
+
+
+	/*		Podmieneny prikaz 	*/
+<Cond>			-> if ( <Exp> ) <Com_Seq> else <Com_Seq>
+
+
+	/*  	For cyklus			*/
+<ForLoop>		-> for ( <VarDef> ; <Exp> ; <Assign> ) <Com_Seq>
+
+
+	/*		Volanie funkcie		*/
+<CallFunc>		-> Id = Id( <Term> ) ;
+<Term>			-> int <Term_n>
+<Term>			-> double <Term_n>
+<Term>			-> string <Term_n>
+<Term>			-> Id <Term_n>
+<Term>			-> E
+<Term_n>		-> , int <Term_n>
+<Term_n>		-> , double <Term_n>
+<Term_n>		-> , string <Term_n>
+<Term_n>		-> , Id <Term_n>
+<Term_n>		-> E
+
+
+	/*		Prikaz navratu z funkcie	*/
+<RetFunc>		-> return <Exp> ;
+
+
+	/*		Prikaz pre nacitanie hodnoty zo vstupu		*/
+<Cin>			-> cin >> <CinId> ;
+<CinId>			-> Id <CinId_n>
+<CinId_n>		-> >> Id <CinId_n>
+<CinId_n>		-> E
+
+
+	/*		Prikaz pro vypis hodnot 	*/
+<Cout>			-> cout << <CoutTerm> ;
+<CoutTerm>		-> int <CoutTerm_n>
+<CoutTerm>		-> double <CoutTerm_n>
+<CoutTerm>		-> string <CoutTerm_n>
+<CoutTerm>		-> Id <CoutTerm_n>
+<CoutTerm_n>	-> << int <CoutTerm_n>
+<CoutTerm_n>	-> << double <CoutTerm_n>
+<CoutTerm_n>	-> << string <CoutTerm_n>
+<CoutTerm_n>	-> << Id <CoutTerm_n>
+<CoutTerm_n>	-> E 
+
+
+	/* 		Slozeny prikaz 		*/
+<Com_Seq>		-> { <Def_Or_Com> }
+<Def_Or_Com>	-> <VarDef> <Def_Or_Com_n>
+<Def_Or_Com>	-> <Coms> <Def_Or_Com_n>
+<Coms>			-> <Assign>
+<Coms>			-> <Cond>
+<Coms>			-> <ForLoop>
+<Coms>			-> <CallFunc>
+<Coms>			-> <RetFunc>
+<Coms>			-> <Cin>
+<Coms>			-> <Cout>
+<Def_Or_Com>	-> E
+<Def_Or_Com_n>	-> <VarDef> <Def_Or_Com_n>
+<Def_Or_Com_n>	-> <Coms> <Def_Or_Com_n>
+<Def_Or_Com_n>	-> E
+
+
+	/*	????Vyraz(Expression)????	*/
+<Exp>			-> 
