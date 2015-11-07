@@ -1,7 +1,6 @@
 	/*		Program		*/
 <PROGRAM>		-> <FUN_SEQ> int main() <COM_SEQ>
-<FUN_SEQ>		-> <FUN_DEC> <FUN_SEQ>
-<FUN_SEQ>		-> <FUN_DEF> <FUN_SEQ>
+<FUN_SEQ>		-> <FUN_DEC_OR_DEF> <FUN_SEQ>
 <FUN_SEQ>		-> E
 
 
@@ -15,16 +14,14 @@
 <VAR_INIT>		-> E
 
 
-	/*		Definice funkce		*/
-<FUN_DEF>		-> <TYPE> id ( <PARAMS> ) <COM_SEQ>
+	/*		Deklaracia/definicia funkcie		*/
+<FUN_DEC_OR_DEF> ->	<TYPE> id ( <PARAMS> ) <DEC_OR_DEF>
+<DEC_OR_DEF>	-> <COM_SEQ>
+<DEC_OR_DEF>	-> ;
 <PARAMS>		-> <TYPE> id <PARAMS_N>
 <PARAMS>		-> E
 <PARAMS_N>		-> , <TYPE> id <PARAMS_N>
 <PARAMS_N>		-> E
-
-
-	/*		Deklarace funkce 	*/
-<FUN_DEC>		-> <TYPE> id ( <PARAMS> ) ;
 
 
 	/* 		Prikaz priradenia	*/
@@ -40,18 +37,15 @@
 
 
 	/*		Volanie funkcie		*/
-<FUN_CALL>		-> id = id( <TERM> ) ;
-<TERM>			-> int <TERM_N>
-<TERM>			-> double <TERM_N>
-<TERM>			-> string <TERM_N>
-<TERM>			-> id <TERM_N>
-<TERM>			-> E
-<TERM_N>		-> , int <TERM_N>
-<TERM_N>		-> , double <TERM_N>
-<TERM_N>		-> , string <TERM_N>
-<TERM_N>		-> , id <TERM_N>
-<TERM_N>		-> E
-
+<FUN_CALL>		-> id = id( <TERM_OR_EPS> ) ;
+<TERM_OR_EPS>	-> <TERM> <TERM_OR_EPS_N>
+<TERM_OR_EPS>	-> E
+<TERM_OR_EPS_N>	-> , <TERM> <TERM_OR_EPS_N>
+<TERM_OR_EPS_N>	-> E
+<TERM>			-> int
+<TERM>			-> double
+<TERM>			-> string
+<TERM>			-> id
 
 	/*		Prikaz navratu z funkcie	*/
 <FUN_RET>		-> return <EXPR> ;
@@ -65,14 +59,8 @@
 
 	/*		Prikaz pro vypis hodnot 	*/
 <COUT>			-> cout << <COUT_TERM> ;
-<COUT_TERM>		-> int <COUT_TERM_N>
-<COUT_TERM>		-> double <COUT_TERM_N>
-<COUT_TERM>		-> string <COUT_TERM_N>
-<COUT_TERM>		-> id <COUT_TERM_N>
-<COUT_TERM_N>	-> << int <COUT_TERM_N>
-<COUT_TERM_N>	-> << double <COUT_TERM_N>
-<COUT_TERM_N>	-> << string <COUT_TERM_N>
-<COUT_TERM_N>	-> << id <COUT_TERM_N>
+<COUT_TERM>		-> <TERM> <COUT_TERM_N>
+<COUT_TERM_N>	-> << <COUT_TERM>
 <COUT_TERM_N>	-> E 
 
 
@@ -93,7 +81,7 @@
 <DEF_OR_COM_N>	-> E
 
 
-	/*	????Vyraz(EXPRression)????	*/
+	/*		Vyraz(EXPRression)		*/
 <EXPR>			-> <EXPR> <OP> <EXPR>
 <OP>			-> +
 <OP>			-> -
