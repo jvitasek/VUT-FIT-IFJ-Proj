@@ -1,41 +1,77 @@
-<var>		->	<type> ID = <expr>;	\ nebo dát auto
-<var>		->	auto ID = <expr>;	/ jako <type> ?
-<var>		->	<type> ID;
-<func_def>	->	<type> ID ( <params> ) <comm>
-<params>	->	<type> ID <params_n>
-<params>	->	E
-<params_n>	->	, <type> ID <params_n>
-<params_n>	->	E
-<comm>		->	...............
-<comm_seq>	->	{ <def_comm> <def_comm_n> }
-<def_comm>	->	E
-<def_comm>	->	<comm>
-<def_comm>	->	<var>
-<def_comm_n>	->	E
-<def_comm_n>	->	<def_comm> <def_comm_n>
-<func_dec>	->	<type> ID ( <params> );
-<call_func>	->	id = <func>	// mìlo by tu být?? protože jinak tu nikde
-<func>		->	ID ( <params> ); //nevidim nic, jak by se dalo volani sestavit
-<expr>		->	......termy, závorky, operátory.........
-<assign>	->	ID = <expr>;
-<assign>	->	ID = ID;
-<for_assign>	->	ID = ID		// protoze ve foru po pøiøazení není ;
-<for_assign>	->	ID = <expr>
-<cond>		->	if ( <expr> ) <comm_seq> else <comm_seq>
-<for>		->	for ( <var> <expr> <for_assign> ) <comm_seq>
-<return>	->	return <expr>;
-<cin>		->	
-<cout>		->
-<type>		->	int
-<type>		->	double
-<type>		->	string
-auto
-cin
-cout
-double
-else
-for
-if
-int
-return
-string
+LL gramatika
+
+1)	<PROGRAM>		->	<FUNC_N> <COMM_SEQ>
+2)	<FUNC_N>		->	<FUNC> <FUNC_N>
+3)	<FUNC_N>		->	E
+
+4)	<VAR_DEF>		->	<TYPE> id <INIT>;
+5)	<VAR_DEF>		->	auto id <INIT>;
+6)	<INIT>			-> 	= <EXPR>
+7)	<INIT>			->	E
+8)	<TYPE>			->	int
+9)	<TYPE>			->	double
+10)	<TYPE>			-> 	string
+
+11)	<FUNC>			-> 	<TYPE> id <PAR_DEF_LIST> <DEC_OR_DEF>
+12)	<DEC_OR_DEF>		->	<COMM_SEQ>
+13)	<DEC_OR_DEF>		->	;
+14)	<PAR_DEF_LIST>		->	( <PARAMS> )
+15)	<PARAMS>		-> 	<TYPE> id <PARAMS_N>
+16)	<PARAMS>		-> 	E
+17)	<PARAMS_N>		-> 	, <TYPE> id <PARAMS_N>
+18)	<PARAMS_N>		-> 	E
+
+19)	<FUNC_CALL>		->	id = id( <TERMS> );
+20)	<TERMS>			-> 	id <TERMS_N>
+21)	<TERMS>			-> 	E
+22)	<TERMS>			-> 	term <TERMS_N>
+23)	<TERMS_N>		-> 	, id <TERMS_N>
+24)	<TERMS_N>		-> 	, term <TERMS_N>
+25)	<TERMS_N>		-> 	E
+
+26)	<COMM_SEQ>		-> 	{ <STMT_LIST> }
+27)	<STMT_LIST>		->	<STMT> <STMT_LIST>
+28)	<STMT_LIST>		->	E
+29)	<STMT>			->	<ASSIGN> ;
+30)	<STMT>			->	if <EXPR> <COMM_SEQ> <IF_N>
+31)	<STMT>			->	for( <VAR_DEF> <EXPR> <ASSIGN> ) <COMM_SEQ>
+32)	<STMT>			->	{ <COMM_SEQ> }
+33)	<STMT>			->	<FUNC_CALL>
+34)	<STMT>			->	<VAR_DEF>
+35)	<STMT>			->	cin >> id <CIN_ID_N>;
+36)	<STMT>			->	cout << <COUT_TERM>;
+37)	<STMT>			->	<RETURN>
+38)	<ASSIGN>		->	id = <EXPR> 
+39)	<CIN_ID_N>		-> 	>> id <CIN_ID_N>
+40)	<CIN_ID_N>		-> 	E
+41)	<COUT_TERM>		-> 	id <COUT_TERM_N>
+42)	<COUT_TERM>		-> 	term <COUT_TERM_N>
+43)	<COUT_TERM_N>		-> 	<< <COUT_TERM_N>
+44)	<COUT_TERM_N>		-> 	<< <COUT_TERM_N>
+45)	<COUT_TERM_N>		-> 	E
+46)	<RETURN>		->	return <EXPR>;
+47)	<IF_N>			->	else <COMM_SEQ>
+48)	<IF_N>			->	E
+
+
+
+Gramatika pro výrazy
+
+<EXPR>		->	( <EXPR> )
+<EXPR>		->	term
+<EXPR>		->	id
+<EXPR>		->	id( )
+<EXPR>		->	id( arg <ARG_N> )
+<ARG_N>		->	, arg <ARG_N>
+<ARG_N>		->	E
+<EXPR>		->	<EXPR> + <EXPR>
+<EXPR>		->	<EXPR> - <EXPR>
+<EXPR>		->	<EXPR> * <EXPR>
+<EXPR>		->	<EXPR> / <EXPR>
+<EXPR>		->	<EXPR> < <EXPR>
+<EXPR>		->	<EXPR> > <EXPR>
+<EXPR>		->	<EXPR> <= <EXPR>
+<EXPR>		->	<EXPR> >= <EXPR>
+<EXPR>		->	<EXPR> == <EXPR>
+<EXPR>		->	<EXPR> != <EXPR>
+
