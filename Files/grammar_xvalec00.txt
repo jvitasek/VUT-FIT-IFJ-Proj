@@ -1,6 +1,6 @@
 LL gramatika
 
-1)	<PROGRAM>		->	<FUNC_N> <COMM_SEQ>
+1)	<PROGRAM>		->	<FUNC_N>
 2)	<FUNC_N>		->	<FUNC> <FUNC_N>
 3)	<FUNC_N>		->	E
 
@@ -30,26 +30,27 @@ LL gramatika
 24)	<COMM_SEQ>		-> 	{ <STMT_LIST> }
 25)	<STMT_LIST>		->	<STMT> <STMT_LIST>
 26)	<STMT_LIST>		->	E
-27)	<STMT>			->	<ASSIGN> ;
+27)	<STMT>			->	id = <FCALL_OR_ASSIGN>
 28)	<STMT>			->	if <EXPR> <COMM_SEQ> <IF_N>
 29)	<STMT>			->	for( <VAR_DEF> <EXPR> <ASSIGN> ) <COMM_SEQ>
 30)	<STMT>			->	{ <COMM_SEQ> }
-31)	<STMT>			->	<FUNC_CALL>
-32)	<STMT>			->	<VAR_DEF>
-33)	<STMT>			->	cin >> id <CIN_ID_N>;
-34)	<STMT>			->	cout << <COUT_TERM>;
-35)	<STMT>			->	<RETURN>
-36)	<ASSIGN>		->	id = <EXPR> 
+31)	<STMT>			->	<VAR_DEF>
+32)	<STMT>			->	cin >> id <CIN_ID_N>;
+33)	<STMT>			->	cout << <COUT_TERM>;
+34)	<STMT>			->	<RETURN>
+35)	<ASSIGN>		->	id = <EXPR> 
+36)	<FCALL_OR_ASSIGN>	->	<EXPR> ;
+37)	<FCALL_OR_ASSIGN>	->	id ( <TERMS> );
 
-37)	<CIN_ID_N>		-> 	>> id <CIN_ID_N>
-38)	<CIN_ID_N>		-> 	E
-39)	<COUT_TERM>		-> 	id <COUT_TERM_N>
-40)	<COUT_TERM_N>		-> 	<< <COUT_TERM_N>
-41)	<COUT_TERM_N>		-> 	E
+38)	<CIN_ID_N>		-> 	>> id <CIN_ID_N>
+39)	<CIN_ID_N>		-> 	E
+40)	<COUT_TERM>		-> 	id <COUT_TERM_N>
+41)	<COUT_TERM_N>		-> 	<< <COUT_TERM_N>
+42)	<COUT_TERM_N>		-> 	E
 
-42)	<RETURN>		->	return <EXPR>;
-43)	<IF_N>			->	else <COMM_SEQ>
-44)	<IF_N>			->	E
+43)	<RETURN>		->	return <EXPR>;
+44)	<IF_N>			->	else <COMM_SEQ>
+45)	<IF_N>			->	E
  
 
 Gramatika pro vyrazy
