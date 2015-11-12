@@ -98,3 +98,24 @@
 <EXPR>			-> <TYPE>
 <EXPR>			-> id
 <EXPR>			-> <FUN_CALL>
+
+
+
+
+
+
+
+<PROGRAM>				-> <FUN_SEQ>
+<FUN_SEQ>				-> int <DEC_OR_DEF_OR_MAIN> <FUN_SEQ>
+<FUN_SEQ>				-> <FUN_TYPE> <FUN_DEC_OR_DEF> <FUN_SEQ>
+<FUN_TYPE>				-> double
+<FUN_TYPE>				-> string
+<DEC_OR_DEF_OR_MAIN>	-> main ( ) <COM_SEQ>
+<DEC_OR_DEF_OR_MAIN>	-> id ( <PARAMS> ) <DEC_OR_DEF>
+<FUN_DEC_OR_DEF>		-> id ( <PARAMS> ) <DEC_OR_DEF>
+<DEC_OR_DEF>			-> <COM_SEQ>
+<DEC_OR_DEF>			-> ;
+<PARAMS>		-> <TYPE> id <PARAMS_N>
+<PARAMS>		-> E
+<PARAMS_N>		-> , <TYPE> id <PARAMS_N>
+<PARAMS_N>		-> E
