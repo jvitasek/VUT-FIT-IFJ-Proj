@@ -24,38 +24,35 @@ LL gramatika
 19)	<FUNC_CALL>		->	id = id( <TERMS> );
 20)	<TERMS>			-> 	id <TERMS_N>
 21)	<TERMS>			-> 	E
-22)	<TERMS>			-> 	term <TERMS_N>
-23)	<TERMS_N>		-> 	, id <TERMS_N>
-24)	<TERMS_N>		-> 	, term <TERMS_N>
-25)	<TERMS_N>		-> 	E
+22)	<TERMS_N>		-> 	, id <TERMS_N>
+23)	<TERMS_N>		-> 	E
 
-26)	<COMM_SEQ>		-> 	{ <STMT_LIST> }
-27)	<STMT_LIST>		->	<STMT> <STMT_LIST>
-28)	<STMT_LIST>		->	E
-29)	<STMT>			->	<ASSIGN> ;
-30)	<STMT>			->	if <EXPR> <COMM_SEQ> <IF_N>
-31)	<STMT>			->	for( <VAR_DEF> <EXPR> <ASSIGN> ) <COMM_SEQ>
-32)	<STMT>			->	{ <COMM_SEQ> }
-33)	<STMT>			->	<FUNC_CALL>
-34)	<STMT>			->	<VAR_DEF>
-35)	<STMT>			->	cin >> id <CIN_ID_N>;
-36)	<STMT>			->	cout << <COUT_TERM>;
-37)	<STMT>			->	<RETURN>
-38)	<ASSIGN>		->	id = <EXPR> 
-39)	<CIN_ID_N>		-> 	>> id <CIN_ID_N>
-40)	<CIN_ID_N>		-> 	E
-41)	<COUT_TERM>		-> 	id <COUT_TERM_N>
-42)	<COUT_TERM>		-> 	term <COUT_TERM_N>
-43)	<COUT_TERM_N>		-> 	<< <COUT_TERM_N>
-44)	<COUT_TERM_N>		-> 	<< <COUT_TERM_N>
-45)	<COUT_TERM_N>		-> 	E
-46)	<RETURN>		->	return <EXPR>;
-47)	<IF_N>			->	else <COMM_SEQ>
-48)	<IF_N>			->	E
+24)	<COMM_SEQ>		-> 	{ <STMT_LIST> }
+25)	<STMT_LIST>		->	<STMT> <STMT_LIST>
+26)	<STMT_LIST>		->	E
+27)	<STMT>			->	<ASSIGN> ;
+28)	<STMT>			->	if <EXPR> <COMM_SEQ> <IF_N>
+29)	<STMT>			->	for( <VAR_DEF> <EXPR> <ASSIGN> ) <COMM_SEQ>
+30)	<STMT>			->	{ <COMM_SEQ> }
+31)	<STMT>			->	<FUNC_CALL>
+32)	<STMT>			->	<VAR_DEF>
+33)	<STMT>			->	cin >> id <CIN_ID_N>;
+34)	<STMT>			->	cout << <COUT_TERM>;
+35)	<STMT>			->	<RETURN>
+36)	<ASSIGN>		->	id = <EXPR> 
 
+37)	<CIN_ID_N>		-> 	>> id <CIN_ID_N>
+38)	<CIN_ID_N>		-> 	E
+39)	<COUT_TERM>		-> 	id <COUT_TERM_N>
+40)	<COUT_TERM_N>		-> 	<< <COUT_TERM_N>
+41)	<COUT_TERM_N>		-> 	E
 
+42)	<RETURN>		->	return <EXPR>;
+43)	<IF_N>			->	else <COMM_SEQ>
+44)	<IF_N>			->	E
+â€ƒ
 
-Gramatika pro výrazy
+Gramatika pro vyrazy
 
 <EXPR>		->	( <EXPR> )
 <EXPR>		->	term
