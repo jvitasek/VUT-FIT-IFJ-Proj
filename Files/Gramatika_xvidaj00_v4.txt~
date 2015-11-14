@@ -87,7 +87,7 @@
 <DEF_OR_COM_N>		-> E
 
 
-<EXPR>				-> expresion
+<EXPR>				-> expr
 <EXPR>				-> E
 
 

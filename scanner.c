@@ -57,7 +57,7 @@ T_Type getToken(FILE *input, string *attr)
 		if((c = fgetc(input)) == EOF)	// nacitanie prveho znaku
 		{
 			go = 0;		// koniec subora => ukoncenie cyklu
-			if(state != S_Start)//(state == S_ComBlock) || (state == S_ComEnd) || (state == S_Str))	// kontrolujem ci sme neboli v blokovom komentare/retazci ked sme prisli na koniec subora => komentar/retazec nebol ukonceny
+			if(state != S_Start)// kontrolujem ci sme neni v nejakom stave => stav nebol ukonceny
 			{
 				return T_Error;
 			}else return T_EOF;		// koniec subora
@@ -130,7 +130,7 @@ T_Type getToken(FILE *input, string *attr)
 					{
 						strAppend(attr,c);
 						state = S_Id;
-					}else //if((isspace(c) || (c == ';')) || (c == '(') || (c == '/'))	// koniec identifikatoru, tak skontrolujeme ci nie je klucovym slovom
+					}else 
 					{
 						ungetc(c,input); 	// vratim posledny nacitany znak, ktory uz do id/kluc. slova nepatri
 						
@@ -169,7 +169,7 @@ T_Type getToken(FILE *input, string *attr)
 						{
 							return T_Id;
 						}
-					}//else return T_Error;	// inak vracia error, lebo tam bolo nieco, co tam byt nema
+					}
 					break;
 				case S_Integ:					// cele cisla
 					if(isdigit(c))
@@ -184,11 +184,11 @@ T_Type getToken(FILE *input, string *attr)
 					{
 						strAppend(attr,c);
 						state = S_Expo1;
-					}else //if((isspace(c) || (c == ';')) || (c == ')'))
+					}else
 					{
 						ungetc(c,input); 	// vratim posledny nacitany znak, ktory uz do cisla nepatri
 						return T_Integ;
-					}//else return T_Error;	// inak vracia error, lebo tam bolo nieco, co tam byt nema
+					}
 					break;
 				case S_Des1:		// kontrola ci po '.' nasleduje cislo
 					if(isdigit(c))	// ak ano tak pokracuje na dalsi stav
@@ -235,11 +235,11 @@ T_Type getToken(FILE *input, string *attr)
 					{
 						strAppend(attr,c);
 						state = S_Doub;
-					}else //if((isspace(c) || (c == ';')))
+					}else 
 					{
 						ungetc(c,input);	// vratim posledny nacitany znak
 						return T_Doub;
-					}//else return T_Error;	// inak vracia error, lebo tam bolo nieco, co tam byt nema
+					}
 					break;
 				case S_Str:
 					if(c == '"')	// koniec retazca
@@ -360,7 +360,7 @@ T_Type getToken(FILE *input, string *attr)
 							strAppend(attr,esc);	// pridam uz vysledok escape sekvence do retazca
 							state = S_Str;	// dalej nacitavam retazec
 						}
-					}else return T_Error;	/////////////////// inak ide zrejme o error ???????????
+					}else return T_Error;	// inak error
 					break;
 				default:
 					break;

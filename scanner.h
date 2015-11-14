@@ -1,7 +1,7 @@
 /**
  * Implementace interpretu imperativniho jazyka IFJ15 *
  * 
- * str.h  -  Hlavickovy subor pre scanner
+ * scanner.h  -  Hlavickovy subor pre scanner
  * 
  * Autori:
  * 			xvidaj00 - Juraj Vida

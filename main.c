@@ -9,14 +9,14 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "scanner.h"
+#include "parser.h"
+#include <stdbool.h>
 
 int main(int argc, char **argv)
 {
 	FILE *input;
 	string attr;		// vytvorim si string
 	strInit(&attr);		// inicializujem string
-	T_Type token;		// vytvorim si premennu token
 	if((argc < 2) || (argc > 2))		// kontrola ci bol zadany spravny pocet parametrov na prikaz. riadke
 	{
 		fprintf(stderr,"Spatne patametry prikazove radky.\n");
@@ -28,13 +28,11 @@ int main(int argc, char **argv)
 		fprintf(stderr,"Zlyhanie otvarania suboru.\n");
 		return 99;
 	}
-	
-	do
+	if(func(input,&attr) != true)
 	{
-		token = getToken(input,&attr);
-		if(token == T_Error) exit(1);
-		printf("%s %d\n",attr.str,token);
-	}while(token != 35);	//T_EOF
+		fprintf(stderr,"Program nie je syntakticky spravny!\n");	//pociatocny neterminal
+		return 2;	// Syntakticka chyba
+	}else printf("Vsetko OK!\n");
 	
 	fclose(input);		// zavre vstupny subor
 	strFree(&attr);		// uvolni string z pamete
