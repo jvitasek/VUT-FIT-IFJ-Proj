@@ -1,0 +1,56 @@
+/**
+* -----------------------------------------------------------------------------
+*
+* Implementace interpretu imperativniho jazyka IFJ15
+*
+* Soubor       : ial.h
+* Popis        : IAL funkce
+* Datum        : Listopad 2015
+* Autori       : xvyrou05 - Marek Vyroubal
+*              
+* -----------------------------------------------------------------------------
+**/
+
+#ifndef _IAL_H_
+#define _IAL_H_
+
+#include <stdlib.h>
+#include <string.h>
+
+
+/**
+ * -----------------------------------------------------------------------------
+ * Tabulka symbolu - tabulka s rozptylenymi polozkami
+ * -----------------------------------------------------------------------------
+ **/
+
+/* Maximalni velikost pole pro implementaci vyhledavaci tabulky. */
+#define MAX_HTSIZE 101
+
+/* typ klice */
+typedef char* tKey;
+
+/* typ obsahu */
+typedef float tData;
+
+/* Datova polozka TRP s explicitne retezenymi synonymy */
+ typedef struct tHTItem{
+   tKey key;            // klic 
+   tData data;          // obsah 
+   struct tHTItem* ptrnext;   // ukazatel na dalsi synonymum
+} tHTItem;
+
+/* TRP s explicitne zretezenymi synonymy. */
+typedef tHTItem* tHTable[MAX_HTSIZE];
+extern int HTSIZE;
+
+/* Prototypy funkci */
+int hashCode (tKey key);
+void htInit (tHTable* ptrht);
+tHTItem* htSearch (tHTable* ptrht, tKey key);
+void htInsert (tHTable* ptrht, tKey key, tData data);
+tData* htRead (tHTable* ptrht, tKey key);
+void htDelete (tHTable* ptrht, tKey key);
+void htClearAll (tHTable* ptrht);
+
+#endif
