@@ -13,15 +13,16 @@
 #include "scanner.h"
 
 
-T_Type token;	// globalna premenna pre token
+T_Token token;	// globalna premenna pre token
+int line = 1;
 
 /*
  * Funkcia, ktora ulozi nasledujuci token do globalnej premennej "token"
  */
 void getNextToken(FILE *input, string *attr)
 {
-	token = getToken(input,attr);
-	if(token == T_Error) exit(1);
+	token = getToken(input,attr,&line);
+	if(token.type == T_Error) exit(1);
 }
 
 /*
@@ -30,10 +31,10 @@ void getNextToken(FILE *input, string *attr)
 bool type()
 {
 	bool ret = false;
-	if(token == T_Int)	// pravidlo 2
+	if(token.type == T_Int)	// pravidlo 2
 	{
 		ret = true;
-	}else if(token == T_Double)	// pravidlo 3
+	}else if(token.type == T_Double)	// pravidlo 3
 	{
 		ret = true;
 	}
@@ -46,7 +47,7 @@ bool type()
 bool params_n(FILE *input, string *attr)
 {
 	bool ret = false;
-	if(token == T_Comma)	// pravislo 6
+	if(token.type == T_Comma)	// pravislo 6
 	{
 		// Uz mame ,
 		getNextToken(input,attr);
@@ -55,7 +56,7 @@ bool params_n(FILE *input, string *attr)
 		{
 			// Uz mame , TYPE
 			getNextToken(input,attr);
-			if(token == T_Id)
+			if(token.type == T_Id)
 			{
 				// Uz mame , TYPE id
 				getNextToken(input,attr);
@@ -66,20 +67,20 @@ bool params_n(FILE *input, string *attr)
 					ret = true;	// cize nastavime navratovy hodnotu na true, pretoze syntax je v poriadku
 				}else
 				{
-					fprintf(stderr,"Zle zadane parametre funkcie.\n");
+					fprintf(stderr,"Zle zadane parametre funkcie.\nLine: %d\n",token.line);
 					return false;
 				}
 			}else
 			{
-				fprintf(stderr,"Nebolo zadane id funkcie.\n");
+				fprintf(stderr,"Nebolo zadane id funkcie.\nLine: %d\n",token.line);
 				return false;
 			}
 		}else
 		{
-			fprintf(stderr,"Nebol zadany int/double za \",\".\n");
+			fprintf(stderr,"Nebol zadany int/double za \",\".\nLine: %d\n",token.line);
 			return false;
 		}		 
-	}else if(token == T_RightParenthesis)	//pravidlo 7
+	}else if(token.type == T_RightParenthesis)	//pravidlo 7
 	{
 		ret = true;
 	}
@@ -92,14 +93,14 @@ bool params_n(FILE *input, string *attr)
 bool params(FILE *input, string *attr)
 {
 	bool ret = false;
-	if((token == T_Int) || (token == T_Double))	// pravidlo 4
+	if((token.type == T_Int) || (token.type == T_Double))	// pravidlo 4
 	{
 		// Simulace pravidla 2 a 3 (TYPE)
 		if(type())
 		{
 			// Uz mame TYPE
 			getNextToken(input,attr);
-			if(token == T_Id)
+			if(token.type == T_Id)
 			{
 				// Uz mame TYPE id
 				getNextToken(input,attr);
@@ -110,20 +111,20 @@ bool params(FILE *input, string *attr)
 					ret = true;	// cize nastavime navratovy hodnotu na true, pretoze syntax je v poriadku
 				}else
 				{
-					fprintf(stderr,"Zle zadane parametre funkcie.\n");
+					fprintf(stderr,"Zle zadane parametre funkcie.\nLine: %d\n",token.line);
 					return false;
 				}
 			}else
 			{
-				fprintf(stderr,"Nebolo zadane id funkcie.\n");
+				fprintf(stderr,"Nebolo zadane id funkcie.\nLine: %d\n",token.line);
 				return false;
 			}
 		}else
 		{
-			fprintf(stderr,"Typ nebol int/double.\n");
+			fprintf(stderr,"Typ nebol int/double.\nLine: %d\n",token.line);
 			return false;
 		}		
-	}else if(token == T_RightParenthesis)	//pravidlo 5
+	}else if(token.type == T_RightParenthesis)	//pravidlo 5
 	{
 		ret = true;
 	}
@@ -136,7 +137,7 @@ bool params(FILE *input, string *attr)
 bool body()
 {
 	bool ret = false;
-	if(token == T_Semicolon)
+	if(token.type == T_Semicolon)
 	{
 		ret = true;
 	}
@@ -150,17 +151,17 @@ bool func(FILE *input, string *attr)
 {
 	getNextToken(input,attr);
 	bool ret = false;
-	if((token == T_Int) || (token == T_Double))
+	if((token.type == T_Int) || (token.type == T_Double))
 	{
 		// Simulace pravidla 2 a 3 (TYPE)
 		if(type())
 		{
 			getNextToken(input,attr);
-			if(token == T_Id)
+			if(token.type == T_Id)
 			{
 				// Uz mame TYPE id
 				getNextToken(input,attr);
-				if(token == T_LeftParenthesis)
+				if(token.type == T_LeftParenthesis)
 				{
 					// Uz mame TYPE id (
 					getNextToken(input,attr);
@@ -169,11 +170,11 @@ bool func(FILE *input, string *attr)
 					{
 						// Uz mame TYPE id ( PARAMS
 						//getNextToken(input,attr);
-						if(token == T_RightParenthesis)
+						if(token.type == T_RightParenthesis)
 						{
 							// Uz mame TYPE id ( PARAMS )
 							getNextToken(input,attr);
-							if(token == T_LeftBrace)
+							if(token.type == T_LeftBrace)
 							{
 								// Uz mame TYPE id ( PARAMS ) {
 								getNextToken(input,attr);
@@ -182,51 +183,51 @@ bool func(FILE *input, string *attr)
 								{
 									// Uz mame TYPE id ( PARAMS ) { BODY
 									getNextToken(input,attr);
-									if(token == T_RightBrace)
+									if(token.type == T_RightBrace)
 									{
 										// Uz mame vsetko TYPE id ( PARAMS ) { BODY }
 										ret = true;	// cize nastavime navratovy hodnotu na true, pretoze syntax je v poriadku
 									}else
 									{
-										fprintf(stderr,"Nebola zadana \"}\" po tele.\n");
+										fprintf(stderr,"Nebola zadana \"}\" po tele.\nLine: %d\n",token.line);
 										return false;
 									}
 								}else
 								{
-									fprintf(stderr,"Nebolo zadane telo po \"{\".\n");
+									fprintf(stderr,"Nebolo zadane telo po \"{\".\nLine: %d\n",token.line);
 									return false;
 								}
 							}else
 							{
-								fprintf(stderr,"Nebola zadana \"{\" po definicii funkcie.\n");
+								fprintf(stderr,"Nebola zadana \"{\" po definicii funkcie.\nLine: %d\n",token.line);
 								return false;
 							}
 						}else
 						{
-							fprintf(stderr,"Nebola zadana \")\" po parametroch funkcie.\n");
+							fprintf(stderr,"Nebola zadana \")\" po parametroch funkcie.\nLine: %d\n",token.line);
 							return false;
 						}
 					}else
 					{
-						fprintf(stderr,"Nespravne zadane parametre funkcie.\n");
+						fprintf(stderr,"Nespravne zadane parametre funkcie.\nLine: %d\n",token.line);
 						return false;
 					}
 				}else
 				{
-					fprintf(stderr,"Nebola zadana \"(\" po nazve funkcie.\n");
+					fprintf(stderr,"Nebola zadana \"(\" po nazve funkcie.\nLine: %d\n",token.line);
 					return false;
 				}
 			}else
 			{
-				fprintf(stderr,"Nebolo zadane id funkcie.\n");
+				fprintf(stderr,"Nebolo zadane id funkcie.\nLine: %d\n",token.line);
 				return false;
 			}
 		}else
 		{
-			fprintf(stderr,"Typ nebol int/double.\n");
+			fprintf(stderr,"Typ nebol int/double.\nLine: %d\n",token.line);
 			return false;
 		}
-	}else fprintf(stderr,"Nebol zadany int/double na zaciatku funkcie.\n");
+	}else fprintf(stderr,"Nebol zadany int/double na zaciatku funkcie.\nLine: %d\n",token.line);
 	return ret;
 }
 

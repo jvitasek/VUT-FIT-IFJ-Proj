@@ -1,3 +1,3 @@
-double main( int a , double ah) {
+double main ( int a , double ah) {
 	;
 }

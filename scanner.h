@@ -75,6 +75,11 @@ typedef enum
 	T_EOF,				// EOF 35
 } T_Type;
 
+typedef struct
+{
+	T_Type type;
+	int line;
+} T_Token;
 
-T_Type getToken(FILE *input, string *attr);
+T_Token getToken(FILE *input, string *attr, int *line);
 

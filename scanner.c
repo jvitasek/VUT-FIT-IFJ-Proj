@@ -45,10 +45,11 @@ int escapeSeq(FILE *myInput)
  * Funkcia, ktora rozsekava vstupny subor na jednotlive lexemy.
  * Konecny stavovy automat.
  */
-T_Type getToken(FILE *input, string *attr)
+T_Token getToken(FILE *input, string *attr, int *line)
 {
 	char c;						// premenna na nacitavanie znaku
-	T_Type token = T_Docas;		// vytvorim si token
+	T_Token token;				// vytvorim si token
+	token.type = T_Error;
 	strClear(attr);				// vymazem obsah stringu
 	S_State state = S_Start;	// nastavim si pociatocny stav
 	int go = 1;					// pomocna premenna pre nacitavanie znakov (kde 1 znamena TRUE, 0 znamena FALSE)
@@ -59,13 +60,19 @@ T_Type getToken(FILE *input, string *attr)
 			go = 0;		// koniec subora => ukoncenie cyklu
 			if(state != S_Start)// kontrolujem ci sme neni v nejakom stave => stav nebol ukonceny
 			{
-				return T_Error;
-			}else return T_EOF;		// koniec subora
+				token.type = T_Error;
+				return token;
+			}else
+			{
+				token.type = T_EOF;		// koniec subora
+				return token;
+			}
 		}else 
 		{
 			switch(state)	// stavy automatu
 			{
 				case S_Start:
+					token.line = *line;
 					if((isalpha(c)) || (c == '_'))	// identifikator alebo klucove slovo
 					{
 						strAppend(attr,c);
@@ -81,18 +88,25 @@ T_Type getToken(FILE *input, string *attr)
 					}else if(c == '/')		// riadkovy/blokovy komentar alebo delenie (tie prekladac maze, cize nebudem ukladat nacitane znaky do stringu)
 					{
 						state = S_Slash;
-					}else if(isspace(c))	// vynechavanie medzier
+					}else if((c == ' ') || (c == '\t') || (c == '\v') || (c == '\f') || (c == '\r'))	// vynechavanie medzier
 					{
+						state = S_Start;
+					}else if(c == '\n')
+					{
+						(*line)++;
 						state = S_Start;
 					}else if(c == '+')		// +
 					{
-						return T_Plus;
+						token.type =  T_Plus;
+						return token;
 					}else if(c == '-')		// -
 					{
-						return T_Min;
+						token.type =  T_Min;
+						return token;
 					}else if(c == '*')		// *
 					{
-						return T_Mul;
+						token.type =  T_Mul;
+						return token;
 					}else if(c == '<')		// < alebo <= alebo <<
 					{
 						state = S_LeftBeak;	// nastavim stav na lavy zobak
@@ -107,23 +121,33 @@ T_Type getToken(FILE *input, string *attr)
 						state = S_NotEqual;
 					}else if(c == ',')		// ,
 					{
-						return T_Comma;
+						token.type =  T_Comma;
+						return token;
 					}else if(c == ';')		// ;
 					{
-						return T_Semicolon;
+						token.type =  T_Semicolon;
+						return token;
 					}else if(c =='(')		// (
 					{
-						return T_LeftParenthesis;
+						token.type =  T_LeftParenthesis;
+						return token;
 					}else if(c ==')')		// )
 					{
-						return T_RightParenthesis;
+						token.type =  T_RightParenthesis;
+						return token;
 					}else if(c =='{')		// {
 					{
-						return T_LeftBrace;
+						token.type =  T_LeftBrace;
+						return token;
 					}else if(c =='}')		// }
 					{
-						return T_RightBrace;
-					}else return T_Error;	// inak bol zly lexem a vraciam error
+						token.type =  T_RightBrace;
+						return token;
+					}else
+					{
+						token.type =  T_Error;	// inak bol zly lexem a vraciam error
+						return token;
+					}
 					break;
 				case S_Id:
 					if((isalpha(c)) || (isdigit(c)) || (c == '_'))	// identifikator alebo klucove slovo
@@ -136,38 +160,49 @@ T_Type getToken(FILE *input, string *attr)
 						
 						if(strcmp(attr->str,"auto") == 0)	// kontrola zhody s jednotlivymi klucovymi slovami
 						{
-							return T_Auto;	// nastavenie typu tokenu
+							token.type =  T_Auto;	// nastavenie typu tokenu
+							return token;
 							
 						}else if(strcmp(attr->str,"cin") == 0)
 						{
-							return T_Cin;
+							token.type =  T_Cin;
+							return token;
 						}else if(strcmp(attr->str,"cout") == 0)
 						{
-							return T_Cout;
+							token.type =  T_Cout;
+							return token;
 						}else if(strcmp(attr->str,"double") == 0)
 						{
-							return T_Double;
+							token.type =  T_Double;
+							return token;
 						}else if(strcmp(attr->str,"else") == 0)
 						{
-							return T_Else;
+							token.type =  T_Else;
+							return token;
 						}else if(strcmp(attr->str,"for") == 0)
 						{
-							return T_For;
+							token.type =  T_For;
+							return token;
 						}else if(strcmp(attr->str,"if") == 0)
 						{
-							return T_If;
+							token.type =  T_If;
+							return token;
 						}else if(strcmp(attr->str,"int") == 0)
 						{
-							return T_Int;
+							token.type =  T_Int;
+							return token;
 						}else if(strcmp(attr->str,"return") == 0)
 						{
-							return T_Return;
+							token.type =  T_Return;
+							return token;
 						}else if(strcmp(attr->str,"string") == 0)
 						{
-							return T_String;
+							token.type =  T_String;
+							return token;
 						}else
 						{
-							return T_Id;
+							token.type =  T_Id;
+							return token;
 						}
 					}
 					break;
@@ -187,7 +222,8 @@ T_Type getToken(FILE *input, string *attr)
 					}else
 					{
 						ungetc(c,input); 	// vratim posledny nacitany znak, ktory uz do cisla nepatri
-						return T_Integ;
+						token.type =  T_Integ;
+						return token;
 					}
 					break;
 				case S_Des1:		// kontrola ci po '.' nasleduje cislo
@@ -195,7 +231,11 @@ T_Type getToken(FILE *input, string *attr)
 					{
 						strAppend(attr,c);
 						state = S_Des2;
-					}else return T_Error;	// inak vracia error, lebo tam bolo nieco, co tam byt nema
+					}else
+					{
+						token.type =  T_Error;	// inak vracia error, lebo tam bolo nieco, co tam byt nema
+						return token;
+					}
 					break;
 				case S_Des2:		// kontrola ci je obyc. desat.cislo alebo aj s exponentom
 					if(isdigit(c))
@@ -209,8 +249,13 @@ T_Type getToken(FILE *input, string *attr)
 					}else if((isdigit(c)) || (c == ';'))
 					{
 						ungetc(c,input);	// vratim posledny nacitany znak
-						return T_Doub;
-					}else return T_Error;	// inak vracia error, lebo tam bolo nieco, co tam byt nema
+						token.type =  T_Doub;
+						return token;
+					}else
+					{
+						token.type =  T_Error;	// inak vracia error, lebo tam bolo nieco, co tam byt nema
+						return token;
+					}
 					break;
 				case S_Expo1:	// kontroluje spravny zapis expo. casti
 					if((c == '+') || (c == '-'))	// ide o expo. cislo aj s +/-
@@ -221,14 +266,22 @@ T_Type getToken(FILE *input, string *attr)
 					{
 						strAppend(attr,c);
 						state = S_Doub;			// preto nastavim stav, ktory uz len docita cisla po koniec
-					}else return T_Error;	// inak vracia error, lebo tam bolo nieco, co tam byt nema
+					}else
+					{
+						token.type =  T_Error;	// inak vracia error, lebo tam bolo nieco, co tam byt nema
+						return token;
+					}
 					break;
 				case S_Expo2: 	// kontroluje ci za +/- je cislo
 					if(isdigit(c))	// je tam cislo
 					{
 						strAppend(attr,c);
 						state = S_Doub;			// preto nastavim stav, ktory uz len docita cisla po koniec
-					}else return T_Error;	// inak vracia error, lebo tam bolo nieco, co tam byt nema
+					}else
+					{
+						token.type =  T_Error;	// inak vracia error, lebo tam bolo nieco, co tam byt nema
+						return token;
+					}
 					break;
 				case S_Doub:
 					if(isdigit(c))
@@ -238,14 +291,16 @@ T_Type getToken(FILE *input, string *attr)
 					}else 
 					{
 						ungetc(c,input);	// vratim posledny nacitany znak
-						return T_Doub;
+						token.type =  T_Doub;
+						return token;
 					}
 					break;
 				case S_Str:
 					if(c == '"')	// koniec retazca
 					{
 						strAppend(attr,c);
-						return T_Str;
+						token.type =  T_Str;
+						return token;
 					}else if(c == '\\')		// ide o escape sekvenci
 					{
 						state = S_EscSeq;	
@@ -265,17 +320,23 @@ T_Type getToken(FILE *input, string *attr)
 					}else  		// inak je to len podiel
 					{
 						ungetc(c,input); 	// vratim posledny nacitany znak,
-						return T_Div;
+						token.type =  T_Div;
+						return token;
 					}
 					break;
 				case S_ComLine:	// riadkovy komentar
 					if(c == '\n')
 					{
+						(*line)++;
 						state = S_Start;
 					}else state = S_ComLine;
 					break;
 				case S_ComBlock:		// blokovy komentar
-					if(c == '*')	// nastavim stav, kde prebehne kontrola ci je uz koniec komentara
+					if(c == '\n')
+					{
+						(*line)++;
+						state = S_ComBlock;
+					}else if(c == '*')	// nastavim stav, kde prebehne kontrola ci je uz koniec komentara
 					{
 						state = S_ComEnd;
 					}else state = S_ComBlock;
@@ -289,46 +350,56 @@ T_Type getToken(FILE *input, string *attr)
 				case S_LeftBeak:	// kontrola o ktoru moznost ide (< <= <<)
 					if(c == '=')
 					{
-						return T_LessEqual;	// <=
+						token.type =  T_LessEqual;	// <=
+						return token;
 					}else if(c == '<')
 					{
-						return T_LeftShift;	// <<
+						token.type =  T_LeftShift;	// <<
+						return token;
 					}else
 					{
 						ungetc(c,input);
-						return T_LessThan;	// <
+						token.type =  T_LessThan;	// <
+						return token;
 					}
 					break;
 				case S_RightBeak:	// kontrola o ktoru moznost ide (> >= >>)
 					if(c == '=')
 					{
-						return T_GreaterEqual;	// >=
+						token.type =  T_GreaterEqual;	// >=
+						return token;
 					}else if(c == '>')
 					{
-						return T_RightShift;	// >>
+						token.type =  T_RightShift;	// >>
+						return token;
 					}else
 					{
 						ungetc(c,input);
-						return T_GreaterThan;	// >
+						token.type =  T_GreaterThan;	// >
+						return token;
 					}
 					break;
 				case S_EqOrAss:			// kontrola ci ide o priradenie alebo rovnost
 					if(c == '=')
 					{
-						return T_Equal;			// ==
+						token.type =  T_Equal;			// ==
+						return token;
 					}else
 					{
 						ungetc(c,input);
-						return T_Assig;			// =
+						token.type =  T_Assig;			// =
+						return token;
 					}
 					break;
 				case S_NotEqual:	// kontrola ci ide o !=
 					if(c == '=')
 					{
-						return T_NotEqual;	// ide o !=
+						token.type =  T_NotEqual;	// ide o !=
+						return token;
 					}else
 					{
-						return T_Error;		// inak ide o chybu
+						token.type =  T_Error;		// inak ide o chybu
+						return token;
 					}
 					break;
 				case S_EscSeq:		// escape sekvencia
@@ -354,13 +425,18 @@ T_Type getToken(FILE *input, string *attr)
 						int esc = escapeSeq(input);		// volam funkciu, ktora mi vypocita int hodnotu danej sekvencie
 						if(esc == -1)
 						{
-							return T_Error;	// bola zadana neplatna escape sekvence
+							token.type =  T_Error;	// bola zadana neplatna escape sekvence
+							return token;
 						}else
 						{
 							strAppend(attr,esc);	// pridam uz vysledok escape sekvence do retazca
 							state = S_Str;	// dalej nacitavam retazec
 						}
-					}else return T_Error;	// inak error
+					}else
+					{
+						token.type =  T_Error;	// inak error
+						return token;
+					}
 					break;
 				default:
 					break;
