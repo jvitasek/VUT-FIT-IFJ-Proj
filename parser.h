@@ -7,8 +7,12 @@
  * 			xvidaj00 - Juraj Vida
  */
  
-#include "str.h"
+#include "scanner.h"
 #include <stdbool.h>
  
 void getNextToken(FILE *input, string *attr);
 bool func(FILE *input, string *attr);
+int parse(FILE *input, string *attr);
+int func_n(FILE *input, string *attr);
+
+T_Token token;

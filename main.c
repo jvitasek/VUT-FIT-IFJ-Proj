@@ -9,8 +9,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "parser.h"
 #include <stdbool.h>
+#include "error.h"
+#include "parser.h"
 
 int main(int argc, char **argv)
 {
@@ -19,20 +20,16 @@ int main(int argc, char **argv)
 	strInit(&attr);		// inicializujem string
 	if((argc < 2) || (argc > 2))		// kontrola ci bol zadany spravny pocet parametrov na prikaz. riadke
 	{
-		fprintf(stderr,"Spatne patametry prikazove radky.\n");
-		return 99;
+		print_error(ERUN_IN, 0);
 	}
 	
 	if((input = (fopen(argv[1],"r"))) == 0)		// otvorime vstupny subor na citanie
 	{
-		fprintf(stderr,"Zlyhanie otvarania suboru.\n");
-		return 99;
+		print_error(ERUN_IN, 0);
 	}
-	if(func(input,&attr) != true)
-	{
-		fprintf(stderr,"Program nie je syntakticky spravny!\n");	//pociatocny neterminal
-		return 2;	// Syntakticka chyba
-	}else printf("Vsetko OK!\n");
+
+	/* HLAVNI FUNKCE */
+	print_error(parse(input,&attr), token.line);
 	
 	fclose(input);		// zavre vstupny subor
 	strFree(&attr);		// uvolni string z pamete

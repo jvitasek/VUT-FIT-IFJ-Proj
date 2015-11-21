@@ -33,4 +33,6 @@ typedef enum TError {
  * Funkce na vypis chyby
  * @param code Kod chyby
  */
-void print_error(TError code);
+void print_error(TError code, int line);
+
+#endif

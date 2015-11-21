@@ -8,7 +8,7 @@
  */
 
 #include <stdio.h>
-#include "parser.h"
+#include "str.h"
 
 // Stavy pre konecny automat
 typedef enum

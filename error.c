@@ -12,27 +12,36 @@
 **/
 
 #include <stdio.h>
+#include <stdlib.h>
 #include "error.h"
 
 /**
  * Funkce na vypis chyby
  * @param code Kod chyby
  */
-void print_error(TError code) {
+void print_error(TError code, int line) {
 	const char *error_msg[] = {
-		[ELEX] = "Lexikalni analyza",
-		[ESYN] = "Syntakticka analyza",
-		[ESEM_DEF] = "Semanticka analyza, nedefinovana funkce/redefinice",
-		[ESEM_TYP] = "Semanticka analyza, chyba typove kompatibility",
-		[ETYP] = "Chyba pri odvozovani datoveho typu promenne",
-		[ESEM] = "Semanticka analyza",
-		[ERUN_IN] = "Behova chyba pri nacitani ciselne hodnoty ze vstupu",
-		[ERUN_UNINIT] = "Behova chyba, prace s neinicializovanou promennou",
-		[ERUN_DIV] = "Behova chyba deleni nulou",
-		[EOTH] = "Nespecifikovana behova chyba",
-		[EINT] = "Interni chyba interpretu"
+		[ENOP] = "SUCCESS: Vse v poradku",
+		[ELEX] = "ERROR: Lexikalni analyza",
+		[ESYN] = "ERROR: Syntakticka analyza",
+		[ESEM_DEF] = "ERROR: Semanticka analyza, nedefinovana funkce/redefinice",
+		[ESEM_TYP] = "ERROR: Semanticka analyza, chyba typove kompatibility",
+		[ETYP] = "ERROR: Chyba pri odvozovani datoveho typu promenne",
+		[ESEM] = "ERROR: Semanticka analyza",
+		[ERUN_IN] = "ERROR: Behova chyba pri nacitani ciselne hodnoty ze vstupu",
+		[ERUN_UNINIT] = "ERROR: Behova chyba, prace s neinicializovanou promennou",
+		[ERUN_DIV] = "ERROR: Behova chyba deleni nulou",
+		[EOTH] = "ERROR: Nespecifikovana behova chyba",
+		[EINT] = "ERROR: Interni chyba interpretu"
 	};
 
-	fprintf(stderr, "ERROR: %s\n", error_msg[code]);
-	return;
+	if(line != 0)
+	{
+		fprintf(stderr, "%s, LINE: %d\n", error_msg[code], line);
+	}
+	else
+	{
+		fprintf(stderr, "%s\n", error_msg[code]);
+	}
+	exit(code);
 }

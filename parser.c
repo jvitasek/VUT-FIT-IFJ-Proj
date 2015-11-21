@@ -9,11 +9,11 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>		// boolean
-#include "scanner.h"
+#include <stdbool.h>
+#include "parser.h"
+#include "error.h"
 
-
-T_Token token;	// globalna premenna pre token
+// globalna premenna pre token
 int line = 1;
 
 /*
@@ -23,6 +23,26 @@ void getNextToken(FILE *input, string *attr)
 {
 	token = getToken(input,attr,&line);
 	if(token.type == T_Error) exit(1);
+}
+
+int parse(FILE *input, string *attr)
+{
+	TError error = ENOP;
+	/**
+	 * @todo inicializace tabulky symbolu
+	 */
+	if((error = func_n(input, attr)) == ENOP)
+	{
+		/**
+		 * @todo generovani instrukci
+		 */
+	}
+	return error;
+}
+
+int func_n(FILE *input, string *attr)
+{
+	return ENOP;
 }
 
 /*
