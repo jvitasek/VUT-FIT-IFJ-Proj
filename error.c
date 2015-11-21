@@ -35,7 +35,7 @@ void print_error(TError code, int line) {
 		[EINT] = "ERROR: Interni chyba interpretu"
 	};
 
-	if(line != 0)
+	if(line != 0 && code != ENOP)
 	{
 		fprintf(stderr, "%s, LINE: %d\n", error_msg[code], line);
 	}
