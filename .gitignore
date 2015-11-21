@@ -1,0 +1,8 @@
+# make a build soubory
+*.o
+
+# predkompilovana hlavicka
+*.gch
+
+# mazani souboru
+*~
