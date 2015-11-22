@@ -3,7 +3,7 @@ int main (int kokot, string ryba)
 	auto jede;
 	string strom;
 
-	int funkce_jak_hovado(double vyhul);
+	int funkce_jak_hovado(double vyhul)
 
 	{
 		int nevyhulim;

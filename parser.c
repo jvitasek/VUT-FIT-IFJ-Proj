@@ -8,6 +8,7 @@
  * 			xvalec00 – Dusan Valecky
  */
 
+//#define DEBUG 1
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -15,13 +16,13 @@
 #include "parser.h"
 #include "error.h"
 
-int line = 0;
+int line = 1;
 TError error;
 
 /**
- * [getNextToken description]
- * @param input [description]
- * @param attr  [description]
+ * Vrati dalsi token ze vstupu
+ * @param input Soubor obsahujici vstupni kod.
+ * @param attr  String lexemu.
  */
 void getNextToken(FILE *input, string *attr)
 {
@@ -30,21 +31,22 @@ void getNextToken(FILE *input, string *attr)
 }
 
 /**
- * [parse description]
- * @param  input [description]
- * @param  attr  [description]
- * @return       [description]
+ * Hlavni funkce parseru. Simuluje pravidlo 1.
+ * @param  input Soubor obsahujici vstupni kod.
+ * @param  attr  String lexemu.
+ * @return       Index do enumerace chyb.
  */
 int parse(FILE *input, string *attr)
 {
 	#ifdef DEBUG
 	printf("parse\n");
 	#endif
-	error = ENOP;
+	error = ESYN;
 	/**
 	 * @todo inicializace tabulky symbolu
 	 */
 	getNextToken(input, attr);
+	// 1: <PROGRAM> -> <FUNC_N>
 	if(func_n(input, attr) == ENOP)
 	{
 		/**
@@ -55,10 +57,10 @@ int parse(FILE *input, string *attr)
 }
 
 /**
- * [func_n description]
- * @param  input [description]
- * @param  attr  [description]
- * @return       [description]
+ * Simuluje pravidla 2 a 3.
+ * @param  input Soubor obsahujici vstupni kod.
+ * @param  attr  String lexemu.
+ * @return       Index do enumerace chyb.
  */
 int func_n(FILE *input, string *attr)
 {
@@ -67,17 +69,19 @@ int func_n(FILE *input, string *attr)
 	#endif
 	error = ESYN;
 	
-	// P: 2
+	// 2: <FUNC_N> -> <FUNC> <FUNC_N>
 	if(func(input, attr) == ENOP)
 	{
 		// <func>
 		getNextToken(input, attr);
 		if(func_n(input, attr) == ENOP)
 		{
+			// <func> <func_n>
 			error = ENOP;
 			return error;
 		}
 	}
+	// 3: <FUNC_N> -> E 
 	else
 	{
 		error = ENOP;
@@ -88,8 +92,8 @@ int func_n(FILE *input, string *attr)
 }
 
 /**
- * [func description]
- * @return [description]
+ * Simuluje pravidlo 11.
+ * @return Index do enumerace chyb.
  */
 int func(FILE *input, string *attr)
 {
@@ -97,7 +101,7 @@ int func(FILE *input, string *attr)
 	printf("func\n");
 	#endif
 	error = ESYN;
-	// P: 11
+	// 11: <FUNC> -> <TYPE> id <PAR_DEF_LIST> <DEC_OR_DEF>
 	if(type() == ENOP)
 	{
 		// <type>
@@ -112,6 +116,7 @@ int func(FILE *input, string *attr)
 				getNextToken(input, attr);
 				if(dec_or_def(input, attr) == ENOP)
 				{
+					// <type> ID <par_def_list> <dec_or_def>
 					error = ENOP;
 					return error;
 				}
@@ -119,7 +124,7 @@ int func(FILE *input, string *attr)
 		}
 		else
 		{
-			fprintf(stderr, "Ocekavano ID.\n");
+			final_error = "Ocekavano ID.\n";
 			return error;
 		}
 	}
@@ -127,10 +132,10 @@ int func(FILE *input, string *attr)
 }
 
 /**
- * [par_def_list description]
- * @param  input [description]
- * @param  attr  [description]
- * @return       [description]
+ * Simuluje pravidlo 14.
+ * @param  input Soubor obsahujici vstupni kod.
+ * @param  attr  String lexemu.
+ * @return       Index do enumerace chyb.
  */
 int par_def_list(FILE *input, string *attr)
 {
@@ -138,13 +143,15 @@ int par_def_list(FILE *input, string *attr)
 	printf("par_def_list\n");
 	#endif
 	error = ESYN;
+	// 14: <PAR_DEF_LIST> -> ( <PARAMS> )
 	if(token.type == T_LeftParenthesis)
 	{
 		// (
 		getNextToken(input, attr);
 		if(params(input, attr) == ENOP)
 		{
-			// (<params
+			// (<params>
+			getNextToken(input, attr);
 			if(token.type == T_RightParenthesis)
 			{
 				// (<params>)
@@ -153,24 +160,24 @@ int par_def_list(FILE *input, string *attr)
 			}
 			else
 			{
-				fprintf(stderr, "Ocekavana prava zavorka.\n");
+				final_error = "Ocekavana prava zavorka.\n";
 				return error;
 			}
 		}
 	}
 	else
 	{
-		fprintf(stderr, "Ocekavana leva zavorka.\n");
+		final_error = "Ocekavana leva zavorka.\n";
 		return error;
 	}
 	return error;
 }
 
 /**
- * [dec_or_def description]
- * @param  input [description]
- * @param  attr  [description]
- * @return       [description]
+ * Simuluje pravidla 12 a 13.
+ * @param  input Soubor obsahujici vstupni kod.
+ * @param  attr  String lexemu.
+ * @return       Index do enumerace chyb.
  */
 int dec_or_def(FILE *input, string *attr)
 {
@@ -178,11 +185,13 @@ int dec_or_def(FILE *input, string *attr)
 	printf("dec_or_def\n");
 	#endif
 	error = ESYN;
+	// 12: <DEC_OR_DEF> -> <COMM_SEQ>
 	if(comm_seq(input, attr) == ENOP)
 	{
 		error = ENOP;
 		return error;
 	}
+	// 13: <DEC_OR_DEF> -> ;
 	else if(token.type == T_Semicolon)
 	{
 		error = ENOP;
@@ -190,17 +199,17 @@ int dec_or_def(FILE *input, string *attr)
 	}
 	else
 	{
-		fprintf(stderr, "Ocekavana sekvence prikazu nebo strednik.\n");
+		final_error = "Ocekavana sekvence prikazu nebo strednik.\n";
 		return error;
 	}
 	return error;
 }
 
 /**
- * [comm_seq description]
- * @param  input [description]
- * @param  attr  [description]
- * @return       [description]
+ * Simuluje pravidlo 19.
+ * @param  input Soubor obsahujici vstupni kod.
+ * @param  attr  String lexemu.
+ * @return       Index do enumerace chyb.
  */
 int comm_seq(FILE *input, string *attr)
 {
@@ -208,6 +217,7 @@ int comm_seq(FILE *input, string *attr)
 	printf("comm_seq\n");
 	#endif
 	error = ESYN;
+	// 19: <COMM_SEQ> -> { <STMT_LIST> }
 	if(token.type == T_LeftBrace)
 	{
 		// {
@@ -224,24 +234,24 @@ int comm_seq(FILE *input, string *attr)
 			}
 			else
 			{
-				fprintf(stderr, "Ocekavana prava slozena zavorka.\n");
+				final_error = "Ocekavana prava slozena zavorka.\n";
 				return error;
 			}
 		}
 	}
 	else
 	{
-		fprintf(stderr, "Ocekavana leva slozena zavorka.\n");
+		final_error = "Ocekavana leva slozena zavorka.\n";
 		return error;
 	}
 	return error;
 }
 
 /**
- * [stmt_list description]
- * @param  input [description]
- * @param  attr  [description]
- * @return       [description]
+ * Simuluje pravidla 20 a 21.
+ * @param  input Soubor obsahujici vstupni kod.
+ * @param  attr  String lexemu.
+ * @return       Index do enumerace chyb.
  */
 int stmt_list(FILE *input, string *attr)
 {
@@ -249,35 +259,38 @@ int stmt_list(FILE *input, string *attr)
 	printf("stmt_list\n");
 	#endif
 	error = ESYN;
-	// P: 20
+	// 20: <STMT_LIST> -> <STMT> <STMT_LIST>
 	if(stmt(input, attr) == ENOP)
 	{
+		// <stmt>
 		getNextToken(input, attr);
 		if(stmt_list(input, attr) == ENOP)
 		{
+			// <stmt> <stmt_list>
 			error = ENOP;
 			return error;
 		}
 	}
-	// P: 21
+	// 21: <STMT_LIST> -> E ????????????????????????????????????????????????????????????????????????????????
 	else if(token.type == T_RightBrace)
 	{
+		// }
 		error = ENOP;
 		return error;
 	}
 	else
 	{
-		fprintf(stderr, "Ocekavan statement nebo prava slozena zavorka.\n");
+		final_error = "Ocekavan statement nebo prava slozena zavorka.\n";
 		return error;
 	}
 	return error;
 }
 
 /**
- * [stmt description]
- * @param  input [description]
- * @param  attr  [description]
- * @return       [description]
+ * Simuluje pravidla 22, 23, 24, 25, 26, 27, 28 a 29
+ * @param  input Soubor obsahujici vstupni kod.
+ * @param  attr  String lexemu.
+ * @return       Index do enumerace chyb.
  */
 int stmt(FILE *input, string *attr)
 {
@@ -285,7 +298,7 @@ int stmt(FILE *input, string *attr)
 	printf("stmt\n");
 	#endif
 	error = ESYN;
-	// P: 29
+	// 29: <STMT> -> id = <FCALL_OR_ASSIGN>
 	if(token.type == T_Id)
 	{
 		// ID
@@ -296,17 +309,18 @@ int stmt(FILE *input, string *attr)
 			getNextToken(input, attr);
 			if(fcall_or_assing(input, attr) == ENOP)
 			{
+				// ID = <fcall_or_assign>
 				error = ENOP;
 				return error;
 			}
 		}
 		else
 		{
-			fprintf(stderr, "Ocekavan znak prirazeni.\n");
+			final_error = "Ocekavan znak prirazeni.\n";
 			return error;
 		}
 	}
-	// P: 22
+	// 22: <STMT> -> if <EXPR> <COMM_SEQ> <IF_N>
 	else if(token.type == T_If)
 	{
 		// if 
@@ -328,7 +342,7 @@ int stmt(FILE *input, string *attr)
 			}
 		}
 	}
-	// P: 23
+	// 23: <STMT> -> for( <VAR_DEF> <EXPR> <ASSIGN> ) <COMM_SEQ>
 	else if(token.type == T_For)
 	{
 		// for
@@ -355,13 +369,14 @@ int stmt(FILE *input, string *attr)
 							getNextToken(input, attr);
 							if(comm_seq(input, attr) == ENOP)
 							{
+								// for ( <var_def> <expr> <assign> ) <comm_seq>
 								error = ENOP;
 								return error;
 							}
 						}
 						else
 						{
-							fprintf(stderr, "Ocekavana prava zavorka.\n");
+							final_error = "Ocekavana prava zavorka.\n";
 							return error;
 						}
 					}
@@ -370,23 +385,25 @@ int stmt(FILE *input, string *attr)
 		}	
 		else
 		{
-			fprintf(stderr, "Ocekavana leva zavorka.\n");
+			final_error = "Ocekavana leva zavorka.\n";
 			return error;
 		}
 	}
-	// P: 24
+	// 24: <STMT> -> <COMM_SEQ>
 	else if(comm_seq(input, attr) == ENOP)
 	{
+		// <comm_seq>
 		error = ENOP;
 		return error;
 	}
-	// P: 25
+	// 25: <STMT> -> <VAR_DEF>
 	else if(var_def(input, attr) == ENOP)
 	{
+		// <var_def>
 		error = ENOP;
 		return error;
 	}
-	// P: 26
+	// 26: <STMT> -> cin >> id <CIN_ID_N>;
 	else if(token.type == T_Cin)
 	{
 		// cin
@@ -411,24 +428,24 @@ int stmt(FILE *input, string *attr)
 					}
 					else
 					{
-						fprintf(stderr, "Ocekavan strednik.\n");
+						final_error = "Ocekavan strednik.\n";
 						return error;
 					}
 				}
 			}
 			else
 			{
-				fprintf(stderr, "Ocekavano ID.\n");
+				final_error = "Ocekavano ID.\n";
 				return error;
 			}
 		}
 		else
 		{
-			fprintf(stderr, "Ocekavano >>.\n");
+			final_error = "Ocekavano >>.\n";
 			return error;
 		}
 	}
-	// P: 27
+	// 27: <STMT> -> cout << <COUT_TERM>;
 	else if(token.type == T_Cout)
 	{
 		// cout
@@ -443,25 +460,27 @@ int stmt(FILE *input, string *attr)
 				getNextToken(input, attr);
 				if(token.type == T_Semicolon)
 				{
+					// cout << <cout_term>;
 					error = ENOP;
 					return error;
 				}
 				else
 				{
-					fprintf(stderr, "Ocekavan strednik.\n");
+					final_error = "Ocekavan strednik.\n";
 					return error;
 				}
 			}
 		}
 		else
 		{
-			fprintf(stderr, "Ocekavano <<.\n");
+			final_error = "Ocekavano <<.\n";
 			return error;
 		}
 	}
-	// P: 28
+	// 28: <STMT> -> <RETURN>
 	else if(ret(input, attr) == ENOP)
 	{
+		// <return>
 		error = ENOP;
 		return error;
 	}
@@ -470,10 +489,10 @@ int stmt(FILE *input, string *attr)
 }
 
 /**
- * [ret description]
- * @param  input [description]
- * @param  attr  [description]
- * @return       [description]
+ * Simuluje pravidlo 42.
+ * @param  input Soubor obsahujici vstupni kod.
+ * @param  attr  String lexemu.
+ * @return       Index do enumerace chyb.
  */
 int ret(FILE *input, string *attr)
 {
@@ -481,7 +500,7 @@ int ret(FILE *input, string *attr)
 	printf("ret\n");
 	#endif
 	error = ESYN;
-	// P: 42
+	// 42: <RETURN> -> return <EXPR>;
 	if(token.type == T_Return)
 	{
 		// return
@@ -498,24 +517,24 @@ int ret(FILE *input, string *attr)
 			}
 			else
 			{
-				fprintf(stderr, "Ocekavan strednik.\n");
+				final_error = "Ocekavan strednik.\n";
 				return error;
 			}
 		}
 	}
 	else
 	{
-		fprintf(stderr, "Ocekavano klicove slovo return.\n");
+		final_error = "Ocekavano klicove slovo return.\n";
 		return error;
 	}
 	return error;
 }
 
 /**
- * [cout_term description]
- * @param  input [description]
- * @param  attr  [description]
- * @return       [description]
+ * Simuluje pravidla 39 a nedefinovane pravidlo.
+ * @param  input Soubor obsahujici vstupni kod.
+ * @param  attr  String lexemu.
+ * @return       Index do enumerace chyb.
  */
 int cout_term(FILE *input, string *attr)
 {
@@ -523,7 +542,7 @@ int cout_term(FILE *input, string *attr)
 	printf("cout_term\n");
 	#endif
 	error = ESYN;
-	// P: 39
+	// 39: <COUT_TERM> -> id <COUT_TERM_N>
 	if(token.type == T_Id)
 	{
 		// ID
@@ -535,7 +554,7 @@ int cout_term(FILE *input, string *attr)
 			return error;
 		}
 	}
-	// P: undef
+	// UNDEF!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	else if(realtype() == ENOP)
 	{
 		// <realtype>
@@ -549,17 +568,17 @@ int cout_term(FILE *input, string *attr)
 	}
 	else
 	{
-		fprintf(stderr, "Ocekavano ID.\n");
+		final_error = "Ocekavano ID.\n";
 		return error;
 	}
 	return error;
 }
 
 /**
- * [cout_term_n description]
- * @param  input [description]
- * @param  attr  [description]
- * @return       [description]
+ * Simuluje pravidla 40 a 41.
+ * @param  input Soubor obsahujici vstupni kod.
+ * @param  attr  String lexemu.
+ * @return       Index do enumerace chyb.
  */
 int cout_term_n(FILE *input, string *attr)
 {
@@ -567,18 +586,19 @@ int cout_term_n(FILE *input, string *attr)
 	printf("cout_term_n\n");
 	#endif
 	error = ESYN;
-	// P: 40
+	// 40: <COUT_TERM_N> -> << <COUT_TERM>
 	if(token.type == T_LeftShift)
 	{
 		// << 
 		getNextToken(input, attr);
 		if(cout_term(input, attr) == ENOP)
 		{
+			// << <cout_term>
 			error = ENOP;
 			return error;
 		}
 	}
-	// P: 41
+	// 41: <COUT_TERM_N> -> E 
 	else
 	{
 		error = ENOP;
@@ -588,10 +608,10 @@ int cout_term_n(FILE *input, string *attr)
 }
 
 /**
- * [cin_id_n description]
- * @param  input [description]
- * @param  attr  [description]
- * @return       [description]
+ * Simuluje pravidlo 37.
+ * @param  input Soubor obsahujici vstupni kod.
+ * @param  attr  String lexemu.
+ * @return       Index do enumerace chyb.
  */
 int cin_id_n(FILE *input, string *attr)
 {
@@ -599,6 +619,7 @@ int cin_id_n(FILE *input, string *attr)
 	printf("cin_id_n\n");
 	#endif
 	error = ESYN;
+	// 37: <CIN_ID_N> -> >> id <CIN_ID_N>
 	if(token.type == T_RightShift)
 	{
 		// >>
@@ -616,7 +637,7 @@ int cin_id_n(FILE *input, string *attr)
 		}
 		else
 		{
-			fprintf(stderr, "Ocekavano ID.\n");
+			final_error = "Ocekavano ID.\n";
 			return error;
 		}
 	}
@@ -629,10 +650,10 @@ int cin_id_n(FILE *input, string *attr)
 }
 
 /**
- * [assign description]
- * @param  input [description]
- * @param  attr  [description]
- * @return       [description]
+ * Simuluje pravidlo 36.
+ * @param  input Soubor obsahujici vstupni kod.
+ * @param  attr  String lexemu.
+ * @return       Index do enumerace chyb.
  */
 int assign(FILE *input, string *attr)
 {
@@ -640,7 +661,7 @@ int assign(FILE *input, string *attr)
 	printf("assign\n");
 	#endif
 	error = ESYN;
-	// P: 36
+	// 36: <ASSIGN> -> id = <EXPR> 
 	if(token.type == T_Id)
 	{
 		// ID
@@ -658,23 +679,23 @@ int assign(FILE *input, string *attr)
 		}
 		else
 		{
-			fprintf(stderr, "Ocekavan znak prirazeni.\n");
+			final_error = "Ocekavan znak prirazeni.\n";
 			return error;
 		}
 	}
 	else
 	{
-		fprintf(stderr, "Ocekavano ID.\n");
+		final_error = "Ocekavano ID.\n";
 		return error;
 	}
 	return error;
 }
 
 /**
- * [var_def description]
- * @param  input [description]
- * @param  attr  [description]
- * @return       [description]
+ * Simuluje pravidlo 4 a 5.
+ * @param  input Soubor obsahujici vstupni kod.
+ * @param  attr  String lexemu.
+ * @return       Index do enumerace chyb.
  */
 int var_def(FILE *input, string *attr)
 {
@@ -682,7 +703,7 @@ int var_def(FILE *input, string *attr)
 	printf("var_def\n");
 	#endif
 	error = ESYN;
-	// P: 5
+	// 5: <VAR_DEF> -> auto id <INIT>;
 	if(token.type == T_Auto)
 	{
 		// auto
@@ -703,18 +724,18 @@ int var_def(FILE *input, string *attr)
 				}
 				else
 				{
-					fprintf(stderr, "Ocekavan strednik.\n");
+					final_error = "Ocekavan strednik.\n";
 					return error;
 				}
 			}
 		}
 		else
 		{
-			fprintf(stderr, "Ocekavano ID.\n");
+			final_error = "Ocekavano ID.\n";
 			return error;
 		}
 	}
-	// P: 4
+	// 4: <VAR_DEF> -> <TYPE> id <INIT>;
 	if(type() == ENOP)
 	{
 		// <type>
@@ -735,14 +756,14 @@ int var_def(FILE *input, string *attr)
 				}
 				else
 				{
-					fprintf(stderr, "Ocekavan strednik.\n");
+					final_error = "Ocekavan strednik.\n";
 					return error;
 				}
 			}
 		}
 		else
 		{
-			fprintf(stderr, "Ocekavano ID.\n");
+			final_error = "Ocekavano ID.\n";
 			return error;
 		}
 	}
@@ -750,10 +771,10 @@ int var_def(FILE *input, string *attr)
 }
 
 /**
- * [init description]
- * @param  input [description]
- * @param  attr  [description]
- * @return       [description]
+ * Simuluje pravidlo 6.
+ * @param  input Soubor obsahujici vstupni kod.
+ * @param  attr  String lexemu.
+ * @return       Index do enumerace chyb.
  */
 int init(FILE *input, string *attr)
 {
@@ -761,7 +782,7 @@ int init(FILE *input, string *attr)
 	printf("init\n");
 	#endif
 	error = ESYN;
-	// P: 6
+	// 6: <INIT> -> = <EXPR>
 	if(token.type == T_Equal)
 	{
 		// = 
@@ -782,10 +803,10 @@ int init(FILE *input, string *attr)
 }
 
 /**
- * [if_n description]
- * @param  input [description]
- * @param  attr  [description]
- * @return       [description]
+ * Simuluje pravidla 43 a 44.
+ * @param  input Soubor obsahujici vstupni kod.
+ * @param  attr  String lexemu.
+ * @return       Index do enumerace chyb.
  */
 int if_n(FILE *input, string *attr)
 {
@@ -793,7 +814,7 @@ int if_n(FILE *input, string *attr)
 	printf("if_n\n");
 	#endif
 	error = ESYN;
-	// P: 43
+	// 43: <IF_N> -> else <COMM_SEQ>
 	if(token.type == T_Else)
 	{
 		// else 
@@ -805,7 +826,7 @@ int if_n(FILE *input, string *attr)
 			return error;
 		}
 	}
-	// P: 44
+	// 44: <IF_N> -> E
 	else
 	{
 		error = ENOP;
@@ -814,20 +835,29 @@ int if_n(FILE *input, string *attr)
 	return error;
 }
 
+/**
+ * Simuluje pravidla vyrazu.
+ * @param  input Soubor obsahujici vstupni kod.
+ * @param  attr  String lexemu.
+ * @return       Index do enumerace chyb.
+ */
 int expr(FILE *input, string *attr)
 {
 	#ifdef DEBUG
 	printf("expr\n");
 	#endif
-	error = ESYN;
+	error = ENOP;
+	/**
+	 * @todo vyrazy
+	 */
 	return error;
 }
 
 /**
- * [fcall_or_assing description]
- * @param  input [description]
- * @param  attr  [description]
- * @return       [description]
+ * Simuluje pravidla 30 a 31.
+ * @param  input Soubor obsahujici vstupni kod.
+ * @param  attr  String lexemu.
+ * @return       Index do enumerace chyb.
  */
 int fcall_or_assing(FILE *input, string *attr)
 {
@@ -835,7 +865,7 @@ int fcall_or_assing(FILE *input, string *attr)
 	printf("fcall_or_assing\n");
 	#endif
 	error = ESYN;
-	// P: 31
+	// 31: <FCALL_OR_ASSIGN> -> id ( <TERMS> );
 	if(token.type == T_Id)
 	{
 		// ID
@@ -846,30 +876,62 @@ int fcall_or_assing(FILE *input, string *attr)
 			getNextToken(input, attr);
 			if(terms(input, attr) == ENOP)
 			{
-				error = ENOP;
-				return error;
+				// ID ( <terms>
+				getNextToken(input, attr);
+				if(token.type == T_RightParenthesis)
+				{
+					// ID ( <terms> )
+					getNextToken(input, attr);
+					if(token.type == T_Semicolon)
+					{
+						// ID ( <terms> ) ;
+						error = ENOP;
+						return error;
+					}
+					else
+					{
+						final_error = "Ocekavan strednik.\n";
+						return error;
+					}
+				}
+				else
+				{
+					final_error = "Ocekavana prava zavorka.\n";
+					return error;
+				}
 			}
 		}
 		else
 		{
-			fprintf(stderr, "Ocekavana leva zavorka.\n");
+			final_error = "Ocekavana leva zavorka.\n";
 			return error;
 		}
 	}
-	// VYRAZ @todo HARDCODED
-	else
+	// 30: <FCALL_OR_ASSIGN> -> <EXPR> ;
+	else if(expr(input, attr) == ENOP)
 	{
-		error = ENOP;
-		return error;
+		// <expr>
+		getNextToken(input, attr);
+		if(token.type == T_Semicolon)
+		{
+			// <ęxpr> ;
+			error = ENOP;
+			return error;
+		}
+		else
+		{
+			final_error = "Ocekavan strednik.\n";
+			return error;
+		}
 	}
 	return error;
 }
 
 /**
- * [terms description]
- * @param  input [description]
- * @param  attr  [description]
- * @return       [description]
+ * Simuluje pravidla 32 a 33.
+ * @param  input Soubor obsahujici vstupni kod.
+ * @param  attr  String lexemu.
+ * @return       Index do enumerace chyb.
  */
 int terms(FILE *input, string *attr)
 {
@@ -877,20 +939,22 @@ int terms(FILE *input, string *attr)
 	printf("terms\n");
 	#endif
 	error = ESYN;
-	// P: 32
+	// 32: <TERMS> -> id <TERMS_N>
 	if(token.type == T_Id)
 	{
 		// ID
 		getNextToken(input, attr);
 		if(terms_n(input, attr) == ENOP)
 		{
+			// ID <terms_n>
 			error = ENOP;
 			return error;
 		}
 	}
-	// P: 33
+	// 33: <TERMS> -> E ?????????????????????????????????????????????????????
 	else if(token.type == T_RightParenthesis)
 	{
+		// )
 		error = ENOP;
 		return error;
 	}
@@ -898,10 +962,10 @@ int terms(FILE *input, string *attr)
 }
 
 /**
- * [terms_n description]
- * @param  input [description]
- * @param  attr  [description]
- * @return       [description]
+ * Simuluje pravidla 34 a 35.
+ * @param  input Soubor obsahujici vstupni kod.
+ * @param  attr  String lexemu.
+ * @return       Index do enumerace chyb.
  */
 int terms_n(FILE *input, string *attr)
 {
@@ -909,9 +973,10 @@ int terms_n(FILE *input, string *attr)
 	printf("terms_n\n");
 	#endif
 	error = ESYN;
-	// P: 35
+	// 35: <TERMS_N> -> E ??????????????????????????????????????????????????
 	if(token.type == T_RightParenthesis)
 	{
+		// )
 		error = ENOP;
 		return error;
 	}
@@ -920,19 +985,35 @@ int terms_n(FILE *input, string *attr)
 	{
 		// ,
 		getNextToken(input, attr);
-		if(terms_n(input, attr) == ENOP)
+		if(token.type == T_Id)
 		{
-			error = ENOP;
-			return error;
+			// , ID
+			getNextToken(input, attr);
+			if(terms_n(input, attr) == ENOP)
+			{
+				// , ID <terms_n>
+				error = ENOP;
+				return error;
+			}
 		}
+		else
+		{
+			final_error = "Ocekavano ID.\n";
+			return error;
+		}	
+	}
+	else
+	{
+		final_error = "Ocekavana carka nebo ukoncovaci zavorka\n.";
+		return error;
 	}
 	return error;
 }
 
 
 /**
- * [type description]
- * @return [description]
+ * Simuluje pravidla 8, 9, 10 a nedefinovane pravidlo.
+ * @return Index do enumerace chyb.
  */
 int type()
 {
@@ -940,41 +1021,45 @@ int type()
 	printf("type\n");
 	#endif
 	error = ESYN;
-	// P: 8
+	// 8: <TYPE> -> int
 	if(token.type == T_Int)
 	{
+		// int
 		error = ENOP;
 		return error;
 	}
-	// P: 9
+	// 9: <TYPE> -> double
 	else if(token.type == T_Double)
 	{
+		// double
 		error = ENOP;
 		return error;
 	}
-	// P: 10
+	// 10: <TYPE> -> string 
 	else if(token.type == T_String)
 	{
+		// string
 		error = ENOP;
 		return error;
 	}
-	// P: undef
+	// UNDEF !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	else if(token.type == T_Auto)
 	{
+		// auto
 		error = ENOP;
 		return error;
 	}
 	else
 	{
-		fprintf(stderr, "Typ neni int/double/string.\n");
+		final_error = "Typ neni int/double/string.\n";
 		return error;
 	}
 	return error;
 }
 
 /**
- * [realtype description]
- * @return [description]
+ * Simuluje nedefinovana pravidla.
+ * @return Index do enumerace chyb.
  */
 int realtype()
 {
@@ -982,16 +1067,19 @@ int realtype()
 	printf("realtype\n");
 	#endif
 	error = ESYN;
+	// UNDEF
 	if(token.type == T_Integ)
 	{
 		error = ENOP;
 		return error;
 	}
+	// UNDEF
 	else if(token.type == T_Doub)
 	{
 		error = ENOP;
 		return error;
 	}
+	// UNDEF
 	else if(token.type == T_Str)
 	{
 		error = ENOP;
@@ -1001,15 +1089,15 @@ int realtype()
 }
 
 /**
- * [params description]
- * @param  input [description]
- * @param  attr  [description]
- * @return       [description]
+ * Simuluje pravidla 15 a 16.
+ * @param  input Soubor obsahujici vstupni kod.
+ * @param  attr  String lexemu.
+ * @return       Index do enumerace chyb.
  */
 int params(FILE *input, string *attr)
 {
 	error = ESYN;
-	// P: 15
+	// 15: <PARAMS> -> <TYPE> id <PARAMS_N>
 	if(type() == ENOP)
 	{
 		// <type>
@@ -1026,9 +1114,10 @@ int params(FILE *input, string *attr)
 			}
 		}
 	}
-	// P: 16
+	// 16: <PARAMS> -> E
 	else
 	{
+		// E
 		error = ENOP;
 		return error;
 	}
@@ -1036,15 +1125,15 @@ int params(FILE *input, string *attr)
 }
 
 /**
- * [params_n description]
- * @param  input [description]
- * @param  attr  [description]
- * @return       [description]
+ * Simuluje pravidla 17 a 18.
+ * @param  input Soubor obsahujici vstupni kod.
+ * @param  attr  String lexemu.
+ * @return       Index do enumerace chyb.
  */
 int params_n(FILE *input, string *attr)
 {
 	error = ESYN;
-	// P: 17
+	// 17: <PARAMS_N> -> , <TYPE> id <PARAMS_N>
 	if(token.type == T_Comma)
 	{
 		// ,
@@ -1053,16 +1142,28 @@ int params_n(FILE *input, string *attr)
 		{
 			// , <type>
 			getNextToken(input, attr);
-			if(params_n(input, attr) == ENOP)
+			if(token.type == T_Id)
 			{
-				// , <type> <params_n>
-				error = ENOP;
-				return error;
+				// , <type> ID
+				getNextToken(input, attr);
+				if(params_n(input, attr) == ENOP)
+				{
+					// , <type> <params_n>
+					error = ENOP;
+					return error;
+				}
 			}
+			else
+			{
+				final_error = "Ocekavano ID.\n";
+				return error;
+			}	
 		}
 	}
+	// 18: <PARAMS_N> -> E
 	else
 	{
+		// E
 		error = ENOP;
 		return error;
 	}
