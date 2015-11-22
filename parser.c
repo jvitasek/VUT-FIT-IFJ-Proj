@@ -14,8 +14,11 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include "parser.h"
+#include "ial.h"
 #include "error.h"
 
+tHTable* globalTS;
+tHTItem* item;
 int line = 1;
 TError error;
 
@@ -42,9 +45,17 @@ int parse(FILE *input, string *attr)
 	printf("parse\n");
 	#endif
 	error = ESYN;
-	/**
-	 * @todo inicializace tabulky symbolu
-	 */
+
+	// inicializace TS
+	item = (tHTItem*) malloc(sizeof(tHTable));
+	item->key = "*UNDEF*";
+	item->data = -1;
+	item->ptrnext = NULL;
+	globalTS = (tHTable*) malloc(sizeof(tHTable));
+	for (int i=0; i<MAX_HTSIZE; (*globalTS)[i++] = item);
+	htInit(globalTS);
+	// konec inicializace TS
+
 	getNextToken(input, attr);
 	// 1: <PROGRAM> -> <FUNC_N>
 	if(func_n(input, attr) == ENOP)
@@ -1168,4 +1179,35 @@ int params_n(FILE *input, string *attr)
 		return error;
 	}
 	return error;
+}
+
+
+
+
+/* tiskne celou tabulku */
+void vypisCelouTabulku( tHTable* ptrht ) {
+	int maxlen = 0;
+	int sumcnt = 0;
+	
+	printf ("------------HASH TABLE--------------\n");
+	for ( int i=0; i<HTSIZE; i++ ) {
+		printf ("%i:",i);
+		int cnt = 0;
+		tHTItem* ptr = (*ptrht)[i];
+		while ( ptr != NULL ) {
+			printf (" (%s,%.2f)",ptr->key,ptr->data);
+			if ( ptr != UNDEFPTR )
+				cnt++;
+			ptr = ptr->ptrnext;
+		}
+		printf ("\n");
+	
+		if (cnt > maxlen)
+			maxlen = cnt;
+		sumcnt+=cnt;
+	}
+	
+	printf ("------------------------------------\n");
+	printf ("Items count %i   The longest list %i\n",sumcnt,maxlen);
+	printf ("------------------------------------\n");
 }
