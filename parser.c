@@ -1192,29 +1192,18 @@ int params_n(FILE *input, string *attr)
  * [vypisCelouTabulku description]
  * @param ptrht [description]
  */
-void vypisCelouTabulku(tHTable* ptrht) {
-	int maxlen = 0;
-	int sumcnt = 0;
+void vypisCelouTabulku( tHTable* ptrht ) {
 	
 	printf ("------------HASH TABLE--------------\n");
 	for ( int i=0; i<HTSIZE; i++ ) {
 		printf ("%i:",i);
-		int cnt = 0;
 		tHTItem* ptr = (*ptrht)[i];
 		while ( ptr != NULL ) {
 			printf (" (%s,%.2f)",ptr->key,ptr->data);
-			if ( ptr != UNDEFPTR )
-				cnt++;
 			ptr = ptr->ptrnext;
 		}
 		printf ("\n");
-	
-		if (cnt > maxlen)
-			maxlen = cnt;
-		sumcnt+=cnt;
 	}
 	
-	printf ("------------------------------------\n");
-	printf ("Items count %i   The longest list %i\n",sumcnt,maxlen);
 	printf ("------------------------------------\n");
 }
