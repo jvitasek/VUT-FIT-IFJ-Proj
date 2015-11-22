@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
 #include "parser.h"
 #include "ial.h"
 #include "error.h"
@@ -30,6 +31,12 @@ TError error;
 void getNextToken(FILE *input, string *attr)
 {
 	token = getToken(input, attr, &line);
+	#ifdef DEBUG
+	if(strcmp(attr->str, "") != 0)
+	{
+		printf("%s\n", strGetStr(attr));
+	}
+	#endif
 	if(token.type == T_Error) exit(1);
 }
 
@@ -1181,11 +1188,11 @@ int params_n(FILE *input, string *attr)
 	return error;
 }
 
-
-
-
-/* tiskne celou tabulku */
-void vypisCelouTabulku( tHTable* ptrht ) {
+/**
+ * [vypisCelouTabulku description]
+ * @param ptrht [description]
+ */
+void vypisCelouTabulku(tHTable* ptrht) {
 	int maxlen = 0;
 	int sumcnt = 0;
 	
