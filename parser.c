@@ -8,13 +8,13 @@
  * 			xvalec00 – Dusan Valecky
  */
 
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include "parser.h"
 #include "error.h"
 
-// globalna premenna pre token
 int line = 0;
 TError error;
 
@@ -37,12 +37,15 @@ void getNextToken(FILE *input, string *attr)
  */
 int parse(FILE *input, string *attr)
 {
+	#ifdef DEBUG
+	printf("parse\n");
+	#endif
 	error = ENOP;
 	/**
 	 * @todo inicializace tabulky symbolu
 	 */
 	getNextToken(input, attr);
-	if((error = func_n(input, attr)) == ENOP)
+	if(func_n(input, attr) == ENOP)
 	{
 		/**
 		 * @todo generovani instrukci
@@ -59,7 +62,42 @@ int parse(FILE *input, string *attr)
  */
 int func_n(FILE *input, string *attr)
 {
+	#ifdef DEBUG
+	printf("func_n\n");
+	#endif
 	error = ESYN;
+	
+	// P: 2
+	if(func(input, attr) == ENOP)
+	{
+		// <func>
+		getNextToken(input, attr);
+		if(func_n(input, attr) == ENOP)
+		{
+			error = ENOP;
+			return error;
+		}
+	}
+	else
+	{
+		error = ENOP;
+		return error;
+	}
+
+	return error;
+}
+
+/**
+ * [func description]
+ * @return [description]
+ */
+int func(FILE *input, string *attr)
+{
+	#ifdef DEBUG
+	printf("func\n");
+	#endif
+	error = ESYN;
+	// P: 11
 	if(type() == ENOP)
 	{
 		// <type>
@@ -68,57 +106,92 @@ int func_n(FILE *input, string *attr)
 		{
 			// <type> ID
 			getNextToken(input, attr);
-			if(token.type == T_LeftParenthesis)
+			if(par_def_list(input, attr) == ENOP)
 			{
-				// <type> ID(
+				// <type> ID <par_def_list>
 				getNextToken(input, attr);
-				if(params(input, attr) == ENOP)
+				if(dec_or_def(input, attr) == ENOP)
 				{
-					// <type> ID(<params>
-					getNextToken(input, attr);
-					// <type> ID(<params>)
-					if(comm_seq(input, attr) == ENOP)
-					{
-						// <type> ID(<params>) { STMT_LIST };
-						error = ENOP;
-					}
-					else if(token.type == T_RightParenthesis)
-					{
-						// <type> ID(<params>)
-						getNextToken(input, attr);
-						if(token.type == T_Semicolon)
-						{
-							// <type> ID(<params>);
-							error = ENOP;
-						}
-						else
-						{
-							fprintf(stderr, "Ocekavan strednik.\n");
-						}
-					}
-					else
-					{
-						fprintf(stderr, "Ocekavan prava zavorka nebo telo funkce.\n");
-					}
+					error = ENOP;
+					return error;
 				}
-				else
-				{
-					fprintf(stderr, "Ocekavany parametry nebo prava zavorka.\n");
-				}
-			}
-			else
-			{
-				fprintf(stderr, "Ocekavana leva zavorka.\n");
 			}
 		}
 		else
 		{
 			fprintf(stderr, "Ocekavano ID.\n");
+			return error;
+		}
+	}
+	return error;
+}
+
+/**
+ * [par_def_list description]
+ * @param  input [description]
+ * @param  attr  [description]
+ * @return       [description]
+ */
+int par_def_list(FILE *input, string *attr)
+{
+	#ifdef DEBUG
+	printf("par_def_list\n");
+	#endif
+	error = ESYN;
+	if(token.type == T_LeftParenthesis)
+	{
+		// (
+		getNextToken(input, attr);
+		if(params(input, attr) == ENOP)
+		{
+			// (<params
+			if(token.type == T_RightParenthesis)
+			{
+				// (<params>)
+				error = ENOP;
+				return error;
+			}
+			else
+			{
+				fprintf(stderr, "Ocekavana prava zavorka.\n");
+				return error;
+			}
 		}
 	}
 	else
 	{
-		fprintf(stderr, "Ocekavan typ.\n");
+		fprintf(stderr, "Ocekavana leva zavorka.\n");
+		return error;
+	}
+	return error;
+}
+
+/**
+ * [dec_or_def description]
+ * @param  input [description]
+ * @param  attr  [description]
+ * @return       [description]
+ */
+int dec_or_def(FILE *input, string *attr)
+{
+	#ifdef DEBUG
+	printf("dec_or_def\n");
+	#endif
+	error = ESYN;
+	if(comm_seq(input, attr) == ENOP)
+	{
+		error = ENOP;
+		return error;
+	}
+	else if(token.type == T_Semicolon)
+	{
+		error = ENOP;
+		return error;
+	}
+	else
+	{
+		fprintf(stderr, "Ocekavana sekvence prikazu nebo strednik.\n");
+		return error;
 	}
 	return error;
 }
@@ -131,6 +204,9 @@ int func_n(FILE *input, string *attr)
  */
 int comm_seq(FILE *input, string *attr)
 {
+	#ifdef DEBUG
+	printf("comm_seq\n");
+	#endif
 	error = ESYN;
 	if(token.type == T_LeftBrace)
 	{
@@ -144,16 +220,19 @@ int comm_seq(FILE *input, string *attr)
 			{
 				// { STMT_LIST }
 				error = ENOP;
+				return error;
 			}
 			else
 			{
 				fprintf(stderr, "Ocekavana prava slozena zavorka.\n");
+				return error;
 			}
 		}
 	}
 	else
 	{
 		fprintf(stderr, "Ocekavana leva slozena zavorka.\n");
+		return error;
 	}
 	return error;
 }
@@ -166,6 +245,9 @@ int comm_seq(FILE *input, string *attr)
  */
 int stmt_list(FILE *input, string *attr)
 {
+	#ifdef DEBUG
+	printf("stmt_list\n");
+	#endif
 	error = ESYN;
 	// P: 20
 	if(stmt(input, attr) == ENOP)
@@ -174,16 +256,19 @@ int stmt_list(FILE *input, string *attr)
 		if(stmt_list(input, attr) == ENOP)
 		{
 			error = ENOP;
+			return error;
 		}
 	}
 	// P: 21
 	else if(token.type == T_RightBrace)
 	{
 		error = ENOP;
+		return error;
 	}
 	else
 	{
 		fprintf(stderr, "Ocekavan statement nebo prava slozena zavorka.\n");
+		return error;
 	}
 	return error;
 }
@@ -196,6 +281,9 @@ int stmt_list(FILE *input, string *attr)
  */
 int stmt(FILE *input, string *attr)
 {
+	#ifdef DEBUG
+	printf("stmt\n");
+	#endif
 	error = ESYN;
 	// P: 29
 	if(token.type == T_Id)
@@ -209,11 +297,13 @@ int stmt(FILE *input, string *attr)
 			if(fcall_or_assing(input, attr) == ENOP)
 			{
 				error = ENOP;
+				return error;
 			}
 		}
 		else
 		{
 			fprintf(stderr, "Ocekavan znak prirazeni.\n");
+			return error;
 		}
 	}
 	// P: 22
@@ -233,6 +323,7 @@ int stmt(FILE *input, string *attr)
 				{
 					// if <expr> <comm_seq> else
 					error = ENOP;
+					return error;
 				}
 			}
 		}
@@ -265,11 +356,13 @@ int stmt(FILE *input, string *attr)
 							if(comm_seq(input, attr) == ENOP)
 							{
 								error = ENOP;
+								return error;
 							}
 						}
 						else
 						{
 							fprintf(stderr, "Ocekavana prava zavorka.\n");
+							return error;
 						}
 					}
 				}
@@ -278,17 +371,20 @@ int stmt(FILE *input, string *attr)
 		else
 		{
 			fprintf(stderr, "Ocekavana leva zavorka.\n");
+			return error;
 		}
 	}
 	// P: 24
 	else if(comm_seq(input, attr) == ENOP)
 	{
 		error = ENOP;
+		return error;
 	}
 	// P: 25
 	else if(var_def(input, attr) == ENOP)
 	{
 		error = ENOP;
+		return error;
 	}
 	// P: 26
 	else if(token.type == T_Cin)
@@ -311,21 +407,25 @@ int stmt(FILE *input, string *attr)
 					{
 						// cin >> ID <cin_id_n>;
 						error = ENOP;
+						return error;
 					}
 					else
 					{
 						fprintf(stderr, "Ocekavan strednik.\n");
+						return error;
 					}
 				}
 			}
 			else
 			{
 				fprintf(stderr, "Ocekavano ID.\n");
+				return error;
 			}
 		}
 		else
 		{
 			fprintf(stderr, "Ocekavano >>.\n");
+			return error;
 		}
 	}
 	// P: 27
@@ -344,22 +444,26 @@ int stmt(FILE *input, string *attr)
 				if(token.type == T_Semicolon)
 				{
 					error = ENOP;
+					return error;
 				}
 				else
 				{
 					fprintf(stderr, "Ocekavan strednik.\n");
+					return error;
 				}
 			}
 		}
 		else
 		{
 			fprintf(stderr, "Ocekavano <<.\n");
+			return error;
 		}
 	}
 	// P: 28
 	else if(ret(input, attr) == ENOP)
 	{
 		error = ENOP;
+		return error;
 	}
 
 	return error;
@@ -373,6 +477,9 @@ int stmt(FILE *input, string *attr)
  */
 int ret(FILE *input, string *attr)
 {
+	#ifdef DEBUG
+	printf("ret\n");
+	#endif
 	error = ESYN;
 	// P: 42
 	if(token.type == T_Return)
@@ -387,16 +494,19 @@ int ret(FILE *input, string *attr)
 			{
 				// return <expr>;
 				error = ENOP;
+				return error;
 			}
 			else
 			{
 				fprintf(stderr, "Ocekavan strednik.\n");
+				return error;
 			}
 		}
 	}
 	else
 	{
 		fprintf(stderr, "Ocekavano klicove slovo return.\n");
+		return error;
 	}
 	return error;
 }
@@ -409,6 +519,9 @@ int ret(FILE *input, string *attr)
  */
 int cout_term(FILE *input, string *attr)
 {
+	#ifdef DEBUG
+	printf("cout_term\n");
+	#endif
 	error = ESYN;
 	// P: 39
 	if(token.type == T_Id)
@@ -419,6 +532,7 @@ int cout_term(FILE *input, string *attr)
 		{
 			// ID <cout_term_n>
 			error = ENOP;
+			return error;
 		}
 	}
 	// P: undef
@@ -430,11 +544,13 @@ int cout_term(FILE *input, string *attr)
 		{
 			// <realtype> <cout_term_n>
 			error = ENOP;
+			return error;
 		}
 	}
 	else
 	{
 		fprintf(stderr, "Ocekavano ID.\n");
+		return error;
 	}
 	return error;
 }
@@ -447,6 +563,9 @@ int cout_term(FILE *input, string *attr)
  */
 int cout_term_n(FILE *input, string *attr)
 {
+	#ifdef DEBUG
+	printf("cout_term_n\n");
+	#endif
 	error = ESYN;
 	// P: 40
 	if(token.type == T_LeftShift)
@@ -456,12 +575,14 @@ int cout_term_n(FILE *input, string *attr)
 		if(cout_term(input, attr) == ENOP)
 		{
 			error = ENOP;
+			return error;
 		}
 	}
 	// P: 41
 	else
 	{
 		error = ENOP;
+		return error;
 	}
 	return error;
 }
@@ -474,6 +595,9 @@ int cout_term_n(FILE *input, string *attr)
  */
 int cin_id_n(FILE *input, string *attr)
 {
+	#ifdef DEBUG
+	printf("cin_id_n\n");
+	#endif
 	error = ESYN;
 	if(token.type == T_RightShift)
 	{
@@ -483,20 +607,23 @@ int cin_id_n(FILE *input, string *attr)
 		{
 			// >> ID
 			getNextToken(input, attr);
-			if(cin_id_n(input, attr))
+			if(cin_id_n(input, attr) == ENOP)
 			{
 				// >> ID <cin_id_n>
 				error = ENOP;
+				return error;
 			}
 		}
 		else
 		{
 			fprintf(stderr, "Ocekavano ID.\n");
+			return error;
 		}
 	}
 	else
 	{
 		error = ENOP;
+		return error;
 	}
 	return error;
 }
@@ -509,6 +636,9 @@ int cin_id_n(FILE *input, string *attr)
  */
 int assign(FILE *input, string *attr)
 {
+	#ifdef DEBUG
+	printf("assign\n");
+	#endif
 	error = ESYN;
 	// P: 36
 	if(token.type == T_Id)
@@ -523,16 +653,19 @@ int assign(FILE *input, string *attr)
 			{
 				// ID = <expr>
 				error = ENOP;
+				return error;
 			}
 		}
 		else
 		{
 			fprintf(stderr, "Ocekavan znak prirazeni.\n");
+			return error;
 		}
 	}
 	else
 	{
 		fprintf(stderr, "Ocekavano ID.\n");
+		return error;
 	}
 	return error;
 }
@@ -545,7 +678,42 @@ int assign(FILE *input, string *attr)
  */
 int var_def(FILE *input, string *attr)
 {
+	#ifdef DEBUG
+	printf("var_def\n");
+	#endif
 	error = ESYN;
+	// P: 5
+	if(token.type == T_Auto)
+	{
+		// auto
+		getNextToken(input, attr);
+		if(token.type == T_Id)
+		{
+			// auto ID
+			getNextToken(input, attr);
+			if(init(input, attr) == ENOP)
+			{
+				// auto ID <init>
+				getNextToken(input, attr);
+				if(token.type == T_Semicolon)
+				{
+					// auto ID <init>;
+					error = ENOP;
+					return error;
+				}
+				else
+				{
+					fprintf(stderr, "Ocekavan strednik.\n");
+					return error;
+				}
+			}
+		}
+		else
+		{
+			fprintf(stderr, "Ocekavano ID.\n");
+			return error;
+		}
+	}
 	// P: 4
 	if(type() == ENOP)
 	{
@@ -563,45 +731,19 @@ int var_def(FILE *input, string *attr)
 				{
 					// <type> ID <init>;
 					error = ENOP;
+					return error;
 				}
 				else
 				{
 					fprintf(stderr, "Ocekavan strednik.\n");
+					return error;
 				}
 			}
 		}
 		else
 		{
 			fprintf(stderr, "Ocekavano ID.\n");
-		}
-	}
-	// P: 5
-	else if(token.type == T_Auto)
-	{
-		// auto
-		getNextToken(input, attr);
-		if(token.type == T_Id)
-		{
-			// auto ID
-			getNextToken(input, attr);
-			if(init(input, attr) == ENOP)
-			{
-				// auto ID <init>
-				getNextToken(input, attr);
-				if(token.type == T_Semicolon)
-				{
-					// auto ID <init>;
-					error = ENOP;
-				}
-				else
-				{
-					fprintf(stderr, "Ocekavan strednik.\n");
-				}
-			}
-		}
-		else
-		{
-			fprintf(stderr, "Ocekavano ID.\n");
+			return error;
 		}
 	}
 	return error;
@@ -615,6 +757,9 @@ int var_def(FILE *input, string *attr)
  */
 int init(FILE *input, string *attr)
 {
+	#ifdef DEBUG
+	printf("init\n");
+	#endif
 	error = ESYN;
 	// P: 6
 	if(token.type == T_Equal)
@@ -625,11 +770,13 @@ int init(FILE *input, string *attr)
 		{
 			// = <expr>
 			error = ENOP;
+			return error;
 		}
 	}
 	else
 	{
 		error = ENOP;
+		return error;
 	}
 	return error;
 }
@@ -642,6 +789,9 @@ int init(FILE *input, string *attr)
  */
 int if_n(FILE *input, string *attr)
 {
+	#ifdef DEBUG
+	printf("if_n\n");
+	#endif
 	error = ESYN;
 	// P: 43
 	if(token.type == T_Else)
@@ -652,20 +802,24 @@ int if_n(FILE *input, string *attr)
 		{
 			// else <comm_seq>
 			error = ENOP;
+			return error;
 		}
 	}
 	// P: 44
 	else
 	{
 		error = ENOP;
+		return error;
 	}
 	return error;
 }
 
 int expr(FILE *input, string *attr)
 {
-	error = ENOP;
-
+	#ifdef DEBUG
+	printf("expr\n");
+	#endif
+	error = ESYN;
 	return error;
 }
 
@@ -677,6 +831,9 @@ int expr(FILE *input, string *attr)
  */
 int fcall_or_assing(FILE *input, string *attr)
 {
+	#ifdef DEBUG
+	printf("fcall_or_assing\n");
+	#endif
 	error = ESYN;
 	// P: 31
 	if(token.type == T_Id)
@@ -690,17 +847,20 @@ int fcall_or_assing(FILE *input, string *attr)
 			if(terms(input, attr) == ENOP)
 			{
 				error = ENOP;
+				return error;
 			}
 		}
 		else
 		{
 			fprintf(stderr, "Ocekavana leva zavorka.\n");
+			return error;
 		}
 	}
 	// VYRAZ @todo HARDCODED
 	else
 	{
 		error = ENOP;
+		return error;
 	}
 	return error;
 }
@@ -713,6 +873,9 @@ int fcall_or_assing(FILE *input, string *attr)
  */
 int terms(FILE *input, string *attr)
 {
+	#ifdef DEBUG
+	printf("terms\n");
+	#endif
 	error = ESYN;
 	// P: 32
 	if(token.type == T_Id)
@@ -722,12 +885,14 @@ int terms(FILE *input, string *attr)
 		if(terms_n(input, attr) == ENOP)
 		{
 			error = ENOP;
+			return error;
 		}
 	}
 	// P: 33
 	else if(token.type == T_RightParenthesis)
 	{
 		error = ENOP;
+		return error;
 	}
 	return error;
 }
@@ -740,11 +905,15 @@ int terms(FILE *input, string *attr)
  */
 int terms_n(FILE *input, string *attr)
 {
+	#ifdef DEBUG
+	printf("terms_n\n");
+	#endif
 	error = ESYN;
 	// P: 35
 	if(token.type == T_RightParenthesis)
 	{
 		error = ENOP;
+		return error;
 	}
 	// 34: <TERMS_N> -> , id <TERMS_N>
 	else if(token.type == T_Comma)
@@ -754,6 +923,7 @@ int terms_n(FILE *input, string *attr)
 		if(terms_n(input, attr) == ENOP)
 		{
 			error = ENOP;
+			return error;
 		}
 	}
 	return error;
@@ -766,25 +936,38 @@ int terms_n(FILE *input, string *attr)
  */
 int type()
 {
+	#ifdef DEBUG
+	printf("type\n");
+	#endif
 	error = ESYN;
 	// P: 8
 	if(token.type == T_Int)
 	{
 		error = ENOP;
+		return error;
 	}
 	// P: 9
-	else if(token.type == T_Double)	// pravidlo 3
+	else if(token.type == T_Double)
 	{
 		error = ENOP;
+		return error;
 	}
 	// P: 10
 	else if(token.type == T_String)
 	{
 		error = ENOP;
+		return error;
+	}
+	// P: undef
+	else if(token.type == T_Auto)
+	{
+		error = ENOP;
+		return error;
 	}
 	else
 	{
 		fprintf(stderr, "Typ neni int/double/string.\n");
+		return error;
 	}
 	return error;
 }
@@ -795,68 +978,24 @@ int type()
  */
 int realtype()
 {
+	#ifdef DEBUG
+	printf("realtype\n");
+	#endif
 	error = ESYN;
 	if(token.type == T_Integ)
 	{
 		error = ENOP;
+		return error;
 	}
 	else if(token.type == T_Doub)
 	{
 		error = ENOP;
+		return error;
 	}
 	else if(token.type == T_Str)
 	{
 		error = ENOP;
-	}
-	return error;
-}
-
-/**
- * [params_n description]
- * @param  input [description]
- * @param  attr  [description]
- * @return       [description]
- */
-int params_n(FILE *input, string *attr)
-{
-	error = ESYN;
-	if(token.type == T_Comma)	// pravislo 6
-	{
-		// Uz mame ,
-		getNextToken(input, attr);
-		// Simulace pravidla 2 a 3 (TYPE)
-		if(type() == ENOP)
-		{
-			// Uz mame , TYPE
-			getNextToken(input, attr);
-			if(token.type == T_Id)
-			{
-				// Uz mame , TYPE id
-				getNextToken(input, attr);
-				// Simulace pravidla 6 a 7 (PARAMS_N)
-				if(params_n(input,attr))
-				{
-					// Uz mame , TYPE id PARAMS_N
-					error = ENOP;
-				}
-				else
-				{
-					fprintf(stderr, "Spatne zadane parametry funkce.\n");
-				}
-			}
-			else
-			{
-				fprintf(stderr, "Ocekavano ID funkce.\n");
-			}
-		}
-		else
-		{
-			fprintf(stderr, "Ocekavan int/double/string za carkou.\n");
-		}		 
-	}
-	else if(token.type == T_RightParenthesis)	//pravidlo 7
-	{
-		error = ENOP;
+		return error;
 	}
 	return error;
 }
@@ -870,37 +1009,62 @@ int params_n(FILE *input, string *attr)
 int params(FILE *input, string *attr)
 {
 	error = ESYN;
-	if((token.type == T_Int) || (token.type == T_Double) || (token.type == T_String))
+	// P: 15
+	if(type() == ENOP)
 	{
-		// Simulace pravidla 2 a 3 (TYPE)
-		if(type() == ENOP)
+		// <type>
+		getNextToken(input, attr);
+		if(token.type == T_Id)
 		{
-			// Uz mame TYPE
+			// <type> ID
 			getNextToken(input, attr);
-			if(token.type == T_Id)
+			if(params_n(input, attr) == ENOP)
 			{
-				// Uz mame TYPE id
-				getNextToken(input, attr);
-				// Simulace pravidla 6 a 7 (PARAMS_N)
-				if(params_n(input,attr) == ENOP)
-				{
-					// Uz mame TYPE id PARAMS_N
-					error = ENOP;
-				}
-				else
-				{
-					fprintf(stderr, "Spatne zadane parametry funkce.\n");
-				}
+				// <type> ID <params_n>
+				error = ENOP;
+				return error;
 			}
-			else
-			{
-				fprintf(stderr, "Ocekavano ID funkce.\n");
-			}
-		}		
+		}
 	}
-	else if(token.type == T_RightParenthesis)	//pravidlo 5
+	// P: 16
+	else
 	{
 		error = ENOP;
+		return error;
+	}
+	return error;
+}
+
+/**
+ * [params_n description]
+ * @param  input [description]
+ * @param  attr  [description]
+ * @return       [description]
+ */
+int params_n(FILE *input, string *attr)
+{
+	error = ESYN;
+	// P: 17
+	if(token.type == T_Comma)
+	{
+		// ,
+		getNextToken(input, attr);
+		if(type() == ENOP)
+		{
+			// , <type>
+			getNextToken(input, attr);
+			if(params_n(input, attr) == ENOP)
+			{
+				// , <type> <params_n>
+				error = ENOP;
+				return error;
+			}
+		}
+	}
+	else
+	{
+		error = ENOP;
+		return error;
 	}
 	return error;
 }

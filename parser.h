@@ -11,10 +11,11 @@
 #include "scanner.h"
 #include <stdbool.h>
  
-void getNextToken(FILE *input, string *attr);
+ // HLAVNI FUNKCE
 int parse(FILE *input, string *attr);
 
 // POM. FUNKCE
+void getNextToken(FILE *input, string *attr);
 int type();
 int realtype();
 
@@ -22,6 +23,9 @@ int realtype();
 int params(FILE *input, string *attr);
 int params_n(FILE *input, string *attr);
 int func_n(FILE *input, string *attr);
+int func(FILE *input, string *attr);
+int par_def_list(FILE *input, string *attr);
+int dec_or_def(FILE *input, string *attr);
 int comm_seq(FILE *input, string *attr);
 int stmt_list(FILE *input, string *attr);
 int stmt(FILE *input, string *attr);
