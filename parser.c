@@ -21,6 +21,9 @@
 
 tHTable* globalTS;
 tHTItem* item;
+/**
+ * @todo deklarace instruction listu
+ */
 int line = 1;
 TError error;
 
@@ -35,7 +38,8 @@ void getNextToken(FILE *input, string *attr)
 	#ifdef DEBUG
 	if(strcmp(attr->str, "") != 0)
 	{
-		//printf("%s\n", strGetStr(attr));
+		printf("---\n%s\n", strGetStr(attr));
+		printf("%d\n---\n", token.type);
 	}
 	#endif
 	if(token.type == T_Error) exit(1);
@@ -55,23 +59,14 @@ int parse(FILE *input, string *attr)
 	error = ESYN;
 
 	// inicializace TS
-	item = (tHTItem*) malloc(sizeof(tHTable));
-	item->key = "*UNDEF*";
-	item->data = -1;
-	item->ptrnext = NULL;
-	globalTS = (tHTable*) malloc(sizeof(tHTable));
-	for (int i=0; i<MAX_HTSIZE; (*globalTS)[i++] = item);
-	htInit(globalTS);
-	// konec inicializace TS
+	if(initSTable() != ENOP)
+	{
+		return error;
+	}
 
 	getNextToken(input, attr);
 	// 1: <PROGRAM> -> <FUNC_N>
-	if(func_n(input, attr) == ENOP)
-	{
-		/**
-		 * @todo generovani instrukci
-		 */
-	}
+	func_n(input, attr);
 	return error;
 }
 
@@ -144,7 +139,7 @@ int func(FILE *input, string *attr)
 		else
 		{
 			fprintf(stderr, "Ocekavano ID.\n");
-			return error;
+			
 		}
 	}
 	return error;
@@ -167,10 +162,17 @@ int par_def_list(FILE *input, string *attr)
 	{
 		// (
 		getNextToken(input, attr);
-		if(params(input, attr) == ENOP)
+		if(token.type == T_RightParenthesis)
+		{
+			// (E)
+			error = ENOP;
+			return error;
+		}
+		else if(params(input, attr) == ENOP)
 		{
 			// (<params>
-			getNextToken(input, attr);
+			//getNextToken(input, attr);
+			printf("%d\n", token.type);
 			if(token.type == T_RightParenthesis)
 			{
 				// (<params>)
@@ -180,14 +182,14 @@ int par_def_list(FILE *input, string *attr)
 			else
 			{
 				fprintf(stderr, "Ocekavana prava zavorka.\n");
-				return error;
+				
 			}
 		}
 	}
 	else
 	{
 		fprintf(stderr, "Ocekavana leva zavorka.\n");
-		return error;
+		
 	}
 	return error;
 }
@@ -219,7 +221,7 @@ int dec_or_def(FILE *input, string *attr)
 	else
 	{
 		fprintf(stderr, "Ocekavana sekvence prikazu nebo strednik.\n");
-		return error;
+		
 	}
 	return error;
 }
@@ -254,14 +256,14 @@ int comm_seq(FILE *input, string *attr)
 			else
 			{
 				fprintf(stderr, "Ocekavana prava slozena zavorka.\n");
-				return error;
+				
 			}
 		}
 	}
 	else
 	{
-		fprintf(stderr, "Ocekavana leva slozena zavorka.\n");
-		return error;
+		//fprintf(stderr, "Ocekavana leva slozena zavorka.\n");
+		
 	}
 	return error;
 }
@@ -330,7 +332,7 @@ int stmt(FILE *input, string *attr)
 		else
 		{
 			fprintf(stderr, "Ocekavan znak prirazeni.\n");
-			return error;
+			
 		}
 	}
 	// 22: <STMT> -> if <EXPR> <COMM_SEQ> <IF_N>
@@ -390,7 +392,7 @@ int stmt(FILE *input, string *attr)
 						else
 						{
 							fprintf(stderr, "Ocekavana prava zavorka.\n");
-							return error;
+							
 						}
 					}
 				}
@@ -399,7 +401,7 @@ int stmt(FILE *input, string *attr)
 		else
 		{
 			fprintf(stderr, "Ocekavana leva zavorka.\n");
-			return error;
+			
 		}
 	}
 	// 24: <STMT> -> <COMM_SEQ>
@@ -442,20 +444,20 @@ int stmt(FILE *input, string *attr)
 					else
 					{
 						fprintf(stderr, "Ocekavan strednik.\n");
-						return error;
+						
 					}
 				}
 			}
 			else
 			{
 				fprintf(stderr, "Ocekavano ID.\n");
-				return error;
+				
 			}
 		}
 		else
 		{
 			fprintf(stderr, "Ocekavano >>.\n");
-			return error;
+			
 		}
 	}
 	// 27: <STMT> -> cout << <COUT_TERM>;
@@ -480,14 +482,14 @@ int stmt(FILE *input, string *attr)
 				else
 				{
 					fprintf(stderr, "Ocekavan strednik.\n");
-					return error;
+					
 				}
 			}
 		}
 		else
 		{
 			fprintf(stderr, "Ocekavano <<.\n");
-			return error;
+			
 		}
 	}
 	// 28: <STMT> -> <RETURN>
@@ -531,14 +533,14 @@ int ret(FILE *input, string *attr)
 			else
 			{
 				fprintf(stderr, "Ocekavan strednik.\n");
-				return error;
+				
 			}
 		}
 	}
 	else
 	{
 		fprintf(stderr, "Ocekavano klicove slovo return.\n");
-		return error;
+		
 	}
 	return error;
 }
@@ -582,7 +584,7 @@ int cout_term(FILE *input, string *attr)
 	else
 	{
 		fprintf(stderr, "Ocekavano ID.\n");
-		return error;
+		
 	}
 	return error;
 }
@@ -651,7 +653,7 @@ int cin_id_n(FILE *input, string *attr)
 		else
 		{
 			fprintf(stderr, "Ocekavano ID.\n");
-			return error;
+			
 		}
 	}
 	else
@@ -693,13 +695,13 @@ int assign(FILE *input, string *attr)
 		else
 		{
 			fprintf(stderr, "Ocekavan znak prirazeni.\n");
-			return error;
+			
 		}
 	}
 	else
 	{
 		fprintf(stderr, "Ocekavano ID.\n");
-		return error;
+		
 	}
 	return error;
 }
@@ -738,14 +740,14 @@ int var_def(FILE *input, string *attr)
 				else
 				{
 					fprintf(stderr, "Ocekavan strednik.\n");
-					return error;
+					
 				}
 			}
 		}
 		else
 		{
 			fprintf(stderr, "Ocekavano ID.\n");
-			return error;
+			
 		}
 	}
 	// 4: <VAR_DEF> -> <TYPE> id <INIT>;
@@ -770,14 +772,14 @@ int var_def(FILE *input, string *attr)
 				else
 				{
 					fprintf(stderr, "Ocekavan strednik.\n");
-					return error;
+					
 				}
 			}
 		}
 		else
 		{
 			fprintf(stderr, "Ocekavano ID.\n");
-			return error;
+			
 		}
 	}
 	return error;
@@ -886,20 +888,20 @@ int fcall_or_assing(FILE *input, string *attr)
 					else
 					{
 						fprintf(stderr, "Ocekavan strednik.\n");
-						return error;
+						
 					}
 				}
 				else
 				{
 					fprintf(stderr, "Ocekavana prava zavorka.\n");
-					return error;
+					
 				}
 			}
 		}
 		else
 		{
 			fprintf(stderr, "Ocekavana leva zavorka.\n");
-			return error;
+			
 		}
 	}
 	// 30: <FCALL_OR_ASSIGN> -> <EXPR> ;
@@ -916,7 +918,7 @@ int fcall_or_assing(FILE *input, string *attr)
 		else
 		{
 			fprintf(stderr, "Ocekavan strednik.\n");
-			return error;
+			
 		}
 	}
 	return error;
@@ -992,7 +994,7 @@ int terms_n(FILE *input, string *attr)
 		else
 		{
 			fprintf(stderr, "Ocekavano ID.\n");
-			return error;
+			
 		}	
 	}
 	else
@@ -1040,11 +1042,6 @@ int type()
 	{
 		// auto
 		error = ENOP;
-		return error;
-	}
-	else
-	{
-		fprintf(stderr, "Typ neni int/double/string.\n");
 		return error;
 	}
 	return error;
@@ -1149,7 +1146,7 @@ int params_n(FILE *input, string *attr)
 			else
 			{
 				fprintf(stderr, "Ocekavano ID.\n");
-				return error;
+				
 			}	
 		}
 	}
@@ -1158,6 +1155,42 @@ int params_n(FILE *input, string *attr)
 	{
 		// E
 		error = ENOP;
+		return error;
+	}
+	return error;
+}
+
+/**
+ * Incializuje tabulku symbolu
+ * @return Index do enumerace chyb.
+ */
+int initSTable()
+{
+	error = ENOP;
+	item = NULL;
+	item = (tHTItem*) malloc(sizeof(tHTable));
+	if(item != NULL)
+	{
+		item->key = "*UNDEF*";
+		item->data = -1;
+		item->ptrnext = NULL;
+	}
+	else
+	{
+		error = EINT;
+		return error;
+	}
+
+	globalTS = NULL;
+	globalTS = (tHTable*) malloc(sizeof(tHTable));
+	if(globalTS != NULL)
+	{
+		for (int i=0; i<MAX_HTSIZE; (*globalTS)[i++] = item);
+		htInit(globalTS);
+	}
+	else
+	{
+		error = EINT;
 		return error;
 	}
 	return error;

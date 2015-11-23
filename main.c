@@ -17,8 +17,8 @@
 int main(int argc, char **argv)
 {
 	FILE *input;
-	string attr;		// vytvorim si string
-	strInit(&attr);		// inicializujem strin
+	string attr;		// vytvorime si string
+	strInit(&attr);		// inicializujeme string
 	final_error = "";
 	if((argc < 2) || (argc > 2))		// kontrola ci bol zadany spravny pocet parametrov na prikaz. riadke
 	{
@@ -30,13 +30,35 @@ int main(int argc, char **argv)
 		print_error(ERUN_IN, 0);
 	}
 
-	/* HLAVNI FUNKCE */
-	print_error(parse(input,&attr), token.line);
-	if(strcmp(final_error, "") != 0)
+	int result;
+	result = parse(input, &attr); // syntakticka analyza
+	switch(result)
 	{
-		fprintf(stderr, "%s\n", final_error);
+		case ENOP:
+			// vse v poradku
+			printf("SUCCESS: vse v poradku!\n");
+			break;
+		default:
+			// nastala chyba v prekladu
+			/**
+			 * @todo uvolneni tabulky symbolu
+			 * @todo uvolneni instruction listu
+			 */
+			print_error(result, token.line);
+			fclose(input);
+			strFree(&attr);
+			return -result;
+		break;
 	}
+
+	/**
+	 * @todo interpretace (predani tabulky symbolu a instruction listu)
+	 */
 	
+	/**
+	 * @todo uvolneni tabulky symbolu
+	 * @todo uvolneni instruction listu
+	 */
 	fclose(input);		// zavre vstupny subor
 	strFree(&attr);		// uvolni string z pamete
 	return 0;

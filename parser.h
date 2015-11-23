@@ -16,6 +16,7 @@ int parse(FILE *input, string *attr); // P: 1
 
 // POM. FUNKCE
 void getNextToken(FILE *input, string *attr);
+int initSTable();
 
 // PRAVIDLA
 int type(); // P: 8, 9, 10
