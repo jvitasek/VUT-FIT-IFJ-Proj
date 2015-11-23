@@ -202,8 +202,9 @@ int StackEmpty(Tstack *stack)
  * @param  attr  String lexemu.
  * @return       Index do enumerace chyb.
  */
-int expr(FILE *input, string *attr)
+TError expr(FILE *input, string *attr)
 {
+	TError error = ESYN;
 	#ifdef DEBUG
 	printf("expr\n");
 	#endif

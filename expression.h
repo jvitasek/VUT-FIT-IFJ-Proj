@@ -65,6 +65,6 @@ TstackElemPtr StackTop(Tstack *stack);
 void StackShift(Tstack *stack, T_Token token);
 int StackEmpty(Tstack *stack);
 int readExpr(FILE *input, string *attr);
-int expr(FILE *input, string *attr); // P: @todo
+TError expr(FILE *input, string *attr); // P: @todo
 
 #endif
