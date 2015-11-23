@@ -118,23 +118,21 @@ TError func(FILE *input, string *attr)
 	if(error == ENOP)
 	{
 		getNextToken(input, attr);
-		switch(token.type)
+		if(token.type == T_Id)
 		{
-			case T_Id:
+			getNextToken(input, attr);
+			error = par_def_list(input, attr);
+			if(error == ENOP)
+			{
 				getNextToken(input, attr);
-				error = par_def_list(input, attr);
-				if(error == ENOP)
-				{
-					getNextToken(input, attr);
-					error = dec_or_def(input, attr);
-					return error;
-				}
-				else
-				{
-					return error;
-				}
-			break;
-		}
+				error = dec_or_def(input, attr);
+				return error;
+			}
+			else
+			{
+				return error;
+			}
+		}		
 	}
 	return error;
 }
@@ -152,23 +150,20 @@ TError par_def_list(FILE *input, string *attr)
 	#endif
 	TError error = ESYN;
 	// 14: <PAR_DEF_LIST> -> ( <PARAMS> )
-	switch(token.type)
+	if(token.type == T_LeftParenthesis)
 	{
-		case T_LeftParenthesis:
+		getNextToken(input, attr);
+		error = params(input, attr);
+		if(error == ENOP)
+		{
 			getNextToken(input, attr);
-			error = params(input, attr);
-			if(error == ENOP)
+			if(token.type == T_RightParenthesis)
 			{
-				getNextToken(input, attr);
-				switch(token.type)
-				{
-					case T_RightParenthesis:
-						return ENOP;
-					break;
-				}
-			}
-		break;
+				return ENOP;
+			}	
+		}
 	}
+			
 	return error;
 }
 
@@ -211,22 +206,18 @@ TError comm_seq(FILE *input, string *attr)
 	#endif
 	TError error = ESYN;
 	// 19: <COMM_SEQ> -> { <STMT_LIST> }
-	switch(token.type)
+	if(token.type == T_LeftBrace)
 	{
-		case T_LeftBrace:
+		getNextToken(input, attr);
+		error = stmt_list(input, attr);
+		if(error == ENOP)
+		{
 			getNextToken(input, attr);
-			error = stmt_list(input, attr);
-			if(error == ENOP)
+			if(token.type == T_RightBrace)
 			{
-				getNextToken(input, attr);
-				switch(token.type)
-				{
-					case T_RightBrace:
-						return ENOP;
-					break;
-				}
+				return ENOP;
 			}
-		break;
+		}
 	}
 	return error;
 }
@@ -341,50 +332,40 @@ TError stmt(FILE *input, string *attr)
 	else if(token.type == T_Cin)
 	{
 		getNextToken(input, attr);
-		switch(token.type)
+		if(token.type == T_RightShift)
 		{
-			case T_RightShift:
+			getNextToken(input, attr);
+			if(token.type == T_Id)
+			{
 				getNextToken(input, attr);
-				switch(token.type)
+				error = cin_id_n(input, attr);
+				if(error == ENOP)
 				{
-					case T_Id:
-						getNextToken(input, attr);
-						error = cin_id_n(input, attr);
-						if(error == ENOP)
-						{
-							getNextToken(input, attr);
-							switch(token.type)
-							{
-								case T_Semicolon:
-									return ENOP;
-								break;
-							}
-						}
-					break;
+					getNextToken(input, attr);
+					if(token.type == T_Semicolon)
+					{
+						return ENOP;
+					}
 				}
-			break;
+			}	
 		}
 	}
 	// 27: <STMT> -> cout << <COUT_TERM>;
 	else if(token.type == T_Cout)
 	{
 		getNextToken(input, attr);
-		switch(token.type)
+		if(token.type == T_LeftShift)
 		{
-			case T_LeftShift:
+			getNextToken(input, attr);
+			error = cout_term(input, attr);
+			if(error == ENOP)
+			{
 				getNextToken(input, attr);
-				error = cout_term(input, attr);
-				if(error == ENOP)
+				if(token.type == T_Semicolon)
 				{
-					getNextToken(input, attr);
-					switch(token.type)
-					{
-						case T_Semicolon:
-							return ENOP;
-						break;
-					}
+					return ENOP;
 				}
-			break;
+			}
 		}
 	}
 	// 28: <STMT> -> <RETURN>
@@ -396,17 +377,15 @@ TError stmt(FILE *input, string *attr)
 	else if(token.type == T_Id)
 	{
 		getNextToken(input, attr);
-		switch(token.type)
+		if(token.type == T_Equal)
 		{
-			case T_Equal:
-				getNextToken(input, attr);
-				error = fcall_or_assign(input, attr);
-				if(error == ENOP)
-				{
-					return error;
-				}
-			break;
-		}
+			getNextToken(input, attr);
+			error = fcall_or_assign(input, attr);
+			if(error == ENOP)
+			{
+				return error;
+			}
+		}		
 	}
 	return error;
 }
@@ -428,13 +407,11 @@ TError params(FILE *input, string *attr)
 	if(error == ENOP)
 	{
 		getNextToken(input, attr);
-		switch(token.type)
+		if(token.type == T_Id)
 		{
-			case T_Id:
-				getNextToken(input, attr);
-				error = params_n(input, attr);
-				return error;
-			break;
+			getNextToken(input, attr);
+			error = params_n(input, attr);
+			return error;
 		}
 	}
 	// 16: <PARAMS> -> E
@@ -465,14 +442,12 @@ TError params_n(FILE *input, string *attr)
 		if(error == ENOP)
 		{
 			getNextToken(input, attr);
-			switch(token.type)
+			if(token.type == T_Id)
 			{
-				case T_Id:
-					getNextToken(input, attr);
-					error = params_n(input, attr);
-					return error;
-				break;
-			}
+				getNextToken(input, attr);
+				error = params_n(input, attr);
+				return error;
+			}	
 		}
 	}
 	// 18: <PARAMS_N> -> E
@@ -496,22 +471,18 @@ TError ret(FILE *input, string *attr)
 	#endif
 	TError error = ESYN;
 	// 42: <RETURN> -> return <EXPR>;
-	switch(token.type)
+	if(token.type == T_Return)
 	{
-		case T_Return:
+		getNextToken(input, attr);
+		error = expr(input, attr);
+		if(error == ENOP)
+		{
 			getNextToken(input, attr);
-			error = expr(input, attr);
-			if(error == ENOP)
+			if(token.type == T_Semicolon)
 			{
-				getNextToken(input, attr);
-				switch(token.type)
-				{
-					case T_Semicolon:
-						return ENOP;
-					break;
-				}
+				return ENOP;
 			}
-		break;
+		}
 	}
 	return error;
 }
@@ -529,17 +500,16 @@ TError cout_term(FILE *input, string *attr)
 	#endif
 	TError error = ESYN;
 	// 39)	<COUT_TERM>		-> 	id <COUT_TERM_N>
-	switch(token.type)
+	if(token.type == T_Id)
 	{
-		case T_Id:
-			getNextToken(input, attr);
-			error = cout_term_n(input, attr);
-			if(error == ENOP)
-			{
-				return error;
-			}
-		break;
+		getNextToken(input, attr);
+		error = cout_term_n(input, attr);
+		if(error == ENOP)
+		{
+			return error;
+		}
 	}
+			
 	/**
 	 * @todo pravidlo na cout konstant (doub, str, integ)
 	 */
@@ -592,17 +562,16 @@ TError cin_id_n(FILE *input, string *attr)
 	if(token.type == T_LeftShift)
 	{
 		getNextToken(input, attr);
-		switch(token.type)
+		if(token.type == T_Id)
 		{
-			case T_Id:
-				getNextToken(input, attr);
-				error = cin_id_n(input, attr);
-				if(error == ENOP)
-				{
-					return error;
-				}
-			break;
+			getNextToken(input, attr);
+			error = cin_id_n(input, attr);
+			if(error == ENOP)
+			{
+				return error;
+			}
 		}
+				
 	}
 	// 38) <CIN_ID_N> -> E
 	else
@@ -625,23 +594,20 @@ TError assign(FILE *input, string *attr)
 	#endif
 	TError error = ESYN;
 	// 36: <ASSIGN> -> id = <EXPR> 
-	switch(token.type)
+	if(token.type == T_Id)
 	{
-		case T_Id:
+		getNextToken(input, attr);
+		if(token.type == T_Equal)
+		{
 			getNextToken(input, attr);
-			switch(token.type)
+			error = expr(input, attr);
+			if(error == ENOP)
 			{
-				case T_Equal:
-					getNextToken(input, attr);
-					error = expr(input, attr);
-					if(error == ENOP)
-					{
-						return error;
-					}
-				break;
+				return error;
 			}
-		break;
+		}	
 	}
+			
 	return error;
 }
 
@@ -661,39 +627,33 @@ TError var_def(FILE *input, string *attr)
 	if((error = type()) == ENOP)
 	{
 		getNextToken(input, attr);
-		switch(token.type)
+		if(token.type == T_Id)
 		{
-			case T_Id:
+			getNextToken(input, attr);
+			error = init(input, attr);
+			if(error == ENOP)
+			{
 				getNextToken(input, attr);
-				error = init(input, attr);
-				if(error == ENOP)
+				if(token.type == T_Semicolon)
 				{
-					getNextToken(input, attr);
-					switch(token.type)
-					{
-						case T_Semicolon:
-							return ENOP;
-						break;
-					}
+					return ENOP;
 				}
-			break;
-		}
+			}
+		}		
 	}
 	// 5: <VAR_DEF> -> auto id <INIT>;
 	else if(token.type == T_Auto)
 	{
 		getNextToken(input, attr);
-		switch(token.type)
+		if(token.type == T_Id)
 		{
-			case T_Id:
-				getNextToken(input, attr);
-				error = init(input, attr);
-				if(error == ENOP)
-				{
-					return error;
-				}
-			break;
-		}
+			getNextToken(input, attr);
+			error = init(input, attr);
+			if(error == ENOP)
+			{
+				return error;
+			}
+		}		
 	}
 	return error;
 }
@@ -774,39 +734,31 @@ TError fcall_or_assign(FILE *input, string *attr)
 	if((error = expr(input, attr)) == ENOP)
 	{
 		getNextToken(input, attr);
-		switch(token.type)
+		if(token.type == T_Semicolon)
 		{
-			case T_Semicolon:
-				return ENOP;
-			break;
+			return ENOP;
 		}
 	}
 	// 31: <FCALL_OR_ASSIGN> -> id ( <TERMS> );
 	else if(token.type == T_Id)
 	{
 		getNextToken(input, attr);
-		switch(token.type)
+		if(token.type == T_LeftParenthesis)
 		{
-			case T_LeftParenthesis:
+			getNextToken(input, attr);
+			error = terms(input, attr);
+			if(error == ENOP)
+			{
 				getNextToken(input, attr);
-				error = terms(input, attr);
-				if(error == ENOP)
+				if(token.type == T_RightParenthesis)
 				{
 					getNextToken(input, attr);
-					switch(token.type)
+					if(token.type == T_Semicolon)
 					{
-						case T_RightParenthesis:
-							getNextToken(input, attr);
-							switch(token.type)
-							{
-								case T_Semicolon:
-									return ENOP;
-								break;
-							}
-						break;
+						return ENOP;
 					}
-				}
-			break;
+				}	
+			}
 		}
 	}
 	return error;
@@ -858,17 +810,15 @@ TError terms_n(FILE *input, string *attr)
 	if(token.type == T_Comma)
 	{
 		getNextToken(input, attr);
-		switch(token.type)
+		if(token.type == T_Id)
 		{
-			case T_Id:
-				getNextToken(input, attr);
-				error = terms_n(input, attr);
-				if(error == ENOP)
-				{
-					return error;
-				}
-			break;
-		}
+			getNextToken(input, attr);
+			error = terms_n(input, attr);
+			if(error == ENOP)
+			{
+				return error;
+			}
+		}		
 	}
 	// 35: <TERMS_N> -> E
 	else
@@ -892,13 +842,9 @@ TError type()
 	// 8: <TYPE> ->	int
 	// 9: <TYPE> ->	double
 	// 10: <TYPE> -> string 
-	switch(token.type)
+	if(token.type == T_Double || token.type == T_String || token.type == T_Int)
 	{
-		case T_Double:
-		case T_String:
-		case T_Int:
-			return ENOP;
-		break;
+		return ENOP;
 	}
 	return error;
 }
