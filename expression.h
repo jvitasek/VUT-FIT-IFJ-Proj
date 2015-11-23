@@ -25,16 +25,20 @@ typedef enum Tsymbols {
 	TgreatEq, // >=
 	Tgreat,   // >
 	Tless,    // <
+	TleftShift, // <<
+	TrightShift, // >>
+	Tassign,	// =
 	Tiden,    // id
 	Tidfun,   // f
-	TleftB,   // (
-	TrightB,  // )
+	TleftP,   // (
+	TrightP,  // )
 	Tcomma,   // ,
 	Tdollar,  // $
 	less,
 	great,
 	equal,
-	empty
+	empty,
+	lessReduc	// < na zasobniku
 } Tsymbols;
 
 typedef enum hashType {  

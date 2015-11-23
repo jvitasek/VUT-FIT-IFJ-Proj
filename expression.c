@@ -15,6 +15,7 @@
 #include "parser.h"
 #include "expression.h"
 
+#define DEBUG 1
 
 
 tHTable* globalTS;
@@ -23,7 +24,7 @@ Tsymbols *exprStr;
 TError error;
 
 /**
- * 
+ * Precedencni tabulka 
  */
 int preceden_tab[16][16] = {
 //	  +		-			*   /      ==     !=    <=      >=     >      <      id    f    (      )      ,       $
@@ -189,12 +190,40 @@ int StackEmpty(Tstack *stack)
 }
 
 /**
-* Funkce precte cely vyraz.
+* Funkce vraci index do tabulky
 */
-/*int readExpr(FILE *input, string *attr)
+int getInd(int tokenType)
 {
+	int index = 0;
 
-}*/
+	switch (tokenType)
+	{
+		case T_Id:						//0
+		case T_Integ:					// cele cisla
+		case T_Doub:	 				// desatinne cisla
+		case T_Str: index = Tiden; break;	// retazec 15				
+		case T_Plus: index = Tplus; break;		// + 16
+		case T_Min: index = Tminus; break;			// - 17
+		case T_Mul:	index = Tmul; break;					// * 18
+		case T_Div:	index = Tdiv; break;					// / 19
+		case T_LessThan: index = Tless; break;			// < 20
+		case T_LessEqual: index = TlessEq; break; 	// <= 21
+		case T_LeftShift: index = TleftShift; break;	// << 22
+		case T_GreaterThan: index = Tgreat; break;	// > 23
+		case T_GreaterEqual: index = TgreatEq; break;	// >= 24
+		case T_RightShift: index = TrightShift; break;	// >> 25
+		case T_Equal: index = Tequal; break;			// == 26
+		case T_Assig: index = Tassign; break;			// = 27
+		case T_NotEqual: index = TnotEq; break;				// != 28
+		case T_Comma: index = Tcomma; break; 					// ,	29
+		case T_LeftParenthesis: index = TleftP; break;		// ( 31
+		case T_RightParenthesis: index = TrightP; break; 	// ) 32
+		case T_EOF: index = Tdollar; break;
+		default: index = ESYN; break;
+	}
+
+	return index;
+}
 
 /**
  * Simuluje pravidla vyrazu.
