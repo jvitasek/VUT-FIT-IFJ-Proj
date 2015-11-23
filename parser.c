@@ -14,9 +14,9 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include "error.h"
 #include "parser.h"
 #include "ial.h"
-#include "error.h"
 
 tHTable* globalTS;
 tHTItem* item;

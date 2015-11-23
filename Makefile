@@ -10,7 +10,7 @@ CFLAGS 	= -std=c99 -Wall -Wextra -pedantic
 CC 		= gcc
 
 main: main.c
-	$(CC) $(CFLAGS) error.c scanner.c parser.c str.c ial.c main.c -o main
+	$(CC) $(CFLAGS) error.c scanner.c parser.c str.c main.c expression.c ial.c -o main
 
 clean:
 	rm main
