@@ -12,7 +12,6 @@
 #define EXPRESSION_H
 
 #include <stdlib.h>
-#include "scanner.h"
 //#include ""
 
 typedef enum Tsymbols {

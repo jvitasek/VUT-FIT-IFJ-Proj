@@ -12,7 +12,9 @@
 #include <stdlib.h>
 #include "error.h"
 #include "ial.h"
+#include "parser.h"
 #include "expression.h"
+
 
 
 tHTable* globalTS;
@@ -23,7 +25,7 @@ TError error;
 /**
  * 
  */
-int preceden_tab[18][18]= {
+int preceden_tab[16][16]= {
 //	  +		-			*   /      ==     !=    <=      >=     >      <      id    f    (      )      ,       $
 	{great, great, less, less, great, great, great, great, great, great, less, less, less, empty, empty, great},		// +
 	{great, great, less, less, great, great, great, great, great, great, less, less, less, empty, empty, great},		// -
