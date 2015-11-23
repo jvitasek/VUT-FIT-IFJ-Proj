@@ -60,10 +60,11 @@ typedef struct Tstack {
 int StackInit(Tstack *stack); // inicialzace zasobniku
 void StackDispose(Tstack *stack);	
 void StackPop(Tstack *stack);
-void StackPush(Tstack *stack, T_Token token);
+int StackPush(Tstack *stack/*, T_Token token*/);
 TstackElemPtr StackTop(Tstack *stack);
 void StackShift(Tstack *stack, T_Token token);
 int StackEmpty(Tstack *stack);
+int readExpr(FILE *input, string *attr);
 int expr(FILE *input, string *attr); // P: @todo
 
 #endif

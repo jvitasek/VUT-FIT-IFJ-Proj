@@ -19,13 +19,13 @@
 
 tHTable* globalTS;
 Tsymbols *exprStr;
-Tstack stack;
+//Tstack stack;
 TError error;
 
 /**
  * 
  */
-int preceden_tab[16][16]= {
+int preceden_tab[16][16] = {
 //	  +		-			*   /      ==     !=    <=      >=     >      <      id    f    (      )      ,       $
 	{great, great, less, less, great, great, great, great, great, great, less, less, less, empty, empty, great},		// +
 	{great, great, less, less, great, great, great, great, great, great, less, less, less, empty, empty, great},		// -
@@ -46,7 +46,7 @@ int preceden_tab[16][16]= {
 };
 
 /**
- * [StackInit description]
+ * Inicializace zasobniku.
  * @param  stack [description]
  * @return       [description]
  */
@@ -82,8 +82,23 @@ int StackInit(Tstack *stack)
 	return ENOP;
 }
 
+/**
+ * Zruseni zasobniku
+ * @param stack
+ */
+void StackDispose(Tstack *stack)
+{
+	TstackElemPtr tempPtr;
+	tempPtr = stack->top;
 
-//void StackDispose(Tstack *stack);
+	while (stack->top != NULL)
+	{
+		tempPtr = stack->top;
+		stack->top = stack->top->Lptr;
+		free(tempPtr);
+	}
+	stack->first = NULL;
+}
 
 /**
  * Vrati dalsi token ze vstupu
@@ -118,6 +133,70 @@ void StackPop(Tstack *stack)
 }
 
 /**
+ * Vlozeni tokenu na zasobnik.
+ * @param  stack [description]
+ * @return       [description]
+ */
+int StackPush(Tstack *stack/*, T_Token token*/)
+{
+	TstackElemPtr tempPtr;
+	tempPtr = malloc(sizeof(struct TstackElem));
+
+	if (tempPtr == NULL)
+	{
+		error = ERUN_UNINIT;
+		return error;
+	}
+
+	tempPtr->idType = Tother;
+	tempPtr->Lptr = stack->top;
+	tempPtr->Rptr = NULL;
+	stack->top->Rptr = tempPtr;
+	stack->top = tempPtr;
+
+	error = ENOP;
+	return error;
+}
+
+/**
+ * Vraci token na vrcholu zasobniku.
+ * @param  stack [description]
+ * @return       [description]
+ */
+TstackElemPtr StackTop(Tstack *stack);
+/*** @TODO ****/
+
+/**
+ * [StackInit description]
+ * @param  stack [description]
+ */
+void StackShift(Tstack *stack, T_Token token);
+/*** @TODO ****/
+
+/**
+ * Kontrola, jestli je zasobnik prazdny.
+ * @param  stack [description]
+ * @return       [description]
+ */
+int StackEmpty(Tstack *stack)
+{
+	if (stack->first == stack->top)
+	{
+		error = ENOP;
+	}
+	
+	return error;
+}
+
+/**
+* Funkce precte cely vyraz.
+*/
+/*int readExpr(FILE *input, string *attr)
+{
+
+}*/
+
+/**
  * Simuluje pravidla vyrazu.
  * @param  input Soubor obsahujici vstupni kod.
  * @param  attr  String lexemu.
@@ -132,10 +211,4 @@ int expr(FILE *input, string *attr)
 	
 	return error;
 }
-
-/*void StackPush(Tstack *stack, T_Token token);
-TstackElemPtr StackTop(Tstack *stack);
-void StackShift(Tstack *stack, T_Token token);
-void StackEmpty(Tstack *stack);*/
-
 
