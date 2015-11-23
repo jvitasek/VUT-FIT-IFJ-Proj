@@ -42,4 +42,5 @@ int cout_term_n(FILE *input, string *attr); // P: 40, 41
 int cin_id_n(FILE *input, string *attr); // P: 37
 int ret(FILE *input, string *attr); // P: 42
 
+
 T_Token token;

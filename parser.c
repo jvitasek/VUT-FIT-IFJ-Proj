@@ -8,7 +8,7 @@
  * 			xvalec00 – Dusan Valecky
  */
 
-//#define DEBUG 1
+#define DEBUG 1
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -34,7 +34,7 @@ void getNextToken(FILE *input, string *attr)
 	#ifdef DEBUG
 	if(strcmp(attr->str, "") != 0)
 	{
-		printf("%s\n", strGetStr(attr));
+		//printf("%s\n", strGetStr(attr));
 	}
 	#endif
 	if(token.type == T_Error) exit(1);
@@ -142,7 +142,7 @@ int func(FILE *input, string *attr)
 		}
 		else
 		{
-			final_error = "Ocekavano ID.\n";
+			fprintf(stderr, "Ocekavano ID.\n");
 			return error;
 		}
 	}
@@ -178,14 +178,14 @@ int par_def_list(FILE *input, string *attr)
 			}
 			else
 			{
-				final_error = "Ocekavana prava zavorka.\n";
+				fprintf(stderr, "Ocekavana prava zavorka.\n");
 				return error;
 			}
 		}
 	}
 	else
 	{
-		final_error = "Ocekavana leva zavorka.\n";
+		fprintf(stderr, "Ocekavana leva zavorka.\n");
 		return error;
 	}
 	return error;
@@ -217,7 +217,7 @@ int dec_or_def(FILE *input, string *attr)
 	}
 	else
 	{
-		final_error = "Ocekavana sekvence prikazu nebo strednik.\n";
+		fprintf(stderr, "Ocekavana sekvence prikazu nebo strednik.\n");
 		return error;
 	}
 	return error;
@@ -252,14 +252,14 @@ int comm_seq(FILE *input, string *attr)
 			}
 			else
 			{
-				final_error = "Ocekavana prava slozena zavorka.\n";
+				fprintf(stderr, "Ocekavana prava slozena zavorka.\n");
 				return error;
 			}
 		}
 	}
 	else
 	{
-		final_error = "Ocekavana leva slozena zavorka.\n";
+		fprintf(stderr, "Ocekavana leva slozena zavorka.\n");
 		return error;
 	}
 	return error;
@@ -289,16 +289,10 @@ int stmt_list(FILE *input, string *attr)
 			return error;
 		}
 	}
-	// 21: <STMT_LIST> -> E ????????????????????????????????????????????????????????????????????????????????
-	else if(token.type == T_RightBrace)
+	else
 	{
 		// }
 		error = ENOP;
-		return error;
-	}
-	else
-	{
-		final_error = "Ocekavan statement nebo prava slozena zavorka.\n";
 		return error;
 	}
 	return error;
@@ -334,7 +328,7 @@ int stmt(FILE *input, string *attr)
 		}
 		else
 		{
-			final_error = "Ocekavan znak prirazeni.\n";
+			fprintf(stderr, "Ocekavan znak prirazeni.\n");
 			return error;
 		}
 	}
@@ -394,7 +388,7 @@ int stmt(FILE *input, string *attr)
 						}
 						else
 						{
-							final_error = "Ocekavana prava zavorka.\n";
+							fprintf(stderr, "Ocekavana prava zavorka.\n");
 							return error;
 						}
 					}
@@ -403,7 +397,7 @@ int stmt(FILE *input, string *attr)
 		}	
 		else
 		{
-			final_error = "Ocekavana leva zavorka.\n";
+			fprintf(stderr, "Ocekavana leva zavorka.\n");
 			return error;
 		}
 	}
@@ -446,20 +440,20 @@ int stmt(FILE *input, string *attr)
 					}
 					else
 					{
-						final_error = "Ocekavan strednik.\n";
+						fprintf(stderr, "Ocekavan strednik.\n");
 						return error;
 					}
 				}
 			}
 			else
 			{
-				final_error = "Ocekavano ID.\n";
+				fprintf(stderr, "Ocekavano ID.\n");
 				return error;
 			}
 		}
 		else
 		{
-			final_error = "Ocekavano >>.\n";
+			fprintf(stderr, "Ocekavano >>.\n");
 			return error;
 		}
 	}
@@ -484,14 +478,14 @@ int stmt(FILE *input, string *attr)
 				}
 				else
 				{
-					final_error = "Ocekavan strednik.\n";
+					fprintf(stderr, "Ocekavan strednik.\n");
 					return error;
 				}
 			}
 		}
 		else
 		{
-			final_error = "Ocekavano <<.\n";
+			fprintf(stderr, "Ocekavano <<.\n");
 			return error;
 		}
 	}
@@ -535,14 +529,14 @@ int ret(FILE *input, string *attr)
 			}
 			else
 			{
-				final_error = "Ocekavan strednik.\n";
+				fprintf(stderr, "Ocekavan strednik.\n");
 				return error;
 			}
 		}
 	}
 	else
 	{
-		final_error = "Ocekavano klicove slovo return.\n";
+		fprintf(stderr, "Ocekavano klicove slovo return.\n");
 		return error;
 	}
 	return error;
@@ -586,7 +580,7 @@ int cout_term(FILE *input, string *attr)
 	}
 	else
 	{
-		final_error = "Ocekavano ID.\n";
+		fprintf(stderr, "Ocekavano ID.\n");
 		return error;
 	}
 	return error;
@@ -655,7 +649,7 @@ int cin_id_n(FILE *input, string *attr)
 		}
 		else
 		{
-			final_error = "Ocekavano ID.\n";
+			fprintf(stderr, "Ocekavano ID.\n");
 			return error;
 		}
 	}
@@ -697,13 +691,13 @@ int assign(FILE *input, string *attr)
 		}
 		else
 		{
-			final_error = "Ocekavan znak prirazeni.\n";
+			fprintf(stderr, "Ocekavan znak prirazeni.\n");
 			return error;
 		}
 	}
 	else
 	{
-		final_error = "Ocekavano ID.\n";
+		fprintf(stderr, "Ocekavano ID.\n");
 		return error;
 	}
 	return error;
@@ -742,14 +736,14 @@ int var_def(FILE *input, string *attr)
 				}
 				else
 				{
-					final_error = "Ocekavan strednik.\n";
+					fprintf(stderr, "Ocekavan strednik.\n");
 					return error;
 				}
 			}
 		}
 		else
 		{
-			final_error = "Ocekavano ID.\n";
+			fprintf(stderr, "Ocekavano ID.\n");
 			return error;
 		}
 	}
@@ -774,14 +768,14 @@ int var_def(FILE *input, string *attr)
 				}
 				else
 				{
-					final_error = "Ocekavan strednik.\n";
+					fprintf(stderr, "Ocekavan strednik.\n");
 					return error;
 				}
 			}
 		}
 		else
 		{
-			final_error = "Ocekavano ID.\n";
+			fprintf(stderr, "Ocekavano ID.\n");
 			return error;
 		}
 	}
@@ -908,20 +902,20 @@ int fcall_or_assing(FILE *input, string *attr)
 					}
 					else
 					{
-						final_error = "Ocekavan strednik.\n";
+						fprintf(stderr, "Ocekavan strednik.\n");
 						return error;
 					}
 				}
 				else
 				{
-					final_error = "Ocekavana prava zavorka.\n";
+					fprintf(stderr, "Ocekavana prava zavorka.\n");
 					return error;
 				}
 			}
 		}
 		else
 		{
-			final_error = "Ocekavana leva zavorka.\n";
+			fprintf(stderr, "Ocekavana leva zavorka.\n");
 			return error;
 		}
 	}
@@ -938,7 +932,7 @@ int fcall_or_assing(FILE *input, string *attr)
 		}
 		else
 		{
-			final_error = "Ocekavan strednik.\n";
+			fprintf(stderr, "Ocekavan strednik.\n");
 			return error;
 		}
 	}
@@ -969,13 +963,18 @@ int terms(FILE *input, string *attr)
 			return error;
 		}
 	}
-	// 33: <TERMS> -> E ?????????????????????????????????????????????????????
-	else if(token.type == T_RightParenthesis)
+	else
 	{
-		// )
 		error = ENOP;
 		return error;
 	}
+	// // 33: <TERMS> -> E ?????????????????????????????????????????????????????
+	// else if(token.type == T_RightParenthesis)
+	// {
+	// 	// )
+	// 	error = ENOP;
+	// 	return error;
+	// }
 	return error;
 }
 
@@ -991,15 +990,8 @@ int terms_n(FILE *input, string *attr)
 	printf("terms_n\n");
 	#endif
 	error = ESYN;
-	// 35: <TERMS_N> -> E ??????????????????????????????????????????????????
-	if(token.type == T_RightParenthesis)
-	{
-		// )
-		error = ENOP;
-		return error;
-	}
 	// 34: <TERMS_N> -> , id <TERMS_N>
-	else if(token.type == T_Comma)
+	if(token.type == T_Comma)
 	{
 		// ,
 		getNextToken(input, attr);
@@ -1016,13 +1008,13 @@ int terms_n(FILE *input, string *attr)
 		}
 		else
 		{
-			final_error = "Ocekavano ID.\n";
+			fprintf(stderr, "Ocekavano ID.\n");
 			return error;
 		}	
 	}
 	else
 	{
-		final_error = "Ocekavana carka nebo ukoncovaci zavorka\n.";
+		error = ENOP;
 		return error;
 	}
 	return error;
@@ -1069,7 +1061,7 @@ int type()
 	}
 	else
 	{
-		final_error = "Typ neni int/double/string.\n";
+		fprintf(stderr, "Typ neni int/double/string.\n");
 		return error;
 	}
 	return error;
@@ -1173,7 +1165,7 @@ int params_n(FILE *input, string *attr)
 			}
 			else
 			{
-				final_error = "Ocekavano ID.\n";
+				fprintf(stderr, "Ocekavano ID.\n");
 				return error;
 			}	
 		}
