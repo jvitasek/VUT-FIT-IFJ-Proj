@@ -20,6 +20,9 @@ Tsymbols *exprStr;
 Tstack stack;
 TError error;
 
+/**
+ * 
+ */
 int preceden_tab[18][18]= {
 //	  +		-			*   /      ==     !=    <=      >=     >      <      id    f    (      )      ,       $
 	{great, great, less, less, great, great, great, great, great, great, less, less, less, empty, empty, great},		// +
@@ -40,6 +43,11 @@ int preceden_tab[18][18]= {
 	{less, less, less, less, less, less, less, less, less, less, less, empty, less, less, empty, empty}					// $
 };
 
+/**
+ * [StackInit description]
+ * @param  stack [description]
+ * @return       [description]
+ */
 int StackInit(Tstack *stack)
 {
 	if (stack == NULL)
@@ -107,6 +115,21 @@ void StackPop(Tstack *stack)
 	}
 }
 
+/**
+ * Simuluje pravidla vyrazu.
+ * @param  input Soubor obsahujici vstupni kod.
+ * @param  attr  String lexemu.
+ * @return       Index do enumerace chyb.
+ */
+int expr(FILE *input, string *attr)
+{
+	#ifdef DEBUG
+	printf("expr\n");
+	#endif
+	error = ENOP;
+	
+	return error;
+}
 
 /*void StackPush(Tstack *stack, T_Token token);
 TstackElemPtr StackTop(Tstack *stack);

@@ -33,7 +33,6 @@ int fcall_or_assing(FILE *input, string *attr); // P: 30, 31
 int terms(FILE *input, string *attr); // P: 32, 33
 int terms_n(FILE *input, string *attr); // P: 34, 35
 int if_n(FILE *input, string *attr); // P: 43, 44
-int expr(FILE *input, string *attr); // P: @todo
 int assign(FILE *input, string *attr); // P: 36
 int var_def(FILE *input, string *attr); // P: 4, 5
 int init(FILE *input, string *attr); // P: 6

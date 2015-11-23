@@ -65,5 +65,6 @@ void StackPush(Tstack *stack, T_Token token);
 TstackElemPtr StackTop(Tstack *stack);
 void StackShift(Tstack *stack, T_Token token);
 int StackEmpty(Tstack *stack);
+int expr(FILE *input, string *attr); // P: @todo
 
 #endif

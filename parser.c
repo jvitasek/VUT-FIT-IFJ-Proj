@@ -17,6 +17,7 @@
 #include "error.h"
 #include "parser.h"
 #include "ial.h"
+#include "expression.h"
 
 tHTable* globalTS;
 tHTItem* item;
@@ -844,24 +845,6 @@ int if_n(FILE *input, string *attr)
 		error = ENOP;
 		return error;
 	}
-	return error;
-}
-
-/**
- * Simuluje pravidla vyrazu.
- * @param  input Soubor obsahujici vstupni kod.
- * @param  attr  String lexemu.
- * @return       Index do enumerace chyb.
- */
-int expr(FILE *input, string *attr)
-{
-	#ifdef DEBUG
-	printf("expr\n");
-	#endif
-	error = ENOP;
-	/**
-	 * @todo vyrazy
-	 */
 	return error;
 }
 
