@@ -27,8 +27,8 @@ typedef enum TError {
 	ERUN_DIV = 90, // Deleni nulou
 	EOTH = 100, // Ostatni chyby
 	EINT = 99, // Interni chyba
-	EEMPTY = -42, // Epsilon pravidlo
-	ENOTFOUND = -69 // Nenalazeno pravidlo
+	EEMPTY = 123, // Epsilon pravidlo
+	ENOTFOUND = 321 // Nenalazeno pravidlo
 } TError;
 
 /**

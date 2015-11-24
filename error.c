@@ -22,6 +22,8 @@
 void print_error(TError code, int line) {
 	const char *error_msg[] = {
 		[ENOP] = "SUCCESS: Vse v poradku",
+		[ENOTFOUND] = "NOTFOUND",
+		[EEMPTY] = "EEMPTY",
 		[ELEX] = "ERROR: Lexikalni analyza",
 		[ESYN] = "ERROR: Syntakticka analyza",
 		[ESEM_DEF] = "ERROR: Semanticka analyza, nedefinovana funkce/redefinice",

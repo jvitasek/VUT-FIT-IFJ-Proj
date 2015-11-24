@@ -50,7 +50,6 @@ int main(int argc, char **argv)
 			return -result;
 		break;
 	}
-
 	/**
 	 * @todo interpretace (predani tabulky symbolu a instruction listu)
 	 */

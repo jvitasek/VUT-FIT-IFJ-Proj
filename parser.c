@@ -8,7 +8,7 @@
  * 			xvalec00 – Dusan Valecky
  */
 
-#define DEBUG 1
+//#define DEBUG 1
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -34,14 +34,6 @@ int line = 1;
 void getNextToken(FILE *input, string *attr)
 {
 	token = getToken(input, attr, &line);
-	#ifdef DEBUG
-	//printf("TOKEN: %d, LINE: %d\n", token.type, token.line);
-	// if(strcmp(attr->str, "") != 0)
-	// {
-	// 	printf("---\n%s\n", strGetStr(attr));
-	// 	printf("%d\n---\n", token.type);
-	// }
-	#endif
 	if(token.type == T_Error) exit(1);
 }
 
@@ -56,7 +48,7 @@ TError parse(FILE *input, string *attr)
 	#ifdef DEBUG
 	printf("parse\n");
 	#endif
-	TError error = ENOP;
+	TError error = ESYN;
 
 	// inicializace TS
 	if(initSTable() != ENOP)
@@ -65,11 +57,23 @@ TError parse(FILE *input, string *attr)
 	}
 
 	getNextToken(input, attr);
+	// prazdny soubor
+	if(token.type == T_EOF)
+	{
+		return ESYN;
+	}
 	// 1: <PROGRAM> -> <FUNC_N>
 	error = func_n(input, attr);
-	if(error == EEMPTY || error == ENOP)
+	#ifdef DEBUG
+	printf("parse: func_n vratilo: %d\n", error);
+	#endif
+	if(error == ENOP || error == EEMPTY)
 	{
 		error = ENOP;
+	}
+	else if(error == ENOTFOUND)
+	{
+		return ESYN;
 	}
 	return error;
 }
@@ -88,11 +92,17 @@ TError func_n(FILE *input, string *attr)
 	TError error = ENOTFOUND;
 	// 2: <FUNC_N> -> <FUNC> <FUNC_N>
 	error = func(input, attr);
+	#ifdef DEBUG
+	printf("func_n: func vratilo: %d\n", error);
+	#endif
 	if(error == ENOP)
 	{
 		// <FUNC>
 		getNextToken(input, attr);
 		error = func_n(input, attr);
+		#ifdef DEBUG
+		printf("func_n: func_n vratilo: %d\n", error);
+		#endif
 		if(error == ENOP)
 		{
 			// <FUNC> <FUNC_N>
@@ -130,6 +140,9 @@ TError func(FILE *input, string *attr)
 	TError error = ENOTFOUND;
 	// 11: <FUNC> -> <TYPE> id <PAR_DEF_LIST> <DEC_OR_DEF>
 	error = type();
+	#ifdef DEBUG
+	printf("func: type vratilo: %d\n", error);
+	#endif
 	if(error == ENOP)
 	{
 		getNextToken(input, attr);
@@ -137,10 +150,16 @@ TError func(FILE *input, string *attr)
 		{
 			getNextToken(input, attr);
 			error = par_def_list(input, attr);
+			#ifdef DEBUG
+			printf("func: par_def_list vratilo: %d\n", error);
+			#endif
 			if(error == ENOP)
 			{
 				getNextToken(input, attr);
 				error = dec_or_def(input, attr);
+				#ifdef DEBUG
+				printf("func: dec_or_def vratilo: %d\n", error);
+				#endif
 				return error;
 			}
 			else if(error == ESYN)
@@ -177,6 +196,9 @@ TError par_def_list(FILE *input, string *attr)
 	{
 		getNextToken(input, attr);
 		error = params(input, attr);
+		#ifdef DEBUG
+		printf("par_def_list: params vratilo: %d\n", error);
+		#endif
 		// neni potreba kontrolovat, zda pravidlo
 		// proslo na epsilon, negetujeme dalsi token
 		if(error == ENOP || error == EEMPTY)
@@ -215,6 +237,9 @@ TError dec_or_def(FILE *input, string *attr)
 	TError error = ENOTFOUND;
 	// 12: <DEC_OR_DEF> -> <COMM_SEQ>
 	error = comm_seq(input, attr);
+	#ifdef DEBUG
+	printf("dec_or_def: comm_seq vratilo: %d\n", error);
+	#endif
 	if(error == ENOP)
 	{
 		return error;
@@ -248,13 +273,17 @@ TError comm_seq(FILE *input, string *attr)
 	{
 		getNextToken(input, attr);
 		error = stmt_list(input, attr);
+		#ifdef DEBUG
+		printf("comm_seq: stmt_list vratilo: %d\n", error);
+		#endif
 		if(error == ENOP || error == EEMPTY)
 		{
 			// pokud pravidlo proslo na epsilonu
 			// negetujeme dalsi token
 			if(error == ENOP)
 			{
-				getNextToken(input, attr);
+				// ?????????????????????????????????? @todo mozny bug
+				//getNextToken(input, attr);
 			}
 
 			if(token.type == T_RightBrace)
@@ -264,7 +293,6 @@ TError comm_seq(FILE *input, string *attr)
 			else
 			{
 				return ESYN;
-				//fprintf(stderr, "COMM_SEQ: ocekavano }\n");
 			}
 		}
 		else if(error == ESYN)
@@ -289,10 +317,16 @@ TError stmt_list(FILE *input, string *attr)
 	TError error = ENOTFOUND;
 	// 20: <STMT_LIST> -> <STMT> <STMT_LIST>
 	error = stmt(input, attr);
+	#ifdef DEBUG
+	printf("stmt_list: stmt vratilo: %d\n", error);
+	#endif
 	if(error == ENOP)
 	{
 		getNextToken(input, attr);
 		error = stmt_list(input, attr);
+		#ifdef DEBUG
+		printf("stmt_list: stmt_list vratilo: %d\n", error);
+		#endif
 		// neni potreba kontrolovat, zda pravidlo
 		// proslo na epsilon, negetujeme dalsi token
 		if(error == ENOP || error == EEMPTY)
@@ -334,14 +368,23 @@ TError stmt(FILE *input, string *attr)
 	{
 		getNextToken(input, attr);
 		error = expr(input, attr);
+		#ifdef DEBUG
+		printf("stmt: stmt vratilo: %d\n", error);
+		#endif
 		if(error == ENOP)
 		{
 			getNextToken(input, attr);
 			error = comm_seq(input, attr);
+			#ifdef DEBUG
+			printf("stmt: comm_seq vratilo: %d\n", error);
+			#endif
 			if(error == ENOP)
 			{
 				getNextToken(input, attr);
 				error = if_n(input, attr);
+				#ifdef DEBUG
+				printf("stmt: if_n vratilo: %d\n", error);
+				#endif
 				// neni potreba kontrolovat, zda pravidlo
 				// proslo na epsilon, negetujeme dalsi token
 				if(error == ENOP || error == EEMPTY)
@@ -372,14 +415,23 @@ TError stmt(FILE *input, string *attr)
 		{
 			getNextToken(input, attr);
 			error = var_def(input, attr);
+			#ifdef DEBUG
+			printf("stmt: var_def vratilo: %d\n", error);
+			#endif
 			if(error == ENOP)
 			{
 				getNextToken(input, attr);
 				error = expr(input, attr);
+				#ifdef DEBUG
+				printf("stmt: expr vratilo: %d\n", error);
+				#endif
 				if(error == ENOP)
 				{
 					getNextToken(input, attr);
 					error = assign(input, attr);
+					#ifdef DEBUG
+					printf("stmt: assign vratilo: %d\n", error);
+					#endif
 					if(error == ENOP)
 					{
 						getNextToken(input, attr);
@@ -387,6 +439,9 @@ TError stmt(FILE *input, string *attr)
 						{
 							getNextToken(input, attr);
 							error = comm_seq(input, attr);
+							#ifdef DEBUG
+							printf("stmt: comm_seq vratilo: %d\n", error);
+							#endif
 							if(error == ENOP)
 							{
 								return ENOP;
@@ -424,11 +479,17 @@ TError stmt(FILE *input, string *attr)
 	// 24: <STMT> -> <COMM_SEQ>
 	else if((error = comm_seq(input, attr)) == ENOP || error == ESYN)
 	{
+		#ifdef DEBUG
+		printf("stmt: comm_seq vratilo: %d\n", error);
+		#endif
 		return error;
 	}
 	// 25: <STMT> -> <VAR_DEF>
 	else if((error = var_def(input, attr)) == ENOP || error == ESYN)
 	{
+		#ifdef DEBUG
+		printf("stmt: var_def vratilo: %d\n", error);
+		#endif
 		return error;
 	}
 	// 26: <STMT> -> cin >> id <CIN_ID_N>;
@@ -442,6 +503,9 @@ TError stmt(FILE *input, string *attr)
 			{
 				getNextToken(input, attr);
 				error = cin_id_n(input, attr);
+				#ifdef DEBUG
+				printf("stmt: cin_id_n vratilo: %d\n", error);
+				#endif
 				// neni potreba kontrolovat, zda pravidlo
 				// proslo na epsilon, negetujeme dalsi token
 				if(error == ENOP || error == EEMPTY)
@@ -483,6 +547,9 @@ TError stmt(FILE *input, string *attr)
 		{
 			getNextToken(input, attr);
 			error = cout_term(input, attr);
+			#ifdef DEBUG
+			printf("stmt: cout_term vratilo: %d\n", error);
+			#endif
 			if(error == ENOP)
 			{
 				getNextToken(input, attr);
@@ -508,6 +575,9 @@ TError stmt(FILE *input, string *attr)
 	// 28: <STMT> -> <RETURN>
 	else if((error = ret(input, attr)) == ENOP || error == ESYN)
 	{
+		#ifdef DEBUG
+		printf("stmt: ret vratilo: %d\n", error);
+		#endif
 		return error;
 	}
 	// 29) <STMT> -> id = <FCALL_OR_ASSIGN>
@@ -518,6 +588,9 @@ TError stmt(FILE *input, string *attr)
 		{
 			getNextToken(input, attr);
 			error = fcall_or_assign(input, attr);
+			#ifdef DEBUG
+			printf("stmt: fcall_or_assign vratilo: %d\n", error);
+			#endif
 			if(error == ENOP)
 			{
 				return error;
@@ -549,6 +622,9 @@ TError params(FILE *input, string *attr)
 	TError error = ENOTFOUND;
 	// 15: <PARAMS> -> <TYPE> id <PARAMS_N>
 	error = type();
+	#ifdef DEBUG
+	printf("params: type vratilo: %d\n", error);
+	#endif
 	if(error == ENOP)
 	{
 		getNextToken(input, attr);
@@ -556,6 +632,9 @@ TError params(FILE *input, string *attr)
 		{
 			getNextToken(input, attr);
 			error = params_n(input, attr);
+			#ifdef DEBUG
+			printf("params: params_n vratilo: %d\n", error);
+			#endif
 			// neni potreba kontrolovat, zda pravidlo
 			// proslo na epsilon, negetujeme dalsi token
 			if(error == ENOP || error == EEMPTY)
@@ -602,6 +681,9 @@ TError params_n(FILE *input, string *attr)
 	{
 		getNextToken(input, attr);
 		error = type();
+		#ifdef DEBUG
+		printf("params_n: type vratilo: %d\n", error);
+		#endif
 		if(error == ENOP)
 		{
 			getNextToken(input, attr);
@@ -609,6 +691,9 @@ TError params_n(FILE *input, string *attr)
 			{
 				getNextToken(input, attr);
 				error = params_n(input, attr);
+				#ifdef DEBUG
+				printf("params_n: params_n vratilo: %d\n", error);
+				#endif
 				// neni potreba kontrolovat, zda pravidlo
 				// proslo na epsilon, negetujeme dalsi token
 				if(error == ENOP || error == EEMPTY)
@@ -656,6 +741,9 @@ TError ret(FILE *input, string *attr)
 	{
 		getNextToken(input, attr);
 		error = expr(input, attr);
+		#ifdef DEBUG
+		printf("ret: expr vratilo: %d\n", error);
+		#endif
 		if(error == ENOP)
 		{
 			getNextToken(input, attr);
@@ -693,6 +781,9 @@ TError cout_term(FILE *input, string *attr)
 	{
 		getNextToken(input, attr);
 		error = cout_term_n(input, attr);
+		#ifdef DEBUG
+		printf("cout_term: cout_term_n vratilo: %d\n", error);
+		#endif
 		// neni potreba kontrolovat, zda pravidlo
 		// proslo na epsilon, negetujeme dalsi token
 		if(error == ENOP || error == EEMPTY)
@@ -728,6 +819,9 @@ TError cout_term_n(FILE *input, string *attr)
 	{
 		getNextToken(input, attr);
 		error = cout_term(input, attr);
+		#ifdef DEBUG
+		printf("cout_term_n: cout_term vratilo: %d\n", error);
+		#endif
 		// neni potreba kontrolovat, zda pravidlo
 		// proslo na epsilon, negetujeme dalsi token
 		if(error == ENOP || error == EEMPTY)
@@ -768,6 +862,9 @@ TError cin_id_n(FILE *input, string *attr)
 		{
 			getNextToken(input, attr);
 			error = cin_id_n(input, attr);
+			#ifdef DEBUG
+			printf("cin_id_n: cin_id_n vratilo: %d\n", error);
+			#endif
 			// neni potreba kontrolovat, zda pravidlo
 			// proslo na epsilon, negetujeme dalsi token
 			if(error == ENOP || error == EEMPTY)
@@ -813,6 +910,9 @@ TError assign(FILE *input, string *attr)
 		{
 			getNextToken(input, attr);
 			error = expr(input, attr);
+			#ifdef DEBUG
+			printf("assign: expr vratilo: %d\n", error);
+			#endif
 			if(error == ENOP)
 			{
 				return error;
@@ -846,6 +946,9 @@ TError var_def(FILE *input, string *attr)
 	// 4: <VAR_DEF> -> <TYPE> id <INIT>;
 	if((error = type()) == ENOP || error == ESYN)
 	{
+		#ifdef DEBUG
+		printf("var_def: type vratilo: %d\n", error);
+		#endif
 		if(error == ESYN)
 		{
 			return error;
@@ -856,6 +959,9 @@ TError var_def(FILE *input, string *attr)
 		{
 			getNextToken(input, attr);
 			error = init(input, attr);
+			#ifdef DEBUG
+			printf("var_def: init vratilo: %d\n", error);
+			#endif
 			if(error == ENOP || error == EEMPTY)
 			{
 				//printf("token pred: %d\n", token.type);
@@ -893,6 +999,9 @@ TError var_def(FILE *input, string *attr)
 		{
 			getNextToken(input, attr);
 			error = init(input, attr);
+			#ifdef DEBUG
+			printf("var_def: init vratilo: %d\n", error);
+			#endif
 			// neni potreba kontrolovat, zda pravidlo
 			// proslo na epsilon, negetujeme dalsi token
 			if(error == ENOP || error == EEMPTY)
@@ -930,6 +1039,9 @@ TError init(FILE *input, string *attr)
 	{
 		getNextToken(input, attr);
 		error = expr(input, attr);
+		#ifdef DEBUG
+		printf("init: expr vratilo: %d\n", error);
+		#endif
 		if(error == ENOP)
 		{
 			return error;
@@ -964,6 +1076,9 @@ TError if_n(FILE *input, string *attr)
 	{
 		getNextToken(input, attr);
 		error = comm_seq(input, attr);
+		#ifdef DEBUG
+		printf("if_n: comm_seq vratilo: %d\n", error);
+		#endif
 		if(error == ENOP)
 		{
 			return error;
@@ -996,6 +1111,9 @@ TError fcall_or_assign(FILE *input, string *attr)
 	// 30: <FCALL_OR_ASSIGN> -> <EXPR> ;
 	if((error = expr(input, attr)) == ENOP || error == ESYN)
 	{
+		#ifdef DEBUG
+		printf("fcall_or_assign: expr vratilo: %d\n", error);
+		#endif
 		if(error == ESYN)
 		{
 			return error;
@@ -1019,7 +1137,9 @@ TError fcall_or_assign(FILE *input, string *attr)
 		{
 			getNextToken(input, attr);
 			error = terms(input, attr);
-
+			#ifdef DEBUG
+			printf("fcall_or_assign: terms vratilo: %d\n", error);
+			#endif
 			if(error == ENOP || error == EEMPTY)
 			{
 				if(error == ENOP)
@@ -1074,6 +1194,9 @@ TError terms(FILE *input, string *attr)
 	{
 		getNextToken(input, attr);
 		error = terms_n(input, attr);
+		#ifdef DEBUG
+		printf("terms: terms_n vratilo: %d\n", error);
+		#endif
 		if(error == ENOP || error == EEMPTY)
 		{
 			error = ENOP;
@@ -1112,6 +1235,9 @@ TError terms_n(FILE *input, string *attr)
 		{
 			getNextToken(input, attr);
 			error = terms_n(input, attr);
+			#ifdef DEBUG
+			printf("terms: terms_n vratilo: %d\n", error);
+			#endif
 			if(error == ENOP || error == EEMPTY)
 			{
 				error = ENOP;
