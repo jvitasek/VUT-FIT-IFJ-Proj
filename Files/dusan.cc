@@ -1,4 +1,4 @@
-int main (int test, string ryba)
+int main(int test, string ryba)
 {
 	double lol;
 }
