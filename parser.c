@@ -35,11 +35,12 @@ void getNextToken(FILE *input, string *attr)
 {
 	token = getToken(input, attr, &line);
 	#ifdef DEBUG
-	if(strcmp(attr->str, "") != 0)
-	{
-		printf("---\n%s\n", strGetStr(attr));
-		printf("%d\n---\n", token.type);
-	}
+	printf("TOKEN: %d, LINE: %d\n", token.type, token.line);
+	// if(strcmp(attr->str, "") != 0)
+	// {
+	// 	printf("---\n%s\n", strGetStr(attr));
+	// 	printf("%d\n---\n", token.type);
+	// }
 	#endif
 	if(token.type == T_Error) exit(1);
 }
@@ -97,7 +98,9 @@ TError func_n(FILE *input, string *attr)
 	// 3: <FUNC_N> -> E 
 	else if(token.type == T_EOF)
 	{
+		#ifdef DEBUG
 		printf("konec souboru\n");
+		#endif
 		error = ENOP;
 	}
 	return error;
@@ -132,7 +135,11 @@ TError func(FILE *input, string *attr)
 			{
 				return error;
 			}
-		}		
+		}
+		else
+		{
+			error = ESYN;
+		}
 	}
 	return error;
 }
@@ -160,10 +167,13 @@ TError par_def_list(FILE *input, string *attr)
 			if(token.type == T_RightParenthesis)
 			{
 				return ENOP;
-			}	
+			}
+			else
+			{
+				error = ESYN;
+			}
 		}
 	}
-			
 	return error;
 }
 
@@ -206,6 +216,7 @@ TError comm_seq(FILE *input, string *attr)
 	#endif
 	TError error = ESYN;
 	// 19: <COMM_SEQ> -> { <STMT_LIST> }
+	printf("TOKEN: %s, TYP: %d\n", attr->str, token.type);
 	if(token.type == T_LeftBrace)
 	{
 		getNextToken(input, attr);
@@ -217,7 +228,19 @@ TError comm_seq(FILE *input, string *attr)
 			{
 				return ENOP;
 			}
+			else
+			{
+				fprintf(stderr, "COMM_SEQ: ocekavano }\n");
+			}
 		}
+		else
+		{
+			fprintf(stderr, "COMM_SEQ: stmt_list nevratil ENOP\n");
+		}
+	}
+	else
+	{
+		fprintf(stderr, "COMM_SEQ: ocekavano {\n");
 	}
 	return error;
 }
@@ -248,7 +271,7 @@ TError stmt_list(FILE *input, string *attr)
 	// 21: <STMT_LIST> -> E
 	else
 	{
-		return error;
+		return ENOP;
 	}
 	return error;
 }
