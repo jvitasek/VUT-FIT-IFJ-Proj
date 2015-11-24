@@ -8,7 +8,7 @@
  * 			xvalec00 – Dusan Valecky
  */
 
-#define DEBUG 1
+//#define DEBUG 1
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -163,15 +163,11 @@ TError par_def_list(FILE *input, string *attr)
 		error = params(input, attr);
 		if(error == ENOP)
 		{
-			getNextToken(input, attr);
-			if(token.type == T_RightParenthesis)
-			{
-				return ENOP;
-			}
-			else
-			{
-				error = ESYN;
-			}
+			return error;
+		}
+		else if(token.type == T_RightParenthesis)
+		{
+			error = ENOP;
 		}
 	}
 	return error;
@@ -216,7 +212,6 @@ TError comm_seq(FILE *input, string *attr)
 	#endif
 	TError error = ESYN;
 	// 19: <COMM_SEQ> -> { <STMT_LIST> }
-	printf("TOKEN: %s, TYP: %d\n", attr->str, token.type);
 	if(token.type == T_LeftBrace)
 	{
 		getNextToken(input, attr);
@@ -230,17 +225,15 @@ TError comm_seq(FILE *input, string *attr)
 			}
 			else
 			{
+				error = ESYN;
 				fprintf(stderr, "COMM_SEQ: ocekavano }\n");
 			}
 		}
 		else
 		{
+			error = ESYN;
 			fprintf(stderr, "COMM_SEQ: stmt_list nevratil ENOP\n");
 		}
-	}
-	else
-	{
-		fprintf(stderr, "COMM_SEQ: ocekavano {\n");
 	}
 	return error;
 }
@@ -336,9 +329,17 @@ TError stmt(FILE *input, string *attr)
 								return ENOP;
 							}
 						}
+						else
+						{
+							error = ESYN;
+						}
 					}
 				}
 			}
+		}
+		else
+		{
+			error = ESYN;
 		}
 	}
 	// 24: <STMT> -> <COMM_SEQ>
@@ -369,8 +370,20 @@ TError stmt(FILE *input, string *attr)
 					{
 						return ENOP;
 					}
+					else
+					{
+						error = ESYN;
+					}
 				}
-			}	
+			}
+			else
+			{
+				error = ESYN;
+			}
+		}
+		else
+		{
+			error = ESYN;
 		}
 	}
 	// 27: <STMT> -> cout << <COUT_TERM>;
@@ -388,7 +401,15 @@ TError stmt(FILE *input, string *attr)
 				{
 					return ENOP;
 				}
+				else
+				{
+					error = ESYN;
+				}
 			}
+		}
+		else
+		{
+			error = ESYN;
 		}
 	}
 	// 28: <STMT> -> <RETURN>
@@ -408,7 +429,11 @@ TError stmt(FILE *input, string *attr)
 			{
 				return error;
 			}
-		}		
+		}
+		else
+		{
+			error = ESYN;
+		}	
 	}
 	return error;
 }
@@ -434,11 +459,18 @@ TError params(FILE *input, string *attr)
 		{
 			getNextToken(input, attr);
 			error = params_n(input, attr);
-			return error;
+			if(error == ENOP)
+			{
+				return error;
+			}
+		}
+		else
+		{
+			error = ESYN;
 		}
 	}
 	// 16: <PARAMS> -> E
-	else
+	else if(token.type == T_RightParenthesis)
 	{
 		error = ENOP;
 	}
@@ -469,12 +501,19 @@ TError params_n(FILE *input, string *attr)
 			{
 				getNextToken(input, attr);
 				error = params_n(input, attr);
-				return error;
-			}	
+				if(error == ENOP)
+				{
+					return error;
+				}
+			}
+			else
+			{
+				error = ESYN;
+			}
 		}
 	}
 	// 18: <PARAMS_N> -> E
-	else
+	else if(token.type == T_RightParenthesis)
 	{
 		return ENOP;
 	}
@@ -505,6 +544,10 @@ TError ret(FILE *input, string *attr)
 			{
 				return ENOP;
 			}
+			else
+			{
+				error = ESYN;
+			}
 		}
 	}
 	return error;
@@ -532,7 +575,6 @@ TError cout_term(FILE *input, string *attr)
 			return error;
 		}
 	}
-			
 	/**
 	 * @todo pravidlo na cout konstant (doub, str, integ)
 	 */
@@ -594,7 +636,10 @@ TError cin_id_n(FILE *input, string *attr)
 				return error;
 			}
 		}
-				
+		else
+		{
+			error = ESYN;
+		}		
 	}
 	// 38) <CIN_ID_N> -> E
 	else
@@ -628,7 +673,11 @@ TError assign(FILE *input, string *attr)
 			{
 				return error;
 			}
-		}	
+		}
+		else
+		{
+			error = ESYN;
+		}
 	}
 			
 	return error;
@@ -661,8 +710,16 @@ TError var_def(FILE *input, string *attr)
 				{
 					return ENOP;
 				}
+				else
+				{
+					error = ESYN;
+				}
 			}
-		}		
+		}
+		else
+		{
+			error = ESYN;
+		}	
 	}
 	// 5: <VAR_DEF> -> auto id <INIT>;
 	else if(token.type == T_Auto)
@@ -676,7 +733,11 @@ TError var_def(FILE *input, string *attr)
 			{
 				return error;
 			}
-		}		
+		}
+		else
+		{
+			error = ESYN;
+		}	
 	}
 	return error;
 }
@@ -761,6 +822,10 @@ TError fcall_or_assign(FILE *input, string *attr)
 		{
 			return ENOP;
 		}
+		else
+		{
+			error = ESYN;
+		}
 	}
 	// 31: <FCALL_OR_ASSIGN> -> id ( <TERMS> );
 	else if(token.type == T_Id)
@@ -780,8 +845,20 @@ TError fcall_or_assign(FILE *input, string *attr)
 					{
 						return ENOP;
 					}
-				}	
+					else
+					{
+						error = ESYN;
+					}
+				}
+				else
+				{
+					error = ESYN;
+				}
 			}
+		}
+		else
+		{
+			error = ESYN;
 		}
 	}
 	return error;
@@ -841,7 +918,11 @@ TError terms_n(FILE *input, string *attr)
 			{
 				return error;
 			}
-		}		
+		}
+		else
+		{
+			error = ESYN;
+		}
 	}
 	// 35: <TERMS_N> -> E
 	else
