@@ -52,21 +52,21 @@ LL gramatika
 
 Gramatika pro vyrazy
 
-<EXPR>		->	( <EXPR> )
-<EXPR>		->	term
-<EXPR>		->	id
-<EXPR>		->	id( )
-<EXPR>		->	id( arg <ARG_N> )
-<ARG_N>		->	, arg <ARG_N>
-<ARG_N>		->	E
-<EXPR>		->	<EXPR> + <EXPR>
-<EXPR>		->	<EXPR> - <EXPR>
-<EXPR>		->	<EXPR> * <EXPR>
-<EXPR>		->	<EXPR> / <EXPR>
-<EXPR>		->	<EXPR> < <EXPR>
-<EXPR>		->	<EXPR> > <EXPR>
-<EXPR>		->	<EXPR> <= <EXPR>
-<EXPR>		->	<EXPR> >= <EXPR>
-<EXPR>		->	<EXPR> == <EXPR>
-<EXPR>		->	<EXPR> != <EXPR>
+45) <EXPR>		->	( <EXPR> )
+46) <EXPR>		->	term
+47) <EXPR>		->	id
+48) <EXPR>		->	id( )
+49) <EXPR>		->	id( arg <ARG_N> )
+50) <ARG_N>		->	, arg <ARG_N>
+51) <ARG_N>		->	E
+52) <EXPR>		->	<EXPR> + <EXPR>
+53)<EXPR>		->	<EXPR> - <EXPR>
+54) <EXPR>		->	<EXPR> * <EXPR>
+55) <EXPR>		->	<EXPR> / <EXPR>
+56) <EXPR>		->	<EXPR> < <EXPR>
+57) <EXPR>		->	<EXPR> > <EXPR>
+58) <EXPR>		->	<EXPR> <= <EXPR>
+59) <EXPR>		->	<EXPR> >= <EXPR>
+60) <EXPR>		->	<EXPR> == <EXPR>
+61) <EXPR>		->	<EXPR> != <EXPR>
 

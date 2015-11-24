@@ -237,8 +237,37 @@ TError expr(FILE *input, string *attr)
 	#ifdef DEBUG
 	printf("expr\n");
 	#endif
-	error = ENOP;
+	error = ENOTFOUND;
+	// 45: <EXPR> -> ( <EXPR> )
+	if(token.type == T_LeftParenthesis)
+	{
+		getNextToken(input, attr);
+		error = expr(input, attr);
+		#ifdef DEBUG
+		printf("expr: expr vratilo: %d\n", error);
+		#endif
+		if(error == ENOP)
+		{
+			getNextToken(input, attr);
+			if(token.type == T_RightParenthesis)
+			{
+				return ENOP;
+			}
+			else
+			{
+				return ESYN;
+			}
+		}
+		else if(error == ESYN)
+		{
+			return error;
+		}
+	}
 	
+	/**
+	 * @todo dodelat dalsi pravidla, jinak vzdy vraci ENOP
+	 */
+	error = ENOP;
 	return error;
 }
 
