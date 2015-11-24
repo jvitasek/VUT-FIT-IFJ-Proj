@@ -60,7 +60,7 @@ TError parse(FILE *input, string *attr)
 	// prazdny soubor
 	if(token.type == T_EOF)
 	{
-		return ENOP;
+		return ESYN;
 	}
 	// 1: <PROGRAM> -> <FUNC_N>
 	error = func_n(input, attr);
