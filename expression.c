@@ -244,10 +244,42 @@ int getPrecSymbol(int ter1, int ter2)
  */
 TError expr(FILE *input, string *attr)
 {
-	TError error = ESYN;
 	//TstackElemPtr tempStack = NULL;
 	//char *tempData = NULL;
-	int index = 0;
+
+	#ifdef DEBUG
+	printf("expr\n");
+	#endif
+
+	TError error = ENOTFOUND;
+	
+	// 45: <EXPR> -> ( <EXPR> )
+	if(token.type == T_LeftParenthesis)
+	{
+		getNextToken(input, attr);
+		error = expr(input, attr);
+		#ifdef DEBUG
+		printf("expr: expr vratilo: %d\n", error);
+		#endif
+		if(error == ENOP)
+		{
+			getNextToken(input, attr);
+			if(token.type == T_RightParenthesis)
+			{
+				return ENOP;
+			}
+			else
+			{
+				return ESYN;
+			}
+		}
+		else if(error == ESYN)
+		{
+			return error;
+		}
+	}
+
+	/*int index = 0;
 	int ter1 = 2;
 	int ter2 = 2;
 
@@ -262,17 +294,9 @@ TError expr(FILE *input, string *attr)
 
 		error = EINT;
 		return error;
-	}
+	}*/
 
-
-
-	//StackPush(&stack);
-
-	#ifdef DEBUG
-	printf("expr\n");
-	#endif
-
-	switch (getPrecSymbol(ter1, ter2))
+	/*switch (getPrecSymbol(ter1, ter2))
 	{
 		case equal: printf("equal!!!\n"); break;
 		case less: printf("less!!!\n"); break;
@@ -284,10 +308,13 @@ TError expr(FILE *input, string *attr)
 	printf("index = %d, stack type %d, token type %d, top %d\n"
 		, index, stack.first->type, token.type, stack.top->type);
 
-	StackDispose(&stack);
+	StackDispose(&stack);*/
 
-	error = ENOP;
 	
+	/**
+	 * @todo dodelat dalsi pravidla, jinak vzdy vraci ENOP
+	 */
+	error = ENOP;
 	return error;
 }
 

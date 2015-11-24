@@ -285,7 +285,6 @@ TError comm_seq(FILE *input, string *attr)
 				// ?????????????????????????????????? @todo mozny bug
 				//getNextToken(input, attr);
 			}
-
 			if(token.type == T_RightBrace)
 			{
 				return ENOP;
@@ -369,7 +368,7 @@ TError stmt(FILE *input, string *attr)
 		getNextToken(input, attr);
 		error = expr(input, attr);
 		#ifdef DEBUG
-		printf("stmt: stmt vratilo: %d\n", error);
+		printf("stmt: expr vratilo: %d\n", error);
 		#endif
 		if(error == ENOP)
 		{
