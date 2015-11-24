@@ -8,7 +8,7 @@
  * 			xvalec00 – Dusan Valecky
  */
 
-//#define DEBUG 1
+#define DEBUG 1
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -35,7 +35,7 @@ void getNextToken(FILE *input, string *attr)
 {
 	token = getToken(input, attr, &line);
 	#ifdef DEBUG
-	printf("TOKEN: %d, LINE: %d\n", token.type, token.line);
+	//printf("TOKEN: %d, LINE: %d\n", token.type, token.line);
 	// if(strcmp(attr->str, "") != 0)
 	// {
 	// 	printf("---\n%s\n", strGetStr(attr));
@@ -67,6 +67,10 @@ TError parse(FILE *input, string *attr)
 	getNextToken(input, attr);
 	// 1: <PROGRAM> -> <FUNC_N>
 	error = func_n(input, attr);
+	if(error == EEMPTY || error == ENOP)
+	{
+		error = ENOP;
+	}
 	return error;
 }
 
@@ -101,7 +105,7 @@ TError func_n(FILE *input, string *attr)
 		#ifdef DEBUG
 		printf("konec souboru\n");
 		#endif
-		error = ENOP;
+		error = EEMPTY;
 	}
 	return error;
 }
@@ -161,8 +165,11 @@ TError par_def_list(FILE *input, string *attr)
 	{
 		getNextToken(input, attr);
 		error = params(input, attr);
-		if(error == ENOP)
+		// neni potreba kontrolovat, zda pravidlo
+		// proslo na epsilon, negetujeme dalsi token
+		if(error == ENOP || error == EEMPTY)
 		{
+			error = ENOP;
 			return error;
 		}
 		else if(token.type == T_RightParenthesis)
@@ -216,9 +223,15 @@ TError comm_seq(FILE *input, string *attr)
 	{
 		getNextToken(input, attr);
 		error = stmt_list(input, attr);
-		if(error == ENOP)
+		if(error == ENOP || error == EEMPTY)
 		{
-			getNextToken(input, attr);
+			// pokud pravidlo proslo na epsilonu
+			// negetujeme dalsi token
+			if(error == ENOP)
+			{
+				getNextToken(input, attr);
+			}
+
 			if(token.type == T_RightBrace)
 			{
 				return ENOP;
@@ -226,13 +239,13 @@ TError comm_seq(FILE *input, string *attr)
 			else
 			{
 				error = ESYN;
-				fprintf(stderr, "COMM_SEQ: ocekavano }\n");
+				//fprintf(stderr, "COMM_SEQ: ocekavano }\n");
 			}
 		}
 		else
 		{
 			error = ESYN;
-			fprintf(stderr, "COMM_SEQ: stmt_list nevratil ENOP\n");
+			//fprintf(stderr, "COMM_SEQ: stmt_list nevratil ENOP\n");
 		}
 	}
 	return error;
@@ -256,15 +269,18 @@ TError stmt_list(FILE *input, string *attr)
 	{
 		getNextToken(input, attr);
 		error = stmt_list(input, attr);
-		if(error == ENOP)
+		// neni potreba kontrolovat, zda pravidlo
+		// proslo na epsilon, negetujeme dalsi token
+		if(error == ENOP || error == EEMPTY)
 		{
+			error = ENOP;
 			return error;
 		}
 	}
 	// 21: <STMT_LIST> -> E
 	else
 	{
-		return ENOP;
+		return EEMPTY;
 	}
 	return error;
 }
@@ -294,9 +310,12 @@ TError stmt(FILE *input, string *attr)
 			{
 				getNextToken(input, attr);
 				error = if_n(input, attr);
-				if(error == ENOP)
+				// neni potreba kontrolovat, zda pravidlo
+				// proslo na epsilon, negetujeme dalsi token
+				if(error == ENOP || error == EEMPTY)
 				{
-					return ENOP;
+					error = ENOP;
+					return error;
 				}
 			}
 		}
@@ -363,9 +382,15 @@ TError stmt(FILE *input, string *attr)
 			{
 				getNextToken(input, attr);
 				error = cin_id_n(input, attr);
-				if(error == ENOP)
+				// neni potreba kontrolovat, zda pravidlo
+				// proslo na epsilon, negetujeme dalsi token
+				if(error == ENOP || error == EEMPTY)
 				{
-					getNextToken(input, attr);
+					if(error == ENOP)
+					{
+						getNextToken(input, attr);
+					}
+
 					if(token.type == T_Semicolon)
 					{
 						return ENOP;
@@ -459,8 +484,11 @@ TError params(FILE *input, string *attr)
 		{
 			getNextToken(input, attr);
 			error = params_n(input, attr);
-			if(error == ENOP)
+			// neni potreba kontrolovat, zda pravidlo
+			// proslo na epsilon, negetujeme dalsi token
+			if(error == ENOP || error == EEMPTY)
 			{
+				error = ENOP;
 				return error;
 			}
 		}
@@ -472,7 +500,7 @@ TError params(FILE *input, string *attr)
 	// 16: <PARAMS> -> E
 	else if(token.type == T_RightParenthesis)
 	{
-		error = ENOP;
+		error = EEMPTY;
 	}
 	return error;
 }
@@ -501,8 +529,11 @@ TError params_n(FILE *input, string *attr)
 			{
 				getNextToken(input, attr);
 				error = params_n(input, attr);
-				if(error == ENOP)
+				// neni potreba kontrolovat, zda pravidlo
+				// proslo na epsilon, negetujeme dalsi token
+				if(error == ENOP || error == EEMPTY)
 				{
+					error = ENOP;
 					return error;
 				}
 			}
@@ -515,7 +546,7 @@ TError params_n(FILE *input, string *attr)
 	// 18: <PARAMS_N> -> E
 	else if(token.type == T_RightParenthesis)
 	{
-		return ENOP;
+		return EEMPTY;
 	}
 	return error;
 }
@@ -570,8 +601,11 @@ TError cout_term(FILE *input, string *attr)
 	{
 		getNextToken(input, attr);
 		error = cout_term_n(input, attr);
-		if(error == ENOP)
+		// neni potreba kontrolovat, zda pravidlo
+		// proslo na epsilon, negetujeme dalsi token
+		if(error == ENOP || error == EEMPTY)
 		{
+			error = ENOP;
 			return error;
 		}
 	}
@@ -598,15 +632,18 @@ TError cout_term_n(FILE *input, string *attr)
 	{
 		getNextToken(input, attr);
 		error = cout_term(input, attr);
-		if(error == ENOP)
+		// neni potreba kontrolovat, zda pravidlo
+		// proslo na epsilon, negetujeme dalsi token
+		if(error == ENOP || error == EEMPTY)
 		{
+			error = ENOP;
 			return error;
 		}
 	}
 	// 41: <COUT_TERM_N> -> E
 	else
 	{
-		error = ENOP;
+		error = EEMPTY;
 	}
 	return error;
 }
@@ -631,8 +668,11 @@ TError cin_id_n(FILE *input, string *attr)
 		{
 			getNextToken(input, attr);
 			error = cin_id_n(input, attr);
-			if(error == ENOP)
+			// neni potreba kontrolovat, zda pravidlo
+			// proslo na epsilon, negetujeme dalsi token
+			if(error == ENOP || error == EEMPTY)
 			{
+				error = ENOP;
 				return error;
 			}
 		}
@@ -644,7 +684,7 @@ TError cin_id_n(FILE *input, string *attr)
 	// 38) <CIN_ID_N> -> E
 	else
 	{
-		error = ENOP;
+		error = EEMPTY;
 	}
 	return error;
 }
@@ -703,16 +743,23 @@ TError var_def(FILE *input, string *attr)
 		{
 			getNextToken(input, attr);
 			error = init(input, attr);
-			if(error == ENOP)
+			if(error == ENOP || error == EEMPTY)
 			{
-				getNextToken(input, attr);
+				printf("token pred: %d\n", token.type);
+				// pokud pravidlo proslo na epsilonu
+				// negetujeme dalsi token
+				if(error == ENOP)
+				{
+					getNextToken(input, attr);
+				}
+				printf("token po: %d\n", token.type);
 				if(token.type == T_Semicolon)
 				{
 					return ENOP;
 				}
 				else
 				{
-					error = ESYN;
+					return ESYN;
 				}
 			}
 		}
@@ -729,8 +776,11 @@ TError var_def(FILE *input, string *attr)
 		{
 			getNextToken(input, attr);
 			error = init(input, attr);
-			if(error == ENOP)
+			// neni potreba kontrolovat, zda pravidlo
+			// proslo na epsilon, negetujeme dalsi token
+			if(error == ENOP || error == EEMPTY)
 			{
+				error = ENOP;
 				return error;
 			}
 		}
@@ -767,7 +817,7 @@ TError init(FILE *input, string *attr)
 	// 7: <INIT> ->	E
 	else
 	{
-		error = ENOP;
+		error = EEMPTY;
 	}
 	return error;
 }
@@ -797,7 +847,7 @@ TError if_n(FILE *input, string *attr)
 	// 44) <IF_N> -> E
 	else
 	{
-		error = ENOP;
+		error = EEMPTY;
 	}
 	return error;
 }
@@ -835,9 +885,14 @@ TError fcall_or_assign(FILE *input, string *attr)
 		{
 			getNextToken(input, attr);
 			error = terms(input, attr);
-			if(error == ENOP)
+
+			if(error == ENOP || error == EEMPTY)
 			{
-				getNextToken(input, attr);
+				if(error == ENOP)
+				{
+					getNextToken(input, attr);
+				}
+
 				if(token.type == T_RightParenthesis)
 				{
 					getNextToken(input, attr);
@@ -881,15 +936,16 @@ TError terms(FILE *input, string *attr)
 	{
 		getNextToken(input, attr);
 		error = terms_n(input, attr);
-		if(error == ENOP)
+		if(error == ENOP || error == EEMPTY)
 		{
+			error = ENOP;
 			return error;
 		}
 	}
 	// 33) <TERMS> -> E
 	else
 	{
-		error = ENOP;
+		error = EEMPTY;
 	}
 	return error;
 }
@@ -914,8 +970,9 @@ TError terms_n(FILE *input, string *attr)
 		{
 			getNextToken(input, attr);
 			error = terms_n(input, attr);
-			if(error == ENOP)
+			if(error == ENOP || error == EEMPTY)
 			{
+				error = ENOP;
 				return error;
 			}
 		}
@@ -927,7 +984,7 @@ TError terms_n(FILE *input, string *attr)
 	// 35: <TERMS_N> -> E
 	else
 	{
-		error = ENOP;
+		error = EEMPTY;
 	}
 	return error;
 }
