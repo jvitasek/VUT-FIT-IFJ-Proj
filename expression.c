@@ -20,7 +20,7 @@
 
 tHTable* globalTS;
 Tsymbols *exprStr;
-//Tstack stack;
+Tstack stack;
 TError error;
 
 /**
@@ -68,7 +68,7 @@ int StackInit(Tstack *stack)
 	{
 		tempPtr->Lptr = NULL;
 		tempPtr->Rptr = NULL;
-		tempPtr->symbols = Tother;
+		tempPtr->type = Tdollar;
 		tempPtr->idType = Tother;
 		tempPtr->data = NULL;
 		stack->first = tempPtr;
@@ -138,7 +138,7 @@ void StackPop(Tstack *stack)
  * @param  stack [description]
  * @return       [description]
  */
-int StackPush(Tstack *stack/*, T_Token token*/)
+int StackPush(Tstack *stack, TstackElemPtr item)
 {
 	TstackElemPtr tempPtr;
 	tempPtr = malloc(sizeof(struct TstackElem));
@@ -171,7 +171,7 @@ TstackElemPtr StackTop(Tstack *stack);
  * [StackInit description]
  * @param  stack [description]
  */
-void StackShift(Tstack *stack, T_Token token);
+int StackShift(Tstack *stack/*, T_Token token*/);
 /*** @TODO ****/
 
 /**
@@ -226,6 +226,17 @@ int getInd(int tokenType)
 }
 
 /**
+ * Funkce vraci symbol z precedencni tabulky (<, >, = nebo 'empty')
+ * @param  ter1  Term na zasobniku.
+ * @param  ter2  Term ze vstupu.
+ * @return       Vysledny symbol z prec. tabulky.
+ */
+int getPrecSymbol(int ter1, int ter2)
+{
+	return preceden_tab[ter1][ter2];
+}
+
+/**
  * Simuluje pravidla vyrazu.
  * @param  input Soubor obsahujici vstupni kod.
  * @param  attr  String lexemu.
@@ -234,9 +245,47 @@ int getInd(int tokenType)
 TError expr(FILE *input, string *attr)
 {
 	TError error = ESYN;
+	//TstackElemPtr tempStack = NULL;
+	//char *tempData = NULL;
+	int index = 0;
+	int ter1 = 2;
+	int ter2 = 2;
+
+	if ((error = StackInit(&stack)) == ENOP)
+	{
+		printf("Inicializace v poho\n");
+	}
+	else
+	{
+		printf("Inicializace v riti\n");
+		StackDispose(&stack);
+
+		error = EINT;
+		return error;
+	}
+
+
+
+	//StackPush(&stack);
+
 	#ifdef DEBUG
 	printf("expr\n");
 	#endif
+
+	switch (getPrecSymbol(ter1, ter2))
+	{
+		case equal: printf("equal!!!\n"); break;
+		case less: printf("less!!!\n"); break;
+		case great: printf("great!!!\n"); break;
+		case empty: printf("empty!!!\n"); break;
+		default: printf("neco jinyho\n"); break;
+	}
+
+	printf("index = %d, stack type %d, token type %d, top %d\n"
+		, index, stack.first->type, token.type, stack.top->type);
+
+	StackDispose(&stack);
+
 	error = ENOP;
 	
 	return error;

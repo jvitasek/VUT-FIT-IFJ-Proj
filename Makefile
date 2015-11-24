@@ -6,7 +6,7 @@
 # Popis:		Makefile pro cely interpret
 ################################################################################
 
-CFLAGS 	= -std=c99 -Wall -Wextra -pedantic
+CFLAGS 	= -std=c99 -Wall -Wextra -pedantic -g
 CC 		= gcc
 
 main: main.c

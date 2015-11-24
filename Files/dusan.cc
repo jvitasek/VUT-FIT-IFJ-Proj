@@ -1,4 +1,8 @@
 int main(int test, string ryba)
 {
-	double lol;
+	if (ahoj)
+	{
+		int ahoj;
+		ahoj = ryba;
+	}
 }
