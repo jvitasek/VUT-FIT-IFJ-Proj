@@ -26,7 +26,8 @@ typedef enum TError {
 	ERUN_UNINIT = 80, // Behova chyba, neinicializovana promenna
 	ERUN_DIV = 90, // Deleni nulou
 	EOTH = 100, // Ostatni chyby
-	EINT = 99 // Interni chyba
+	EINT = 99, // Interni chyba
+	EEMPTY = -42
 } TError;
 
 /**
