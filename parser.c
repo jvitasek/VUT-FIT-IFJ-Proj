@@ -56,7 +56,7 @@ TError parse(FILE *input, string *attr)
 	#ifdef DEBUG
 	printf("parse\n");
 	#endif
-	TError error = ESYN;
+	TError error = ENOP;
 
 	// inicializace TS
 	if(initSTable() != ENOP)
@@ -85,7 +85,7 @@ TError func_n(FILE *input, string *attr)
 	#ifdef DEBUG
 	printf("func_n\n");
 	#endif
-	TError error = ESYN;
+	TError error = ENOTFOUND;
 	// 2: <FUNC_N> -> <FUNC> <FUNC_N>
 	error = func(input, attr);
 	if(error == ENOP)
@@ -98,6 +98,14 @@ TError func_n(FILE *input, string *attr)
 			// <FUNC> <FUNC_N>
 			return error;
 		}
+		else if(error == ESYN)
+		{
+			return error;
+		}
+	}
+	else if(error == ESYN)
+	{
+		return error;
 	}
 	// 3: <FUNC_N> -> E 
 	else if(token.type == T_EOF)
@@ -119,7 +127,7 @@ TError func(FILE *input, string *attr)
 	#ifdef DEBUG
 	printf("func\n");
 	#endif
-	TError error = ESYN;
+	TError error = ENOTFOUND;
 	// 11: <FUNC> -> <TYPE> id <PAR_DEF_LIST> <DEC_OR_DEF>
 	error = type();
 	if(error == ENOP)
@@ -135,15 +143,19 @@ TError func(FILE *input, string *attr)
 				error = dec_or_def(input, attr);
 				return error;
 			}
-			else
+			else if(error == ESYN)
 			{
 				return error;
 			}
 		}
 		else
 		{
-			error = ESYN;
+			return ESYN;
 		}
+	}
+	else if(error == ESYN)
+	{
+		return error;
 	}
 	return error;
 }
@@ -159,7 +171,7 @@ TError par_def_list(FILE *input, string *attr)
 	#ifdef DEBUG
 	printf("par_def_list\n");
 	#endif
-	TError error = ESYN;
+	TError error = ENOTFOUND;
 	// 14: <PAR_DEF_LIST> -> ( <PARAMS> )
 	if(token.type == T_LeftParenthesis)
 	{
@@ -172,9 +184,18 @@ TError par_def_list(FILE *input, string *attr)
 			error = ENOP;
 			return error;
 		}
+		else if(error == ESYN)
+		{
+			return error;
+		}
 		else if(token.type == T_RightParenthesis)
 		{
 			error = ENOP;
+		}
+		// ???????????????????????????????????????????????????????????
+		else
+		{
+			return ESYN;
 		}
 	}
 	return error;
@@ -191,10 +212,14 @@ TError dec_or_def(FILE *input, string *attr)
 	#ifdef DEBUG
 	printf("dec_or_def\n");
 	#endif
-	TError error = ESYN;
+	TError error = ENOTFOUND;
 	// 12: <DEC_OR_DEF> -> <COMM_SEQ>
 	error = comm_seq(input, attr);
 	if(error == ENOP)
+	{
+		return error;
+	}
+	else if(error == ESYN)
 	{
 		return error;
 	}
@@ -217,7 +242,7 @@ TError comm_seq(FILE *input, string *attr)
 	#ifdef DEBUG
 	printf("comm_seq\n");
 	#endif
-	TError error = ESYN;
+	TError error = ENOTFOUND;
 	// 19: <COMM_SEQ> -> { <STMT_LIST> }
 	if(token.type == T_LeftBrace)
 	{
@@ -238,14 +263,13 @@ TError comm_seq(FILE *input, string *attr)
 			}
 			else
 			{
-				error = ESYN;
+				return ESYN;
 				//fprintf(stderr, "COMM_SEQ: ocekavano }\n");
 			}
 		}
-		else
+		else if(error == ESYN)
 		{
-			error = ESYN;
-			//fprintf(stderr, "COMM_SEQ: stmt_list nevratil ENOP\n");
+			return error;
 		}
 	}
 	return error;
@@ -262,7 +286,7 @@ TError stmt_list(FILE *input, string *attr)
 	#ifdef DEBUG
 	printf("stmt_list\n");
 	#endif
-	TError error = ESYN;
+	TError error = ENOTFOUND;
 	// 20: <STMT_LIST> -> <STMT> <STMT_LIST>
 	error = stmt(input, attr);
 	if(error == ENOP)
@@ -276,6 +300,14 @@ TError stmt_list(FILE *input, string *attr)
 			error = ENOP;
 			return error;
 		}
+		else if(error == ESYN)
+		{
+			return error;
+		}
+	}
+	else if(error == ESYN)
+	{
+		return error;
 	}
 	// 21: <STMT_LIST> -> E
 	else
@@ -296,7 +328,7 @@ TError stmt(FILE *input, string *attr)
 	#ifdef DEBUG
 	printf("stmt\n");
 	#endif
-	TError error = ESYN;
+	TError error = ENOTFOUND;
 	// 22: <STMT> -> if <EXPR> <COMM_SEQ> <IF_N>
 	if(token.type == T_If)
 	{
@@ -317,7 +349,19 @@ TError stmt(FILE *input, string *attr)
 					error = ENOP;
 					return error;
 				}
+				else if(error == ESYN)
+				{
+					return error;
+				}
 			}
+			else if(error == ESYN)
+			{
+				return error;
+			}
+		}
+		else if(error == ESYN)
+		{
+			return error;
 		}
 	}
 	// 23: <STMT> -> for( <VAR_DEF> <EXPR> <ASSIGN> ) <COMM_SEQ>
@@ -347,27 +391,43 @@ TError stmt(FILE *input, string *attr)
 							{
 								return ENOP;
 							}
+							else if(error == ESYN)
+							{
+								return error;
+							}
 						}
 						else
 						{
-							error = ESYN;
+							return ESYN;
 						}
 					}
+					else if(error == ESYN)
+					{
+						return error;
+					}
 				}
+				else if(error == ESYN)
+				{
+					return error;
+				}
+			}
+			else if(error == ESYN)
+			{
+				return error;
 			}
 		}
 		else
 		{
-			error = ESYN;
+			return ESYN;
 		}
 	}
 	// 24: <STMT> -> <COMM_SEQ>
-	else if((error = comm_seq(input, attr)) == ENOP)
+	else if((error = comm_seq(input, attr)) == ENOP || error == ESYN)
 	{
 		return error;
 	}
 	// 25: <STMT> -> <VAR_DEF>
-	else if((error = var_def(input, attr)) == ENOP)
+	else if((error = var_def(input, attr)) == ENOP || error == ESYN)
 	{
 		return error;
 	}
@@ -397,18 +457,22 @@ TError stmt(FILE *input, string *attr)
 					}
 					else
 					{
-						error = ESYN;
+						return ESYN;
 					}
+				}
+				else if(error == ESYN)
+				{
+					return error;
 				}
 			}
 			else
 			{
-				error = ESYN;
+				return ESYN;
 			}
 		}
 		else
 		{
-			error = ESYN;
+			return ESYN;
 		}
 	}
 	// 27: <STMT> -> cout << <COUT_TERM>;
@@ -428,17 +492,21 @@ TError stmt(FILE *input, string *attr)
 				}
 				else
 				{
-					error = ESYN;
+					return ESYN;
 				}
+			}
+			else if(error == ESYN)
+			{
+				return error;
 			}
 		}
 		else
 		{
-			error = ESYN;
+			return ESYN;
 		}
 	}
 	// 28: <STMT> -> <RETURN>
-	else if((error = ret(input, attr)) == ENOP)
+	else if((error = ret(input, attr)) == ENOP || error == ESYN)
 	{
 		return error;
 	}
@@ -454,10 +522,14 @@ TError stmt(FILE *input, string *attr)
 			{
 				return error;
 			}
+			else if(error == ESYN)
+			{
+				return error;
+			}
 		}
 		else
 		{
-			error = ESYN;
+			return ESYN;
 		}	
 	}
 	return error;
@@ -474,7 +546,7 @@ TError params(FILE *input, string *attr)
 	#ifdef DEBUG
 	printf("params\n");
 	#endif
-	TError error = ESYN;
+	TError error = ENOTFOUND;
 	// 15: <PARAMS> -> <TYPE> id <PARAMS_N>
 	error = type();
 	if(error == ENOP)
@@ -491,11 +563,19 @@ TError params(FILE *input, string *attr)
 				error = ENOP;
 				return error;
 			}
+			else if(error == ESYN)
+			{
+				return error;
+			}
 		}
 		else
 		{
-			error = ESYN;
+			return ESYN;
 		}
+	}
+	else if(error == ESYN)
+	{
+		return error;
 	}
 	// 16: <PARAMS> -> E
 	else if(token.type == T_RightParenthesis)
@@ -516,7 +596,7 @@ TError params_n(FILE *input, string *attr)
 	#ifdef DEBUG
 	printf("params_n\n");
 	#endif
-	TError error = ESYN;
+	TError error = ENOTFOUND;
 	// 17: <PARAMS_N> -> , <TYPE> id <PARAMS_N>
 	if(token.type == T_Comma)
 	{
@@ -536,11 +616,19 @@ TError params_n(FILE *input, string *attr)
 					error = ENOP;
 					return error;
 				}
+				else if(error == ESYN)
+				{
+					return error;
+				}
 			}
 			else
 			{
-				error = ESYN;
+				return ESYN;
 			}
+		}
+		else if(error == ESYN)
+		{
+			return error;
 		}
 	}
 	// 18: <PARAMS_N> -> E
@@ -562,7 +650,7 @@ TError ret(FILE *input, string *attr)
 	#ifdef DEBUG
 	printf("ret\n");
 	#endif
-	TError error = ESYN;
+	TError error = ENOTFOUND;
 	// 42: <RETURN> -> return <EXPR>;
 	if(token.type == T_Return)
 	{
@@ -577,8 +665,12 @@ TError ret(FILE *input, string *attr)
 			}
 			else
 			{
-				error = ESYN;
+				return ESYN;
 			}
+		}
+		else if(error == ESYN)
+		{
+			return error;
 		}
 	}
 	return error;
@@ -595,8 +687,8 @@ TError cout_term(FILE *input, string *attr)
 	#ifdef DEBUG
 	printf("cout_term\n");
 	#endif
-	TError error = ESYN;
-	// 39)	<COUT_TERM>		-> 	id <COUT_TERM_N>
+	TError error = ENOTFOUND;
+	// 39: <COUT_TERM> -> id <COUT_TERM_N>
 	if(token.type == T_Id)
 	{
 		getNextToken(input, attr);
@@ -606,6 +698,10 @@ TError cout_term(FILE *input, string *attr)
 		if(error == ENOP || error == EEMPTY)
 		{
 			error = ENOP;
+			return error;
+		}
+		else if(error == ESYN)
+		{
 			return error;
 		}
 	}
@@ -626,7 +722,7 @@ TError cout_term_n(FILE *input, string *attr)
 	#ifdef DEBUG
 	printf("cout_term_n\n");
 	#endif
-	TError error = ESYN;
+	TError error = ENOTFOUND;
 	// 40: <COUT_TERM_N> -> << <COUT_TERM>
 	if(token.type == T_LeftShift)
 	{
@@ -637,6 +733,10 @@ TError cout_term_n(FILE *input, string *attr)
 		if(error == ENOP || error == EEMPTY)
 		{
 			error = ENOP;
+			return error;
+		}
+		else if(error == ESYN)
+		{
 			return error;
 		}
 	}
@@ -659,7 +759,7 @@ TError cin_id_n(FILE *input, string *attr)
 	#ifdef DEBUG
 	printf("cin_id_n\n");
 	#endif
-	TError error = ESYN;
+	TError error = ENOTFOUND;
 	// 37) <CIN_ID_N> -> >> id <CIN_ID_N>
 	if(token.type == T_LeftShift)
 	{
@@ -675,10 +775,14 @@ TError cin_id_n(FILE *input, string *attr)
 				error = ENOP;
 				return error;
 			}
+			else if(error == ESYN)
+			{
+				return error;
+			}
 		}
 		else
 		{
-			error = ESYN;
+			return ESYN;
 		}		
 	}
 	// 38) <CIN_ID_N> -> E
@@ -700,7 +804,7 @@ TError assign(FILE *input, string *attr)
 	#ifdef DEBUG
 	printf("assign\n");
 	#endif
-	TError error = ESYN;
+	TError error = ENOTFOUND;
 	// 36: <ASSIGN> -> id = <EXPR> 
 	if(token.type == T_Id)
 	{
@@ -713,10 +817,14 @@ TError assign(FILE *input, string *attr)
 			{
 				return error;
 			}
+			else if(error == ESYN)
+			{
+				return error;
+			}
 		}
 		else
 		{
-			error = ESYN;
+			return ESYN;
 		}
 	}
 			
@@ -734,10 +842,15 @@ TError var_def(FILE *input, string *attr)
 	#ifdef DEBUG
 	printf("var_def\n");
 	#endif
-	TError error = ESYN;
+	TError error = ENOTFOUND;
 	// 4: <VAR_DEF> -> <TYPE> id <INIT>;
-	if((error = type()) == ENOP)
+	if((error = type()) == ENOP || error == ESYN)
 	{
+		if(error == ESYN)
+		{
+			return error;
+		}
+
 		getNextToken(input, attr);
 		if(token.type == T_Id)
 		{
@@ -745,14 +858,14 @@ TError var_def(FILE *input, string *attr)
 			error = init(input, attr);
 			if(error == ENOP || error == EEMPTY)
 			{
-				printf("token pred: %d\n", token.type);
+				//printf("token pred: %d\n", token.type);
 				// pokud pravidlo proslo na epsilonu
 				// negetujeme dalsi token
 				if(error == ENOP)
 				{
 					getNextToken(input, attr);
 				}
-				printf("token po: %d\n", token.type);
+				//printf("token po: %d\n", token.type);
 				if(token.type == T_Semicolon)
 				{
 					return ENOP;
@@ -762,10 +875,14 @@ TError var_def(FILE *input, string *attr)
 					return ESYN;
 				}
 			}
+			else if(error == ESYN)
+			{
+				return error;
+			}
 		}
 		else
 		{
-			error = ESYN;
+			return ESYN;
 		}	
 	}
 	// 5: <VAR_DEF> -> auto id <INIT>;
@@ -783,10 +900,14 @@ TError var_def(FILE *input, string *attr)
 				error = ENOP;
 				return error;
 			}
+			else if(error == ESYN)
+			{
+				return error;
+			}
 		}
 		else
 		{
-			error = ESYN;
+			return ESYN;
 		}	
 	}
 	return error;
@@ -803,13 +924,17 @@ TError init(FILE *input, string *attr)
 	#ifdef DEBUG
 	printf("init\n");
 	#endif
-	TError error = ESYN;
+	TError error = ENOTFOUND;
 	// 6: <INIT> -> = <EXPR>
 	if(token.type == T_Equal)
 	{
 		getNextToken(input, attr);
 		error = expr(input, attr);
 		if(error == ENOP)
+		{
+			return error;
+		}
+		else if(error == ESYN)
 		{
 			return error;
 		}
@@ -833,13 +958,17 @@ TError if_n(FILE *input, string *attr)
 	#ifdef DEBUG
 	printf("if_n\n");
 	#endif
-	TError error = ESYN;
+	TError error = ENOTFOUND;
 	// 43) <IF_N> -> else <COMM_SEQ>
 	if(token.type == T_Else)
 	{
 		getNextToken(input, attr);
 		error = comm_seq(input, attr);
 		if(error == ENOP)
+		{
+			return error;
+		}
+		else if(error == ESYN)
 		{
 			return error;
 		}
@@ -863,10 +992,15 @@ TError fcall_or_assign(FILE *input, string *attr)
 	#ifdef DEBUG
 	printf("fcall_or_assign\n");
 	#endif
-	TError error = ESYN;
+	TError error = ENOTFOUND;
 	// 30: <FCALL_OR_ASSIGN> -> <EXPR> ;
-	if((error = expr(input, attr)) == ENOP)
+	if((error = expr(input, attr)) == ENOP || error == ESYN)
 	{
+		if(error == ESYN)
+		{
+			return error;
+		}
+
 		getNextToken(input, attr);
 		if(token.type == T_Semicolon)
 		{
@@ -874,7 +1008,7 @@ TError fcall_or_assign(FILE *input, string *attr)
 		}
 		else
 		{
-			error = ESYN;
+			return ESYN;
 		}
 	}
 	// 31: <FCALL_OR_ASSIGN> -> id ( <TERMS> );
@@ -902,18 +1036,22 @@ TError fcall_or_assign(FILE *input, string *attr)
 					}
 					else
 					{
-						error = ESYN;
+						return ESYN;
 					}
 				}
 				else
 				{
-					error = ESYN;
+					return ESYN;
 				}
+			}
+			else if(error == ESYN)
+			{
+				return error;
 			}
 		}
 		else
 		{
-			error = ESYN;
+			return ESYN;
 		}
 	}
 	return error;
@@ -930,7 +1068,7 @@ TError terms(FILE *input, string *attr)
 	#ifdef DEBUG
 	printf("terms\n");
 	#endif
-	TError error = ESYN;
+	TError error = ENOTFOUND;
 	// 32) <TERMS> -> id <TERMS_N>
 	if(token.type == T_Id)
 	{
@@ -939,6 +1077,10 @@ TError terms(FILE *input, string *attr)
 		if(error == ENOP || error == EEMPTY)
 		{
 			error = ENOP;
+			return error;
+		}
+		else if(error == ESYN)
+		{
 			return error;
 		}
 	}
@@ -961,7 +1103,7 @@ TError terms_n(FILE *input, string *attr)
 	#ifdef DEBUG
 	printf("terms_n\n");
 	#endif
-	TError error = ESYN;
+	TError error = ENOTFOUND;
 	// 34: <TERMS_N> -> , id <TERMS_N>
 	if(token.type == T_Comma)
 	{
@@ -975,10 +1117,14 @@ TError terms_n(FILE *input, string *attr)
 				error = ENOP;
 				return error;
 			}
+			else if(error == ESYN)
+			{
+				return error;
+			}	
 		}
 		else
 		{
-			error = ESYN;
+			return ESYN;
 		}
 	}
 	// 35: <TERMS_N> -> E
@@ -999,7 +1145,7 @@ TError type()
 	#ifdef DEBUG
 	printf("type\n");
 	#endif
-	TError error = ESYN;
+	TError error = ENOTFOUND;
 	// 8: <TYPE> ->	int
 	// 9: <TYPE> ->	double
 	// 10: <TYPE> -> string 
