@@ -12,4 +12,4 @@
 main
 
 # testovaci soubor SA
-Files/dusan.cc
+Files/*.cc
