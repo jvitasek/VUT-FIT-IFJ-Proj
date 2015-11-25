@@ -235,7 +235,8 @@ int tokToTerm(int tokenType)
 		case T_Comma: index = PComma; break; 					// ,	29
 		case T_LeftParenthesis: index = PLeftP; break;		// ( 31
 		case T_RightParenthesis: index = PRightP; break; 	// ) 32
-		case T_EOF: index = PDollar; break;
+		case T_Semicolon:
+		case T_RightParenthesis: index = PDollar; break;
 		default: index = ESYN; break;
 	}
 
@@ -250,6 +251,9 @@ int tokToTerm(int tokenType)
  */
 int getPrecSymbol(int ter1, int ter2)
 {
+	#ifdef DEBUG
+	printf("[%d][%d]\n", ter1, ter2);
+	#endif
 	return preceden_tab[ter1][ter2];
 }
 
@@ -298,8 +302,6 @@ TError expr(FILE *input, string *attr)
 	}*/
 
 	int index = 0;
-	int ter1 = 2;
-	int ter2 = 2;
 
 	if ((error = StackInit(&stack)) == ENOP)
 	{
@@ -317,20 +319,34 @@ TError expr(FILE *input, string *attr)
 	// prevedu si token na term (PSymbols)
 	tokterm = tokToTerm(token.type);
 
-	if ((error = StackPush(&stack, tokterm)) != ENOP)
-	{
-		/* code */
-	}
+	// if ((error = StackPush(&stack, tokterm)) != ENOP)
+	// {
+	// 	/* code */
+	// }
 
 	// podivam se do precedencni tabulky a vratim z ni hledany symbol
-	switch (getPrecSymbol(ter1, ter2))
-	{
-		case equal: printf("equal!!!\n"); break;
-		case less: printf("less!!!\n"); break;
-		case great: printf("great!!!\n"); break;
-		case empty: printf("empty!!!\n"); break;
-		default: printf("neco jinyho\n"); break;
-	}
+	do {
+		switch (getPrecSymbol(stack.top->termType, tokterm))
+		{
+			case equal:
+				// EQUAL ALGO
+				StackPush(&stack, tokterm);
+				getNextToken(input, attr);
+			break;
+			case less:
+				// LESS ALGO
+			break;
+			case great:
+				// GREAT ALGO
+			break;
+			case empty:
+				return ESYN;
+			break;
+			default:
+				// OTHER ALGO
+			break;
+		}
+	} while((stack.top->termType == PDollar) && (tokToTerm(token.type) == PDollar))
 
 	printf("index = %d, stack type %d, token type %d,\n"
 		"stack top %d, stack first %d tokterm %d\n"

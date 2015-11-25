@@ -8,7 +8,7 @@
  * 			xvalec00 – Dusan Valecky
  */
 
-#define DEBUG 1
+//#define DEBUG 1
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -366,38 +366,35 @@ TError stmt(FILE *input, string *attr)
 	printf("stmt\n");
 	#endif
 	TError error = ENOTFOUND;
-	// 22: <STMT> -> if <EXPR> <COMM_SEQ> <IF_N>
+	// 22: <STMT> -> if ( <EXPR> ) <COMM_SEQ> <IF_N>
 	if(token.type == T_If)
 	{
 		getNextToken(input, attr);
-		error = expr(input, attr);
-		#ifdef DEBUG
-		printf("stmt: expr vratilo: %d\n", error);
-		#endif
-		if(error == ENOP)
+		if(token.type == T_LeftParenthesis)
 		{
 			getNextToken(input, attr);
-			error = comm_seq(input, attr);
+			error = expr(input, attr);
 			#ifdef DEBUG
-			printf("stmt: comm_seq vratilo: %d\n", error);
+			printf("stmt: expr vratilo: %d\n", error);
 			#endif
 			if(error == ENOP)
 			{
 				getNextToken(input, attr);
-				error = if_n(input, attr);
-				#ifdef DEBUG
-				printf("stmt: if_n vratilo: %d\n", error);
-				#endif
-				// neni potreba kontrolovat, zda pravidlo
-				// proslo na epsilon, negetujeme dalsi token
-				if(error == ENOP || error == EEMPTY)
+				if(token.type == T_RightParenthesis)
 				{
-					error = ENOP;
-					return error;
-				}
-				else if(error == ESYN)
-				{
-					return error;
+					getNextToken(input, attr);
+					error = comm_seq(input, attr);
+					#ifdef DEBUG
+					printf("stmt: comm_seq vratilo: %d\n", error);
+					#endif
+					if(error == ENOP)
+					{
+						return ENOP;
+					}
+					else if(error == ESYN)
+					{
+						return error;
+					}
 				}
 			}
 			else if(error == ESYN)
@@ -405,9 +402,9 @@ TError stmt(FILE *input, string *attr)
 				return error;
 			}
 		}
-		else if(error == ESYN)
+		else
 		{
-			return error;
+			return ESYN;
 		}
 	}
 	// 23: <STMT> -> for( <VAR_DEF> <EXPR> <ASSIGN> ) <COMM_SEQ>

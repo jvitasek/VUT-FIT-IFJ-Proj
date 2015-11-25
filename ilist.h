@@ -39,6 +39,7 @@ typedef enum {
 	/* instrukce skoku */
 	I_GOTO, // (adr, - , - ) skoci na adresu adr 
 	I_IFGOTO, // (adr, cond, - ) skoci na adresu adr, pokud plati podminka cond
+	
 
 	/* zasobnik parametru*/
 	I_PUSH, // pushne na zasobnik
@@ -75,7 +76,7 @@ typedef enum {
 	I_CONCAT;
 	I_FIND;
 	I_SORT; 
-} tInstcruction;
+} tInstruction;
 
 /*
  * Struktura reprezentujici 3AC instrukci

@@ -22,8 +22,8 @@ LL gramatika
 19)	<COMM_SEQ>		-> 	{ <STMT_LIST> }
 20)	<STMT_LIST>		->	<STMT> <STMT_LIST>
 21)	<STMT_LIST>		->	E
-22)	<STMT>			->	if <EXPR> <COMM_SEQ> <IF_N>
-23)	<STMT>			->	for( <VAR_DEF> <EXPR> <ASSIGN> ) <COMM_SEQ>
+22)	<STMT>			->	if( <EXPR> ) <COMM_SEQ> <IF_N>
+23)	<STMT>			->	for( <VAR_DEF> <EXPR>; <ASSIGN> ) <COMM_SEQ>
 24)	<STMT>			->	<COMM_SEQ>
 25)	<STMT>			->	<VAR_DEF>
 26)	<STMT>			->	cin >> id <CIN_ID_N>;
@@ -47,8 +47,6 @@ LL gramatika
 42)	<RETURN>		->	return <EXPR>;
 43)	<IF_N>			->	else <COMM_SEQ>
 44)	<IF_N>			->	E
-
- 
 
 Gramatika pro vyrazy
 
