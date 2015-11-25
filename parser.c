@@ -19,6 +19,8 @@
 #include "ial.h"
 #include "expression.h"
 
+int counterVar = 1;		// globalna premenna, ktora sluzi pri tvorbe pomocnych premennych na medzivypocty
+
 tHTable* globalTS;
 tHTItem* item;
 /**
@@ -373,7 +375,7 @@ TError stmt(FILE *input, string *attr)
 		if(token.type == T_LeftParenthesis)
 		{
 			getNextToken(input, attr);
-			error = expr(input, attr, 1);
+			error = expr(input, attr, 1, &counterVar);
 			#ifdef DEBUG
 			printf("stmt: expr vratilo: %d\n", error);
 			#endif
@@ -417,7 +419,7 @@ TError stmt(FILE *input, string *attr)
 			if(error == ENOP)
 			{
 				getNextToken(input, attr);
-				error = expr(input, attr, 0);
+				error = expr(input, attr, 0, &counterVar);
 				#ifdef DEBUG
 				printf("stmt: expr vratilo: %d\n", error);
 				#endif
@@ -730,7 +732,7 @@ TError ret(FILE *input, string *attr)
 	if(token.type == T_Return)
 	{
 		getNextToken(input, attr);
-		error = expr(input, attr, 0);
+		error = expr(input, attr, 0, &counterVar);
 		#ifdef DEBUG
 		printf("ret: expr vratilo: %d\n", error);
 		#endif
@@ -891,7 +893,7 @@ TError assign(FILE *input, string *attr)
 		if(token.type == T_Equal)
 		{
 			getNextToken(input, attr);
-			error = expr(input, attr, 1);
+			error = expr(input, attr, 1, &counterVar);
 			#ifdef DEBUG
 			printf("assign: expr vratilo: %d\n", error);
 			#endif
@@ -1004,7 +1006,7 @@ TError init(FILE *input, string *attr)
 	if(token.type == T_Equal)
 	{
 		getNextToken(input, attr);
-		error = expr(input, attr, 0);
+		error = expr(input, attr, 0, &counterVar);
 		#ifdef DEBUG
 		printf("init: expr vratilo: %d\n", error);
 		#endif
@@ -1075,7 +1077,7 @@ TError fcall_or_assign(FILE *input, string *attr)
 	#endif
 	TError error = ENOTFOUND;
 	// 30: <FCALL_OR_ASSIGN> -> <EXPR> ;
-	if((error = expr(input, attr, 0)) == ENOP || error == ESYN)
+	if((error = expr(input, attr, 0, &counterVar)) == ENOP || error == ESYN)
 	{
 		#ifdef DEBUG
 		printf("fcall_or_assign: expr vratilo: %d\n", error);

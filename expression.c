@@ -17,6 +17,7 @@
 
 #define DEBUG 1
 
+int *counteerVar;	// sluzi pri tvorbe pomocnych premennych
 
 //tHTable* globalTS;
 PSymbols *exprStr;
@@ -256,14 +257,35 @@ int getPrecSymbol(int ter1, int ter2)
 	return preceden_tab[ter1][ter2];
 }
 
+
+/**
+ * Funkcia, ktora nam generuje pomocne premenne $x,
+ * do ktorych sa budu ukladat medzivypocty pri generovani 3AK.
+ * 
+ */
+void generateVariable(string *var, int *counter)
+{
+	strClear(var);
+	strAppend(var,'$');
+	int i = *counter;
+	while(i != 0)
+	{
+		strAppend(var, (char)(i % 10 + '0'));
+		i = i / 10;
+	}
+	(*counter)++;
+}
+
 /**
  * Hlavni funkce vyrazu.
  * @param  input Soubor obsahujici vstupni kod.
  * @param  attr  String lexemu.
  * @return       Index do enumerace chyb.
  */
-TError expr(FILE *input, string *attr, int semi_or_par)
+TError expr(FILE *input, string *attr, int semi_or_par, int *count)
 {
+	counteerVar = count;
+	
 	//TstackElemPtr tempStack = NULL;
 	//char *tempData = NULL;
 	int tokterm;

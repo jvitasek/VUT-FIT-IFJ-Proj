@@ -68,6 +68,6 @@ int StackPush(Tstack *stack, int tokterm);
 TstackElemPtr StackTop(Tstack *stack);
 int StackShift(Tstack *stack/*, T_Token token*/);
 int StackEmpty(Tstack *stack);
-TError expr(FILE *input, string *attr, int semi_or_par); // P: @todo
+TError expr(FILE *input, string *attr, int semi_or_par, int *count); // P: @todo
 
 #endif
