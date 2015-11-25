@@ -12,10 +12,11 @@
 **/
 
 
-#include "ial.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "str.h"
+#include "ial.h"
 
 int HTSIZE = MAX_HTSIZE;
 
@@ -32,10 +33,83 @@ int HTSIZE = MAX_HTSIZE;
 /**
  * -----------------------------------------------------------------------------
  * Razeni - algoritmus Heap sort
+ * (podle opory IAL)
  * -----------------------------------------------------------------------------
  **/
 
-// TODO
+/*
+** Funkce prosetí hromadou
+*/
+void siftDown(char* a, int Left, int Right) {
+    int j, i;
+    // pomocna promenna tehoz typu jako polozka pole
+    char Temp;
+    // ridici promenna cyklu
+    int Cont = 0;
+    i = Left;
+    // index leveho syna
+    j = 2 * i;
+    Temp = a[i];
+    Cont = (j <= Right);
+
+    while (Cont){
+    	// uzel ma oba synovske uzly
+        if (j < Right) {
+            // pravy syn je vetsi
+            if(a[j] < a[j + 1]) {
+                // nastav jako vetsiho z dvojice synu
+                j++;
+            }
+        }
+
+        // prvek Temp jiz byl posunut na sve misto; cyklus konci
+        if(Temp >= a[j]) {
+            Cont = 0;
+        // prvek Temp propada niz, a[j] vyplouva o uroven vys
+        }
+        else {
+            a[i] = a[j];
+            // syn se stane otcem pro pristi cyklus
+            i = j;
+            // pristi levy syn
+            j = 2 * i;
+            // podmínka : "j není terminální uzel"
+            Cont = (j <= Right);
+        }
+
+    }
+    // konecne umisteni proseteho uzlu
+    a[i] = Temp;
+}
+
+/*
+** Funkce razeni hromadou heap sort
+*/
+void heapSort (char* a) {
+	int i, Left, Right;
+    int Temp;
+
+    // pocet prvku
+    int delka = strlen(a);
+
+    // ustaveni hromady
+    Left = (delka / 2);
+    Right = (delka - 1);
+
+    for (i = Left; i >= 0; i--) {
+    	siftDown(a, i, Right);
+    }
+
+    // heapSort
+    for (Right = delka-1; Right >= 1; Right--) {
+        // vymena korene s akt. poslednim prvkem
+        Temp = a[0];
+        a[0] = a[Right];
+        a[Right] = Temp;
+        // znovu ustaveni hromady
+        siftDown(a, 0, Right-1);
+    }
+}
 
 
 /**
@@ -47,7 +121,7 @@ int HTSIZE = MAX_HTSIZE;
 /* 
 ** Rozptylovaci funkce 
 */
-int hashCode ( tKey key ) {
+int hashCode (tKey key) {
 	int retval = 1;
 	int keylen = strlen(key);
 	for ( int i=0; i<keylen; i++ )
@@ -58,7 +132,7 @@ int hashCode ( tKey key ) {
 /*
 ** Inicializace tabulky
 */
-void htInit ( tHTable* ptrht ) {
+void htInit (tHTable* ptrht) {
 
 	if ((*ptrht) == NULL) {
 		return;
@@ -70,12 +144,12 @@ void htInit ( tHTable* ptrht ) {
 }
 
 /* 
-** Vyhledani prvku v TRP ptrht podle zadaného klice key. Pokud je
+** Vyhledani prvku v TRP ptrht podle zadaneho klice key. Pokud je
 ** dany prvek nalezen, vraci se ukazatel na dany prvek. Pokud prvek nalezen neni, 
 ** vraci se hodnota NULL.
 **
 */
-tHTItem* htSearch ( tHTable* ptrht, tKey key ) {
+tHTItem* htSearch (tHTable* ptrht, tKey key) {
 
 	// pokud bude tabulka neinicializovaná
 	if ((*ptrht) == NULL) {
@@ -103,7 +177,7 @@ tHTItem* htSearch ( tHTable* ptrht, tKey key ) {
 ** Tato funkce vklada do tabulky ptrht polozku s klicem key a s daty
 ** data.
 */
-void htInsert ( tHTable* ptrht, tKey key, tData data ) {
+void htInsert (tHTable* ptrht, tKey key, tData data) {
 
 	if ((*ptrht) == NULL) {
 		return;
@@ -131,7 +205,7 @@ void htInsert ( tHTable* ptrht, tKey key, tData data ) {
 ** Pokud je polozka nalezena, vraci funkce ukazatel na polozku
 ** Pokud polozka nalezena nebyla, vraci se funkcni hodnota NULL
 */
-tData* htRead ( tHTable* ptrht, tKey key ) {
+tData* htRead (tHTable* ptrht, tKey key) {
 
 	tHTItem* item = htSearch(ptrht, key); // najdu prvek podle klice
 
@@ -148,7 +222,7 @@ tData* htRead ( tHTable* ptrht, tKey key ) {
 /*
 ** Funkce vyjme polozku s klicem key z tabulky ptrht.  
 */
-void htDelete ( tHTable* ptrht, tKey key ) {
+void htDelete (tHTable* ptrht, tKey key) {
 
 	if ((*ptrht) == NULL) {
 		return;
@@ -178,7 +252,7 @@ void htDelete ( tHTable* ptrht, tKey key ) {
 /*
 ** Funkce zrusi vsechny polozky tabulky
 */
-void htClearAll ( tHTable* ptrht ) {
+void htClearAll (tHTable* ptrht) {
 
 	if ((*ptrht) == NULL) {
 		return;
@@ -196,3 +270,14 @@ void htClearAll ( tHTable* ptrht ) {
 		(*ptrht)[i] = NULL;
 	}
 }
+
+/**
+ * [length description]
+ * @param  s [description]
+ * @return   [description]
+ */
+int length(string s)
+{
+	return strlen(s.str);
+}
+
