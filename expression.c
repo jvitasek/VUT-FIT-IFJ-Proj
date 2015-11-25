@@ -226,12 +226,9 @@ int tokToTerm(int tokenType)
 		case T_Div:	index = PDiv; break;					// / 19
 		case T_LessThan: index = PLess; break;			// < 20
 		case T_LessEqual: index = PLessEq; break; 	// <= 21
-		//case T_LeftShift: index = PLeftShift; break;	// << 22
 		case T_GreaterThan: index = PGreat; break;	// > 23
 		case T_GreaterEqual: index = PGreatEq; break;	// >= 24
-		//case T_RightShift: index = PRightShift; break;	// >> 25
 		case T_Equal: index = PEqual; break;			// == 26
-		//case T_Assig: index = PAssign; break;			// = 27
 		case T_NotEqual: index = PNotEq; break;				// != 28
 		case T_Comma: index = PComma; break; 					// ,	29
 		case T_LeftParenthesis: index = PLeftP; break;		// ( 31
@@ -373,6 +370,8 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count)
 	// ukonceno strednikem
 	if(semi_or_par == 0)
 	{
+		TstackElemPtr temp = NULL;
+
 		do {
 			switch (getPrecSymbol(stack.top->termType, tokterm))
 			{
@@ -389,7 +388,6 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count)
 				break;
 				case great:
 					// GREAT ALGO
-					TstackElemPtr temp;
 					temp->Lptr = NULL;
 					temp->Rptr = NULL;
 					temp->termType = none;
@@ -480,6 +478,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count)
 	// ukonceno pravou zavorkou
 	else if(semi_or_par == 1)
 	{
+		TstackElemPtr temp = NULL;
 		// leva zavorka jiz nactena
 		int counter = 1;
 		do {
@@ -507,7 +506,6 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count)
 				break;
 				case great:
 					// GREAT ALGO
-					TstackElemPtr temp;
 					temp->Lptr = NULL;
 					temp->Rptr = NULL;
 					temp->termType = none;

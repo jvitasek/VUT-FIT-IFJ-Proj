@@ -426,7 +426,7 @@ TError stmt(FILE *input, string *attr)
 				if(error == ENOP)
 				{
 					getNextToken(input, attr);
-					error = assign(input, attr, 1);
+					error = assign(input, attr); ///// za attr 1, myslim, ze staci v expr
 					#ifdef DEBUG
 					printf("stmt: assign vratilo: %d\n", error);
 					#endif
