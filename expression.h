@@ -14,32 +14,33 @@
 #include <stdlib.h>
 //#include ""
 
-typedef enum Tsymbols {
-	Tplus,    // 0 +
-	Tminus,   // 1 -
-	Tmul,     // 2 *
-	Tdiv,     // 3 /
-	Tequal,    // 4 ==
-	TnotEq,   // 5 !=
-	TlessEq,  // 6 <=
-	TgreatEq, // 7 >=
-	Tgreat,   // 8 >
-	Tless,    // 9 <
-	TleftShift, // 10 <<
-	TrightShift, // 11 >>
-	Tassign,	// 12 =
-	Tiden,    // 13 id
-	Tidfun,   // 14 f
-	TleftP,   // 15 (
-	TrightP,  // 16 )
-	Tcomma,   // 17 ,
-	Tdollar,  // 18 $
+typedef enum PSymbols {
+	PPlus,    // 0 +
+	PMinus,   // 1 -
+	PMul,     // 2 *
+	PDiv,     // 3 /
+	PEqual,    // 4 ==
+	PNotEq,   // 5 !=
+	PLessEq,  // 6 <=
+	PGreatEq, // 7 >=
+	PGreat,   // 8 >
+	PLess,    // 9 <
+	PLeftShift, // 10 <<
+	PRightShift, // 11 >>
+	PAssign,	// 12 =
+	PIden,    // 13 id
+	PIdFun,   // 14 f
+	PLeftP,   // 15 (
+	PRightP,  // 16 )
+	PComma,   // 17 ,
+	PDollar,  // 18 $
+	PLessReduc,	// 23 < na zasobniku
+	PNonTerm,		// 24 neterminal
 	less,		// 19 < v preceden. tabulce
 	great,	// 20 > v preceden. tabulce
 	equal,	// 21 = v preceden. tabulce
-	empty,	// 22 'nic' v preceden. tabulce 
-	lessReduc	// 23 < na zasobniku
-} Tsymbols;
+	empty	// 22 'nic' v preceden. tabulce 
+} PSymbols;
 
 typedef enum hashType {  
 	Tstring,	// 0 string
@@ -52,7 +53,7 @@ typedef enum hashType {
 typedef struct TstackElem {
 	struct TstackElem *Lptr;
 	struct TstackElem *Rptr;
-	Tsymbols type;
+	PSymbols termType;
 	hashType idType;
 	char *data;
 } *TstackElemPtr;

@@ -18,8 +18,8 @@
 #define DEBUG 1
 
 
-tHTable* globalTS;
-Tsymbols *exprStr;
+//tHTable* globalTS;
+PSymbols *exprStr;
 Tstack stack;
 TError error;
 
@@ -48,8 +48,8 @@ int preceden_tab[16][16] = {
 
 /**
  * Inicializace zasobniku.
- * @param  stack [description]
- * @return       [description]
+ * @param  stack Zasobnik termu.
+ * @return       ENOP v pripade uspechu.
  */
 int StackInit(Tstack *stack)
 {
@@ -62,17 +62,17 @@ int StackInit(Tstack *stack)
 	stack->top = NULL;
 	stack->first = NULL;
 
-	TstackElemPtr tempPtr = NULL;
-	tempPtr = malloc(sizeof(struct TstackElem));
-	if (tempPtr != NULL)
+	TstackElemPtr tempPtr1 = NULL;
+	tempPtr1 = malloc(sizeof(struct TstackElem));
+	if (tempPtr1 != NULL)
 	{
-		tempPtr->Lptr = NULL;
-		tempPtr->Rptr = NULL;
-		tempPtr->type = Tdollar;
-		tempPtr->idType = Tother;
-		tempPtr->data = NULL;
-		stack->first = tempPtr;
-		stack->top = tempPtr;
+		tempPtr1->Lptr = NULL;
+		tempPtr1->Rptr = NULL;
+		tempPtr1->termType = PDollar;
+		tempPtr1->idType = Tother;
+		tempPtr1->data = NULL;
+		stack->first = tempPtr1;
+		stack->top = tempPtr1;
 	}
 	else
 	{
@@ -84,34 +84,34 @@ int StackInit(Tstack *stack)
 }
 
 /**
- * Zruseni zasobniku
- * @param stack
+ * Zruseni zasobniku.
+ * @param stack 	Zasobnik termu.
  */
 void StackDispose(Tstack *stack)
 {
-	TstackElemPtr tempPtr;
-	tempPtr = stack->top;
+	TstackElemPtr tempPtr2;
+	tempPtr2 = stack->top;
 
 	while (stack->top != NULL)
 	{
-		tempPtr = stack->top;
+		tempPtr2 = stack->top;
 		stack->top = stack->top->Lptr;
-		free(tempPtr);
+		free(tempPtr2);
 	}
 	stack->first = NULL;
 }
 
 /**
  * Vrati dalsi token ze vstupu
- * @param stack
+ * @param stack 	Zasobnik termu.
  */
 void StackPop(Tstack *stack)
 {
-	TstackElemPtr tempPtr = NULL;
+	TstackElemPtr tempPtr3 = NULL;
 
 	if (stack->top != NULL)
 	{
-		tempPtr = stack->top;
+		tempPtr3 = stack->top;
 		if (stack->top->data != NULL)
 		{
 			free(stack->top->data);
@@ -129,59 +129,72 @@ void StackPop(Tstack *stack)
 			stack->top->Rptr = NULL;
 		}
 
-		free(tempPtr);
+		free(tempPtr3);
 	}
 }
 
 /**
  * Vlozeni tokenu na zasobnik.
- * @param  stack [description]
- * @return       [description]
+ * @param  stack Zasobnik termu.
+ * @return       ENOP v pripade uspechu.
  */
 int StackPush(Tstack *stack, TstackElemPtr item)
 {
-	TstackElemPtr tempPtr;
-	tempPtr = malloc(sizeof(struct TstackElem));
+	TstackElemPtr tempPtr4;
+	tempPtr4 = malloc(sizeof(struct TstackElem));
 
-	if (tempPtr == NULL)
+	if (tempPtr4 == NULL)
 	{
 		error = ERUN_UNINIT;
 		return error;
 	}
 
-	tempPtr->idType = Tother;
-	tempPtr->Lptr = stack->top;
-	tempPtr->Rptr = NULL;
-	stack->top->Rptr = tempPtr;
-	stack->top = tempPtr;
+	tempPtr4->idType = Tother; ////
+	tempPtr4->Lptr = stack->top;
+	tempPtr4->Rptr = NULL;
+	stack->top->Rptr = tempPtr4;
+	stack->top = tempPtr4;
 
 	error = ENOP;
 	return error;
 }
 
 /**
- * Vraci token na vrcholu zasobniku.
- * @param  stack [description]
- * @return       [description]
+ * Vraci terminal nejblize vrcholu zasobniku.
+ * @param  stack Zasobnik termu.
+ * @return       Term nejblize vrcholu.
  */
-TstackElemPtr StackTop(Tstack *stack);
-/*** @TODO ****/
+TstackElemPtr StackTop(Tstack *stack)
+{
+	TstackElemPtr tempPtr5 = stack->top;
+
+	// na vrcholu zasobniku muze byt i neterm. nebo <
+	while (tempPtr5->termType > PDollar)
+	{
+		tempPtr5 = tempPtr5->Lptr;
+	}
+
+	return tempPtr5;
+}
 
 /**
- * [StackInit description]
- * @param  stack [description]
+ * Pridani handle na zasobnik a pushnuti tokenu.
+ * @param  stack Zasobnik termu.
+ * @return       .
  */
-int StackShift(Tstack *stack/*, T_Token token*/);
+int StackShift(Tstack *stack);
 /*** @TODO ****/
 
 /**
  * Kontrola, jestli je zasobnik prazdny.
- * @param  stack [description]
- * @return       [description]
+ * @param  stack Zasobnik termu.
+ * @return       ENOP v pripade true.
  */
 int StackEmpty(Tstack *stack)
 {
-	if (stack->first == stack->top)
+	error = -5;
+
+	if (stack->top == stack->first)
 	{
 		error = ENOP;
 	}
@@ -191,6 +204,8 @@ int StackEmpty(Tstack *stack)
 
 /**
 * Funkce vraci index do tabulky
+* @param  tokenType	Typ tokenu.
+* @return index 		PSymbol z tokenu.
 */
 int getInd(int tokenType)
 {
@@ -201,24 +216,24 @@ int getInd(int tokenType)
 		case T_Id:						//0
 		case T_Integ:					// cele cisla
 		case T_Doub:	 				// desatinne cisla
-		case T_Str: index = Tiden; break;	// retazec 15				
-		case T_Plus: index = Tplus; break;		// + 16
-		case T_Min: index = Tminus; break;			// - 17
-		case T_Mul:	index = Tmul; break;					// * 18
-		case T_Div:	index = Tdiv; break;					// / 19
-		case T_LessThan: index = Tless; break;			// < 20
-		case T_LessEqual: index = TlessEq; break; 	// <= 21
-		case T_LeftShift: index = TleftShift; break;	// << 22
-		case T_GreaterThan: index = Tgreat; break;	// > 23
-		case T_GreaterEqual: index = TgreatEq; break;	// >= 24
-		case T_RightShift: index = TrightShift; break;	// >> 25
-		case T_Equal: index = Tequal; break;			// == 26
-		case T_Assig: index = Tassign; break;			// = 27
-		case T_NotEqual: index = TnotEq; break;				// != 28
-		case T_Comma: index = Tcomma; break; 					// ,	29
-		case T_LeftParenthesis: index = TleftP; break;		// ( 31
-		case T_RightParenthesis: index = TrightP; break; 	// ) 32
-		case T_EOF: index = Tdollar; break;
+		case T_Str: index = PIden; break;	// retazec 15				
+		case T_Plus: index = PPlus; break;		// + 16
+		case T_Min: index = PMinus; break;			// - 17
+		case T_Mul:	index = PMul; break;					// * 18
+		case T_Div:	index = PDiv; break;					// / 19
+		case T_LessThan: index = PLess; break;			// < 20
+		case T_LessEqual: index = PLessEq; break; 	// <= 21
+		case T_LeftShift: index = PLeftShift; break;	// << 22
+		case T_GreaterThan: index = PGreat; break;	// > 23
+		case T_GreaterEqual: index = PGreatEq; break;	// >= 24
+		case T_RightShift: index = PRightShift; break;	// >> 25
+		case T_Equal: index = PEqual; break;			// == 26
+		case T_Assig: index = PAssign; break;			// = 27
+		case T_NotEqual: index = PNotEq; break;				// != 28
+		case T_Comma: index = PComma; break; 					// ,	29
+		case T_LeftParenthesis: index = PLeftP; break;		// ( 31
+		case T_RightParenthesis: index = PRightP; break; 	// ) 32
+		case T_EOF: index = PDollar; break;
 		default: index = ESYN; break;
 	}
 
@@ -237,7 +252,7 @@ int getPrecSymbol(int ter1, int ter2)
 }
 
 /**
- * Simuluje pravidla vyrazu.
+ * Hlavni funkce vyrazu.
  * @param  input Soubor obsahujici vstupni kod.
  * @param  attr  String lexemu.
  * @return       Index do enumerace chyb.
@@ -252,7 +267,7 @@ TError expr(FILE *input, string *attr)
 	#endif
 
 	TError error = ENOTFOUND;
-	
+
 	// 45: <EXPR> -> ( <EXPR> )
 	if(token.type == T_LeftParenthesis)
 	{
