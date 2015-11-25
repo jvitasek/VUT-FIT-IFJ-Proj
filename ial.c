@@ -330,10 +330,27 @@ string concat(string s1, string s2)
  */
 string substr(string s, int i, int n)
 {
-	/**
-	 * @todo
-	 */
-	return s;
+	string res;
+	strInit(&res);
+	char *input = s.str;
+	char *result = malloc(n+1);
+	if(result != NULL)
+	{
+		int index = i;
+		int res_index = 0;
+		if(length(s) >= n)
+		{
+			while(input[index] != '\0' && index <= n)
+			{
+				result[res_index] = input[index];
+				++res_index;
+				++index;
+			}
+			result[res_index+1] = '\0';
+			res = toString(result);
+		}
+	}
+	return res;
 }
 
 /**
