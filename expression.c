@@ -278,6 +278,14 @@ void generateVariable(string *var, int *counter)
 	(*counter)++;
 }
 
+/**
+ * Funkcia, ktora vytvori a vlozi novu instrukciu do zoznamu instrukcii.
+ * 
+ * @param  instType  Typ danej instrukcie.
+ * @param  op1		 Operand1 (ukazatel do tabulky symbolov)
+ * @param  op2		 Operand2 (ukazatel do tabulky sumbolov)
+ * @param  res		 Vysledok
+ */
 void generateInst(tInstCode instType, void *op1, void *op2, void *res)
 {
 	//tInst inst;
