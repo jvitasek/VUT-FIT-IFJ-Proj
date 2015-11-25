@@ -15,43 +15,44 @@
 //#include ""
 
 typedef enum Tsymbols {
-	Tplus,    // +
-	Tminus,   // -
-	Tmul,     // *
-	Tdiv,     // /
-	Tequal,    // ==
-	TnotEq,   // !=
-	TlessEq,  // <=
-	TgreatEq, // >=
-	Tgreat,   // >
-	Tless,    // <
-	TleftShift, // <<
-	TrightShift, // >>
-	Tassign,	// =
-	Tiden,    // id
-	Tidfun,   // f
-	TleftP,   // (
-	TrightP,  // )
-	Tcomma,   // ,
-	Tdollar,  // $
-	less,
-	great,
-	equal,
-	empty,
-	lessReduc	// < na zasobniku
+	Tplus,    // 0 +
+	Tminus,   // 1 -
+	Tmul,     // 2 *
+	Tdiv,     // 3 /
+	Tequal,    // 4 ==
+	TnotEq,   // 5 !=
+	TlessEq,  // 6 <=
+	TgreatEq, // 7 >=
+	Tgreat,   // 8 >
+	Tless,    // 9 <
+	TleftShift, // 10 <<
+	TrightShift, // 11 >>
+	Tassign,	// 12 =
+	Tiden,    // 13 id
+	Tidfun,   // 14 f
+	TleftP,   // 15 (
+	TrightP,  // 16 )
+	Tcomma,   // 17 ,
+	Tdollar,  // 18 $
+	less,		// 19 < v preceden. tabulce
+	great,	// 20 > v preceden. tabulce
+	equal,	// 21 = v preceden. tabulce
+	empty,	// 22 'nic' v preceden. tabulce 
+	lessReduc	// 23 < na zasobniku
 } Tsymbols;
 
 typedef enum hashType {  
-	Tstring,
-	Tdouble,
-	Tint,
-	Tother
+	Tstring,	// 0 string
+	Tdouble,	// 1 double
+	Tint,		// 2 integer
+	Tid,		// 3 identifikator
+	Tother	// 4 jiny
 } hashType;
 
 typedef struct TstackElem {
 	struct TstackElem *Lptr;
 	struct TstackElem *Rptr;
-	Tsymbols symbols;
+	Tsymbols type;
 	hashType idType;
 	char *data;
 } *TstackElemPtr;
@@ -64,11 +65,10 @@ typedef struct Tstack {
 int StackInit(Tstack *stack); // inicialzace zasobniku
 void StackDispose(Tstack *stack);	
 void StackPop(Tstack *stack);
-int StackPush(Tstack *stack/*, T_Token token*/);
+int StackPush(Tstack *stack, TstackElemPtr item);
 TstackElemPtr StackTop(Tstack *stack);
-void StackShift(Tstack *stack, T_Token token);
+int StackShift(Tstack *stack/*, T_Token token*/);
 int StackEmpty(Tstack *stack);
-int readExpr(FILE *input, string *attr);
 TError expr(FILE *input, string *attr); // P: @todo
 
 #endif
