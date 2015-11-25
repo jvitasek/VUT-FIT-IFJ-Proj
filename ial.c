@@ -310,6 +310,9 @@ string concat(string s1, string s2)
 {
 	string res;
 	strInit(&res);
+	/**
+	 * @todo malloc by asi mel obsahovat sizeof char krat to co tam je ted
+	 */
 	char *result = malloc(length(s1)+length(s2)+1); // +1 ukonceni \0
 	if(result != NULL)
 	{
@@ -333,6 +336,9 @@ string substr(string s, int i, int n)
 	string res;
 	strInit(&res);
 	char *input = s.str;
+	/**
+	 * @todo malloc by asi mel obsahovat sizeof char krat to co tam je ted
+	 */
 	char *result = malloc(n+1);
 	if(result != NULL)
 	{
@@ -363,7 +369,7 @@ string substr(string s, int i, int n)
 int find(string s, string search)
 {
 	/**
-	 * @todo
+	 * @todo Jarda
 	 */
 	return 0;
 }
@@ -377,7 +383,7 @@ int find(string s, string search)
 string sort(string s)
 {
 	/**
-	 * @todo
+	 * @todo Jarda
 	 */
 	return s;
 }
