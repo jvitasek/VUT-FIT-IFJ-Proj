@@ -8,7 +8,7 @@
  * 			xvalec00 – Dusan Valecky
  */
  
-#include "scanner.h"
+#include "ial.h"
 #include <stdbool.h>
  
  // HLAVNI FUNKCE
@@ -20,6 +20,7 @@ TError initSTable();
 
 // PRAVIDLA
 TError type(); // P: 8, 9, 10
+TError realtype(); // UNDEF
 TError params(FILE *input, string *attr); // P: 15, 16
 TError params_n(FILE *input, string *attr); // P: 17, 18
 TError func(FILE *input, string *attr); // P: 11

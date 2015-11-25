@@ -9,9 +9,10 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include "str.h"
+#include "ial.h"
 
 #define STR_LEN 8
+
 
 /*
  * Funkcia vytvara novy retazec.
@@ -55,6 +56,19 @@ int strAppend(string *s, char c)
 void strFree(string *s)
 {
 	free(s->str);
+}
+
+string toString(char *s)
+{
+	string result;
+	strInit(&result);
+	int index = 0;
+	while(s[index] != '\0')
+	{
+		strAppend(&result, s[index]);
+		++index;
+	}
+	return result;
 }
 
 /*

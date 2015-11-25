@@ -11,6 +11,7 @@
 #ifndef _IAL_H_
 #define _IAL_H_
 
+#include "scanner.h"
 
 /**
  * -----------------------------------------------------------------------------
@@ -60,6 +61,7 @@ void htClearAll (tHTable* ptrht);
 
 
 // vestavene funkce
+string concat(string s1, string s2);
 /*int length(string s);
 string substr(string s, int i, int n);
 string concat(string s1, string s2);

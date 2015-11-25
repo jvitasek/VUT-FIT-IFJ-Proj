@@ -23,3 +23,4 @@ void strFree(string *s);
 void strClear(string *s);
 char *strGetStr(string *s);
 int strGetLength(string *s);
+string toString(char *s);

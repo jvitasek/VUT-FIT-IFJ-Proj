@@ -12,10 +12,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "str.h"
 #include "ial.h"
 
 int HTSIZE = MAX_HTSIZE;
+
+string concat(string s1, string s2);
+int length(string s);
 
 
 /**
@@ -297,4 +299,42 @@ int length(string s)
 {
 	return strlen(s.str);
 }
+
+/**
+ * Konkatenace dvou retezcu.
+ * @param  s1 Prvni retezec.
+ * @param  s2 Druhy retezec.
+ * @return    Konkatenovane retezce.
+ */
+string concat(string s1, string s2)
+{
+	string res;
+	strInit(&res);
+	char *result = malloc(length(s1)+length(s2)+1); // +1 ukonceni \0
+	if(result != NULL)
+	{
+		strcpy(result, s1.str);
+		strcat(result, s2.str);
+		res = toString(result);
+		return res;
+	}
+	return res;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

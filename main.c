@@ -19,7 +19,6 @@ int main(int argc, char **argv)
 	FILE *input;
 	string attr;		// vytvorime si string
 	strInit(&attr);		// inicializujeme string
-	final_error = "";
 	if((argc < 2) || (argc > 2))		// kontrola ci bol zadany spravny pocet parametrov na prikaz. riadke
 	{
 		print_error(ERUN_IN, 0);

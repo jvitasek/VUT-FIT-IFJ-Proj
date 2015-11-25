@@ -37,6 +37,4 @@ typedef enum TError {
  */
 void print_error(TError code, int line);
 
-char *final_error;
-
 #endif
