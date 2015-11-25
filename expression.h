@@ -36,7 +36,8 @@ typedef enum PSymbols {
 	less,		// 18 < v preceden. tabulce
 	great,	// 19 > v preceden. tabulce
 	equal,	// 20 = v preceden. tabulce
-	empty	// 21 'nic' v preceden. tabulce 
+	empty,	// 21 'nic' v preceden. tabulce
+	none
 } PSymbols;
 
 typedef enum hashType {  
@@ -67,6 +68,6 @@ int StackPush(Tstack *stack, int tokterm);
 TstackElemPtr StackTop(Tstack *stack);
 int StackShift(Tstack *stack/*, T_Token token*/);
 int StackEmpty(Tstack *stack);
-TError expr(FILE *input, string *attr); // P: @todo
+TError expr(FILE *input, string *attr, int semi_or_par); // P: @todo
 
 #endif

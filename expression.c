@@ -235,8 +235,7 @@ int tokToTerm(int tokenType)
 		case T_Comma: index = PComma; break; 					// ,	29
 		case T_LeftParenthesis: index = PLeftP; break;		// ( 31
 		case T_RightParenthesis: index = PRightP; break; 	// ) 32
-		case T_Semicolon:
-		case T_RightParenthesis: index = PDollar; break;
+		case T_Semicolon: index = PDollar; break;
 		default: index = ESYN; break;
 	}
 
@@ -263,7 +262,7 @@ int getPrecSymbol(int ter1, int ter2)
  * @param  attr  String lexemu.
  * @return       Index do enumerace chyb.
  */
-TError expr(FILE *input, string *attr)
+TError expr(FILE *input, string *attr, int semi_or_par)
 {
 	//TstackElemPtr tempStack = NULL;
 	//char *tempData = NULL;
@@ -324,29 +323,235 @@ TError expr(FILE *input, string *attr)
 	// 	/* code */
 	// }
 
+
+
 	// podivam se do precedencni tabulky a vratim z ni hledany symbol
-	do {
-		switch (getPrecSymbol(stack.top->termType, tokterm))
-		{
-			case equal:
-				// EQUAL ALGO
-				StackPush(&stack, tokterm);
-				getNextToken(input, attr);
-			break;
-			case less:
-				// LESS ALGO
-			break;
-			case great:
-				// GREAT ALGO
-			break;
-			case empty:
-				return ESYN;
-			break;
-			default:
-				// OTHER ALGO
-			break;
-		}
-	} while((stack.top->termType == PDollar) && (tokToTerm(token.type) == PDollar))
+	
+	// ukonceno strednikem
+	if(semi_or_par == 0)
+	{
+		do {
+			switch (getPrecSymbol(stack.top->termType, tokterm))
+			{
+				case equal:
+					// EQUAL ALGO
+					StackPush(&stack, tokterm);
+					getNextToken(input, attr);
+				break;
+				case less:
+					// LESS ALGO
+					StackPush(&stack, PLessReduc);
+					StackPush(&stack, tokterm);
+					getNextToken(input, attr);
+				break;
+				case great:
+					// GREAT ALGO
+					TstackElemPtr temp;
+					temp->Lptr = NULL;
+					temp->Rptr = NULL;
+					temp->termType = none;
+					temp->idType = Tother;
+					temp->data = NULL;
+					do
+					{
+						if(temp->Lptr != NULL)
+						{
+							temp = temp->Lptr;
+						}
+						else
+						{
+							temp = stack.top->Lptr;
+						}
+					} while(temp->termType != PLessReduc);
+
+
+					if(temp->Rptr->termType == PIden)
+					{
+						/**
+						 * @todo redukce
+						 */
+					}
+					else
+					{
+						switch(temp->Rptr->Rptr->termType)
+						{
+							case PPlus:
+								/**
+								 * @todo pravidlo addRule()
+								 */
+							break;
+							case PMinus:
+								/**
+								 * @todo pravidlo subRule()
+								 */
+							break;
+							case PMul:
+								/**
+								 * @todo pravidlo mulRule()
+								 */
+							break;
+							case PDiv:
+								/**
+								 * @todo pravidlo divRule()
+								 */
+							break;
+							case PLess:
+							case PGreat:
+							case PLessEq:
+							case PGreatEq:
+								/**
+								 * @todo pravidlo comp1Rule()
+								 */
+							break;
+							case PEqual:
+							case PNotEq:
+								/**
+								 * @todo pravidlo comp2Rule()
+								 */
+							break;
+							case PRightP:
+								/**
+								 * @todo pravidlo parRule()
+								 */
+							break;
+							case PIden:
+								/**
+								 * @todo pravidlo idRule()
+								 */
+							break;
+
+						}
+					}
+					free(temp);
+				break;
+				case empty:
+					StackDispose(&stack);
+					return ESYN;
+				break;
+				default:
+					// OTHER ALGO
+				break;
+			}
+		} while((stack.top->termType == PDollar) && (tokToTerm(token.type) == PDollar));
+	}
+	// ukonceno pravou zavorkou
+	else if(semi_or_par == 1)
+	{
+		// leva zavorka jiz nactena
+		int counter = 1;
+		do {
+			switch (getPrecSymbol(stack.top->termType, tokterm))
+			{
+				case equal:
+					// EQUAL ALGO
+					StackPush(&stack, tokterm);
+					getNextToken(input, attr);
+				break;
+				case less:
+					// LESS ALGO
+					if(token.type == T_LeftParenthesis)
+					{
+						++counter;
+					}
+					else if(token.type == T_RightParenthesis)
+					{
+						--counter;
+					}
+
+					StackPush(&stack, PLessReduc);
+					StackPush(&stack, tokterm);
+					getNextToken(input, attr);
+				break;
+				case great:
+					// GREAT ALGO
+					TstackElemPtr temp;
+					temp->Lptr = NULL;
+					temp->Rptr = NULL;
+					temp->termType = none;
+					temp->idType = Tother;
+					temp->data = NULL;
+					do
+					{
+						if(temp->Lptr != NULL)
+						{
+							temp = temp->Lptr;
+						}
+						else
+						{
+							temp = stack.top->Lptr;
+						}
+					} while(temp->termType != PLessReduc);
+
+
+					if(temp->Rptr->termType == PIden)
+					{
+						/**
+						 * @todo redukce
+						 */
+					}
+					else
+					{
+						switch(temp->Rptr->Rptr->termType)
+						{
+							case PPlus:
+								/**
+								 * @todo pravidlo addRule()
+								 */
+							break;
+							case PMinus:
+								/**
+								 * @todo pravidlo subRule()
+								 */
+							break;
+							case PMul:
+								/**
+								 * @todo pravidlo mulRule()
+								 */
+							break;
+							case PDiv:
+								/**
+								 * @todo pravidlo divRule()
+								 */
+							break;
+							case PLess:
+							case PGreat:
+							case PLessEq:
+							case PGreatEq:
+								/**
+								 * @todo pravidlo comp1Rule()
+								 */
+							break;
+							case PEqual:
+							case PNotEq:
+								/**
+								 * @todo pravidlo comp2Rule()
+								 */
+							break;
+							case PRightP:
+								/**
+								 * @todo pravidlo parRule()
+								 */
+							break;
+							case PIden:
+								/**
+								 * @todo pravidlo idRule()
+								 */
+							break;
+
+						}
+					}
+					free(temp);
+				break;
+				case empty:
+					StackDispose(&stack);
+					return ESYN;
+				break;
+				default:
+					// OTHER ALGO
+				break;
+			}
+		} while((stack.top->termType == PDollar) && (tokToTerm(token.type) == PRightP) && (counter == 0));
+	}
 
 	printf("index = %d, stack type %d, token type %d,\n"
 		"stack top %d, stack first %d tokterm %d\n"

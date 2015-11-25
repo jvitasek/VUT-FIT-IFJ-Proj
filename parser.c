@@ -373,28 +373,24 @@ TError stmt(FILE *input, string *attr)
 		if(token.type == T_LeftParenthesis)
 		{
 			getNextToken(input, attr);
-			error = expr(input, attr);
+			error = expr(input, attr, 1);
 			#ifdef DEBUG
 			printf("stmt: expr vratilo: %d\n", error);
 			#endif
 			if(error == ENOP)
 			{
 				getNextToken(input, attr);
-				if(token.type == T_RightParenthesis)
+				error = comm_seq(input, attr);
+				#ifdef DEBUG
+				printf("stmt: comm_seq vratilo: %d\n", error);
+				#endif
+				if(error == ENOP)
 				{
-					getNextToken(input, attr);
-					error = comm_seq(input, attr);
-					#ifdef DEBUG
-					printf("stmt: comm_seq vratilo: %d\n", error);
-					#endif
-					if(error == ENOP)
-					{
-						return ENOP;
-					}
-					else if(error == ESYN)
-					{
-						return error;
-					}
+					return ENOP;
+				}
+				else if(error == ESYN)
+				{
+					return error;
 				}
 			}
 			else if(error == ESYN)
@@ -421,39 +417,31 @@ TError stmt(FILE *input, string *attr)
 			if(error == ENOP)
 			{
 				getNextToken(input, attr);
-				error = expr(input, attr);
+				error = expr(input, attr, 0);
 				#ifdef DEBUG
 				printf("stmt: expr vratilo: %d\n", error);
 				#endif
 				if(error == ENOP)
 				{
 					getNextToken(input, attr);
-					error = assign(input, attr);
+					error = assign(input, attr, 1);
 					#ifdef DEBUG
 					printf("stmt: assign vratilo: %d\n", error);
 					#endif
 					if(error == ENOP)
 					{
 						getNextToken(input, attr);
-						if(token.type == T_RightParenthesis)
+						error = comm_seq(input, attr);
+						#ifdef DEBUG
+						printf("stmt: comm_seq vratilo: %d\n", error);
+						#endif
+						if(error == ENOP)
 						{
-							getNextToken(input, attr);
-							error = comm_seq(input, attr);
-							#ifdef DEBUG
-							printf("stmt: comm_seq vratilo: %d\n", error);
-							#endif
-							if(error == ENOP)
-							{
-								return ENOP;
-							}
-							else if(error == ESYN)
-							{
-								return error;
-							}
+							return ENOP;
 						}
-						else
+						else if(error == ESYN)
 						{
-							return ESYN;
+							return error;
 						}
 					}
 					else if(error == ESYN)
@@ -742,21 +730,13 @@ TError ret(FILE *input, string *attr)
 	if(token.type == T_Return)
 	{
 		getNextToken(input, attr);
-		error = expr(input, attr);
+		error = expr(input, attr, 0);
 		#ifdef DEBUG
 		printf("ret: expr vratilo: %d\n", error);
 		#endif
 		if(error == ENOP)
 		{
-			getNextToken(input, attr);
-			if(token.type == T_Semicolon)
-			{
-				return ENOP;
-			}
-			else
-			{
-				return ESYN;
-			}
+			return error;
 		}
 		else if(error == ESYN)
 		{
@@ -911,7 +891,7 @@ TError assign(FILE *input, string *attr)
 		if(token.type == T_Equal)
 		{
 			getNextToken(input, attr);
-			error = expr(input, attr);
+			error = expr(input, attr, 1);
 			#ifdef DEBUG
 			printf("assign: expr vratilo: %d\n", error);
 			#endif
@@ -966,22 +946,7 @@ TError var_def(FILE *input, string *attr)
 			#endif
 			if(error == ENOP || error == EEMPTY)
 			{
-				//printf("token pred: %d\n", token.type);
-				// pokud pravidlo proslo na epsilonu
-				// negetujeme dalsi token
-				if(error == ENOP)
-				{
-					getNextToken(input, attr);
-				}
-				//printf("token po: %d\n", token.type);
-				if(token.type == T_Semicolon)
-				{
-					return ENOP;
-				}
-				else
-				{
-					return ESYN;
-				}
+				return error;
 			}
 			else if(error == ESYN)
 			{
@@ -1008,7 +973,6 @@ TError var_def(FILE *input, string *attr)
 			// proslo na epsilon, negetujeme dalsi token
 			if(error == ENOP || error == EEMPTY)
 			{
-				error = ENOP;
 				return error;
 			}
 			else if(error == ESYN)
@@ -1040,7 +1004,7 @@ TError init(FILE *input, string *attr)
 	if(token.type == T_Equal)
 	{
 		getNextToken(input, attr);
-		error = expr(input, attr);
+		error = expr(input, attr, 0);
 		#ifdef DEBUG
 		printf("init: expr vratilo: %d\n", error);
 		#endif
@@ -1111,24 +1075,18 @@ TError fcall_or_assign(FILE *input, string *attr)
 	#endif
 	TError error = ENOTFOUND;
 	// 30: <FCALL_OR_ASSIGN> -> <EXPR> ;
-	if((error = expr(input, attr)) == ENOP || error == ESYN)
+	if((error = expr(input, attr, 0)) == ENOP || error == ESYN)
 	{
 		#ifdef DEBUG
 		printf("fcall_or_assign: expr vratilo: %d\n", error);
 		#endif
-		if(error == ESYN)
+		if(error == ENOP)
 		{
 			return error;
 		}
-
-		getNextToken(input, attr);
-		if(token.type == T_Semicolon)
+		else if(error == ESYN)
 		{
-			return ENOP;
-		}
-		else
-		{
-			return ESYN;
+			return error;
 		}
 	}
 	// 31: <FCALL_OR_ASSIGN> -> id ( <TERMS> );
