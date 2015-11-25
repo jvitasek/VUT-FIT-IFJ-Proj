@@ -63,10 +63,10 @@ void htClearAll (tHTable* ptrht);
 
 
 // vestavene funkce
-int length(string s);
+/*int length(string s);
 string substr(string s, int i, int n);
 string concat(string s1, string s2);
 int find(string s, string search);
-string sort(string s);
+string sort(string s);*/
 
 #endif
