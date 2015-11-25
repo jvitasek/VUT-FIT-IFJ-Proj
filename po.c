@@ -34,11 +34,7 @@ int line = 1;
 void getNextToken(FILE *input, string *attr)
 {
 	token = getToken(input, attr, &line);
-	if(token.type == T_Error)
-	{
-		print_error(ELEX, token.line);
-		exit(1);
-	}
+	if(token.type == T_Error) exit(1);
 }
 
 /**
@@ -515,8 +511,7 @@ TError stmt(FILE *input, string *attr)
 				{
 					if(error == ENOP)
 					{
-						// ?????????????????????????????????? @todo mozny bug
-						//getNextToken(input, attr);
+						getNextToken(input, attr);
 					}
 
 					if(token.type == T_Semicolon)
@@ -556,8 +551,7 @@ TError stmt(FILE *input, string *attr)
 			#endif
 			if(error == ENOP)
 			{
-				// ?????????????????????????????????? @todo mozny bug
-				//getNextToken(input, attr);
+				getNextToken(input, attr);
 				if(token.type == T_Semicolon)
 				{
 					return ENOP;
@@ -860,7 +854,7 @@ TError cin_id_n(FILE *input, string *attr)
 	#endif
 	TError error = ENOTFOUND;
 	// 37) <CIN_ID_N> -> >> id <CIN_ID_N>
-	if(token.type == T_RightShift)
+	if(token.type == T_LeftShift)
 	{
 		getNextToken(input, attr);
 		if(token.type == T_Id)

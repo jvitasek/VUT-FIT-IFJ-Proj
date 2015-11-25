@@ -12,10 +12,11 @@
 **/
 
 
-#include "ial.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "str.h"
+#include "ial.h"
 
 int HTSIZE = MAX_HTSIZE;
 
@@ -196,3 +197,14 @@ void htClearAll ( tHTable* ptrht ) {
 		(*ptrht)[i] = NULL;
 	}
 }
+
+/**
+ * [length description]
+ * @param  s [description]
+ * @return   [description]
+ */
+int length(string s)
+{
+	return strlen(s.str);
+}
+

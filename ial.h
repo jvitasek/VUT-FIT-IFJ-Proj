@@ -14,9 +14,6 @@
 #ifndef _IAL_H_
 #define _IAL_H_
 
-#include <stdlib.h>
-#include <string.h>
-
 
 /**
  * -----------------------------------------------------------------------------
@@ -52,5 +49,13 @@ void htInsert (tHTable* ptrht, tKey key, tData data);
 tData* htRead (tHTable* ptrht, tKey key);
 void htDelete (tHTable* ptrht, tKey key);
 void htClearAll (tHTable* ptrht);
+
+
+// vestavene funkce
+int length(string s);
+string substr(string s, int i, int n);
+string concat(string s1, string s2);
+int find(string s, string search);
+string sort(string s);
 
 #endif
