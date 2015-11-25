@@ -321,10 +321,49 @@ string concat(string s1, string s2)
 	return res;
 }
 
+/**
+ * Vrati substring daneho stringu od i do n (basic_string c++).
+ * @param  s Zdrojovy string.
+ * @param  i Prvni pozice.
+ * @param  n Posledni pozice.
+ * @return   Nalezeny substring.
+ */
+string substr(string s, int i, int n)
+{
+	/**
+	 * @todo
+	 */
+	return s;
+}
 
+/**
+ * Najde prvni vyskyt substringu a vrati jeho index.
+ * Vyuziva Boyer-Mooreuv algoritmus.
+ * @param  s      Haystack.
+ * @param  search Needle
+ * @return        Pozice prvniho vyskytu
+ */
+int find(string s, string search)
+{
+	/**
+	 * @todo
+	 */
+	return 0;
+}
 
-
-
+/**
+ * Seradi string podle ordinalnich hodnot
+ * Vyuziva algoritmus Heap sort.
+ * @param  s String k serazeni.
+ * @return   Serazeny string.
+ */
+string sort(string s)
+{
+	/**
+	 * @todo
+	 */
+	return s;
+}
 
 
 
