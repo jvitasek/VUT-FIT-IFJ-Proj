@@ -1,15 +1,12 @@
 /**
-* -----------------------------------------------------------------------------
-*
-* Implementace interpretu imperativniho jazyka IFJ15
-*
-* Soubor       : ial.h
-* Popis        : IAL funkce
-* Datum        : Listopad 2015
-* Autori       : xvyrou05 - Marek Vyroubal
-*              
-* -----------------------------------------------------------------------------
-**/
+ * Implementace interpretu imperativniho jazyka IFJ15 *
+ * 
+ * ial.c  -  Zakladni algoritmy
+ * 
+ * Autori:
+ * 			xvyrou05 – Marek Vyroubal
+ * 			xvitas02 – Jakub Vitasek
+ */
 
 #ifndef _IAL_H_
 #define _IAL_H_

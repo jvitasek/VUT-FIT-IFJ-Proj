@@ -1,15 +1,12 @@
 /**
-* -----------------------------------------------------------------------------
-*
-* Implementace interpretu imperativniho jazyka IFJ15
-*
-* Soubor       : ial.c
-* Popis        : IAL funkce
-* Datum        : Listopad 2015
-* Autori       : xvyrou05 - Marek Vyroubal
-*              
-* -----------------------------------------------------------------------------
-**/
+ * Implementace interpretu imperativniho jazyka IFJ15 *
+ * 
+ * ial.c  -  Zakladni algoritmy
+ * 
+ * Autori:
+ * 			xvyrou05 – Marek Vyroubal
+ * 			xvitas02 – Jakub Vitasek
+ */
 
 
 #include <stdio.h>
@@ -27,7 +24,9 @@ int HTSIZE = MAX_HTSIZE;
  * -----------------------------------------------------------------------------
  **/
 
- // TODO
+/**
+ * @todo
+ */
 
 
 /**
@@ -37,9 +36,12 @@ int HTSIZE = MAX_HTSIZE;
  * -----------------------------------------------------------------------------
  **/
 
-/*
-** Funkce prosetí hromadou
-*/
+/**
+ * Funkce proseti hromadou.
+ * @param a     [description]
+ * @param Left  [description]
+ * @param Right [description]
+ */
 void siftDown(char* a, int Left, int Right) {
     int j, i;
     // pomocna promenna tehoz typu jako polozka pole
@@ -82,9 +84,10 @@ void siftDown(char* a, int Left, int Right) {
     a[i] = Temp;
 }
 
-/*
-** Funkce razeni hromadou heap sort
-*/
+/**
+ * Funkce razeni hromadou heap sort.
+ * @param a [description]
+ */
 void heapSort (char* a) {
 	int i, Left, Right;
     int Temp;
@@ -118,9 +121,11 @@ void heapSort (char* a) {
  * -----------------------------------------------------------------------------
  **/
 
-/* 
-** Rozptylovaci funkce 
-*/
+/**
+ * Rozptylovaci funkce.
+ * @param  key [description]
+ * @return     [description]
+ */
 int hashCode (tKey key) {
 	int retval = 1;
 	int keylen = strlen(key);
@@ -129,9 +134,10 @@ int hashCode (tKey key) {
 	return ( retval % HTSIZE );
 }
 
-/*
-** Inicializace tabulky
-*/
+/**
+ * Inicializace tabulky.
+ * @param ptrht [description]
+ */
 void htInit (tHTable* ptrht) {
 
 	if ((*ptrht) == NULL) {
@@ -143,12 +149,14 @@ void htInit (tHTable* ptrht) {
 	}
 }
 
-/* 
-** Vyhledani prvku v TRP ptrht podle zadaneho klice key. Pokud je
-** dany prvek nalezen, vraci se ukazatel na dany prvek. Pokud prvek nalezen neni, 
-** vraci se hodnota NULL.
-**
-*/
+/**
+ * Vyhledani prvku v TRP ptrht podle zadaneho klice key. Pokud je
+ * dany prvek nalezen, vraci se ukazatel na dany prvek. Pokud prvek nalezen neni, 
+ * vraci se hodnota NULL.
+ * @param  ptrht [description]
+ * @param  key   [description]
+ * @return       [description]
+ */
 tHTItem* htSearch (tHTable* ptrht, tKey key) {
 
 	// pokud bude tabulka neinicializovaná
@@ -173,10 +181,13 @@ tHTItem* htSearch (tHTable* ptrht, tKey key) {
 	return NULL;
 }
 
-/* 
-** Tato funkce vklada do tabulky ptrht polozku s klicem key a s daty
-** data.
-*/
+/**
+ * Tato funkce vklada do tabulky ptrht polozku s klicem key a s daty
+ * data.
+ * @param ptrht [description]
+ * @param key   [description]
+ * @param data  [description]
+ */
 void htInsert (tHTable* ptrht, tKey key, tData data) {
 
 	if ((*ptrht) == NULL) {
@@ -200,11 +211,14 @@ void htInsert (tHTable* ptrht, tKey key, tData data) {
 	}
 }
 
-/*
-** Tato funkce zjistuje hodnotu datove casti polozky zadane klicem.
-** Pokud je polozka nalezena, vraci funkce ukazatel na polozku
-** Pokud polozka nalezena nebyla, vraci se funkcni hodnota NULL
-*/
+/**
+ * Tato funkce zjistuje hodnotu datove casti polozky zadane klicem.
+ * Pokud je polozka nalezena, vraci funkce ukazatel na polozku
+ * Pokud polozka nalezena nebyla, vraci se funkcni hodnota NULL
+ * @param  ptrht [description]
+ * @param  key   [description]
+ * @return       [description]
+ */
 tData* htRead (tHTable* ptrht, tKey key) {
 
 	tHTItem* item = htSearch(ptrht, key); // najdu prvek podle klice
@@ -219,9 +233,11 @@ tData* htRead (tHTable* ptrht, tKey key) {
 	}
 }
 
-/*
-** Funkce vyjme polozku s klicem key z tabulky ptrht.  
-*/
+/**
+ * Funkce vyjme polozku s klicem key z tabulky ptrht. 
+ * @param ptrht [description]
+ * @param key   [description]
+ */
 void htDelete (tHTable* ptrht, tKey key) {
 
 	if ((*ptrht) == NULL) {
@@ -249,9 +265,10 @@ void htDelete (tHTable* ptrht, tKey key) {
 	return;
 }
 
-/*
-** Funkce zrusi vsechny polozky tabulky
-*/
+/**
+ * Funkce zrusi vsechny polozky tabulky
+ * @param ptrht [description]
+ */
 void htClearAll (tHTable* ptrht) {
 
 	if ((*ptrht) == NULL) {
@@ -272,9 +289,9 @@ void htClearAll (tHTable* ptrht) {
 }
 
 /**
- * [length description]
- * @param  s [description]
- * @return   [description]
+ * Vraci pocet znaku retezce.
+ * @param  s String k vypoctu znaku.
+ * @return   Pocet znaku.
  */
 int length(string s)
 {
