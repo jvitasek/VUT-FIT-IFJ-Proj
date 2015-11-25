@@ -25,21 +25,18 @@ typedef enum PSymbols {
 	PGreatEq, // 7 >=
 	PGreat,   // 8 >
 	PLess,    // 9 <
-	PLeftShift, // 10 <<
-	PRightShift, // 11 >>
-	PAssign,	// 12 =
-	PIden,    // 13 id
-	PIdFun,   // 14 f
-	PLeftP,   // 15 (
-	PRightP,  // 16 )
-	PComma,   // 17 ,
-	PDollar,  // 18 $
-	PLessReduc,	// 23 < na zasobniku
-	PNonTerm,		// 24 neterminal
-	less,		// 19 < v preceden. tabulce
-	great,	// 20 > v preceden. tabulce
-	equal,	// 21 = v preceden. tabulce
-	empty	// 22 'nic' v preceden. tabulce 
+	PIden,    // 10 id
+	PIdFun,   // 11 f
+	PLeftP,   // 12 (
+	PRightP,  // 13 )
+	PComma,   // 14 ,
+	PDollar,  // 15 $
+	PLessReduc,	// 16 < na zasobniku
+	PNonTerm,		// 17 neterminal
+	less,		// 18 < v preceden. tabulce
+	great,	// 19 > v preceden. tabulce
+	equal,	// 20 = v preceden. tabulce
+	empty	// 21 'nic' v preceden. tabulce 
 } PSymbols;
 
 typedef enum hashType {  
@@ -66,7 +63,7 @@ typedef struct Tstack {
 int StackInit(Tstack *stack); // inicialzace zasobniku
 void StackDispose(Tstack *stack);	
 void StackPop(Tstack *stack);
-int StackPush(Tstack *stack, TstackElemPtr item);
+int StackPush(Tstack *stack, int tokterm);
 TstackElemPtr StackTop(Tstack *stack);
 int StackShift(Tstack *stack/*, T_Token token*/);
 int StackEmpty(Tstack *stack);

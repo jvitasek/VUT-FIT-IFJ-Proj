@@ -135,10 +135,11 @@ void StackPop(Tstack *stack)
 
 /**
  * Vlozeni tokenu na zasobnik.
- * @param  stack Zasobnik termu.
+ * @param  stack   Zasobnik termu.
+ * @param  tokterm Terminal prevedeny z tokenu.
  * @return       ENOP v pripade uspechu.
  */
-int StackPush(Tstack *stack, TstackElemPtr item)
+int StackPush(Tstack *stack, int tokterm)
 {
 	TstackElemPtr tempPtr4;
 	tempPtr4 = malloc(sizeof(struct TstackElem));
@@ -149,7 +150,8 @@ int StackPush(Tstack *stack, TstackElemPtr item)
 		return error;
 	}
 
-	tempPtr4->idType = Tother; ////
+	tempPtr4->termType = tokterm; ////
+	printf("StackPush - vkladam termType: %d\n", tempPtr4->termType);
 	tempPtr4->Lptr = stack->top;
 	tempPtr4->Rptr = NULL;
 	stack->top->Rptr = tempPtr4;
@@ -207,7 +209,7 @@ int StackEmpty(Tstack *stack)
 * @param  tokenType	Typ tokenu.
 * @return index 		PSymbol z tokenu.
 */
-int getInd(int tokenType)
+int tokToTerm(int tokenType)
 {
 	int index = 0;
 
@@ -223,12 +225,12 @@ int getInd(int tokenType)
 		case T_Div:	index = PDiv; break;					// / 19
 		case T_LessThan: index = PLess; break;			// < 20
 		case T_LessEqual: index = PLessEq; break; 	// <= 21
-		case T_LeftShift: index = PLeftShift; break;	// << 22
+		//case T_LeftShift: index = PLeftShift; break;	// << 22
 		case T_GreaterThan: index = PGreat; break;	// > 23
 		case T_GreaterEqual: index = PGreatEq; break;	// >= 24
-		case T_RightShift: index = PRightShift; break;	// >> 25
+		//case T_RightShift: index = PRightShift; break;	// >> 25
 		case T_Equal: index = PEqual; break;			// == 26
-		case T_Assig: index = PAssign; break;			// = 27
+		//case T_Assig: index = PAssign; break;			// = 27
 		case T_NotEqual: index = PNotEq; break;				// != 28
 		case T_Comma: index = PComma; break; 					// ,	29
 		case T_LeftParenthesis: index = PLeftP; break;		// ( 31
@@ -261,6 +263,7 @@ TError expr(FILE *input, string *attr)
 {
 	//TstackElemPtr tempStack = NULL;
 	//char *tempData = NULL;
+	int tokterm;
 
 	#ifdef DEBUG
 	printf("expr\n");
@@ -269,7 +272,7 @@ TError expr(FILE *input, string *attr)
 	TError error = ENOTFOUND;
 
 	// 45: <EXPR> -> ( <EXPR> )
-	if(token.type == T_LeftParenthesis)
+	/*if(token.type == T_LeftParenthesis)
 	{
 		getNextToken(input, attr);
 		error = expr(input, attr);
@@ -292,26 +295,35 @@ TError expr(FILE *input, string *attr)
 		{
 			return error;
 		}
-	}
+	}*/
 
-	/*int index = 0;
+	int index = 0;
 	int ter1 = 2;
 	int ter2 = 2;
 
 	if ((error = StackInit(&stack)) == ENOP)
 	{
-		printf("Inicializace v poho\n");
+		fprintf(stderr, "Inicializace v poho\n");
 	}
 	else
 	{
-		printf("Inicializace v riti\n");
+		fprintf(stderr, "Inicializace \n");
 		StackDispose(&stack);
 
 		error = EINT;
 		return error;
-	}*/
+	}
 
-	/*switch (getPrecSymbol(ter1, ter2))
+	// prevedu si token na term (PSymbols)
+	tokterm = tokToTerm(token.type);
+
+	if ((error = StackPush(&stack, tokterm)) != ENOP)
+	{
+		/* code */
+	}
+
+	// podivam se do precedencni tabulky a vratim z ni hledany symbol
+	switch (getPrecSymbol(ter1, ter2))
 	{
 		case equal: printf("equal!!!\n"); break;
 		case less: printf("less!!!\n"); break;
@@ -320,10 +332,12 @@ TError expr(FILE *input, string *attr)
 		default: printf("neco jinyho\n"); break;
 	}
 
-	printf("index = %d, stack type %d, token type %d, top %d\n"
-		, index, stack.first->type, token.type, stack.top->type);
+	printf("index = %d, stack type %d, token type %d,\n"
+		"stack top %d, stack first %d tokterm %d\n"
+		, index, stack.first->termType, token.type, stack.top->termType, 
+		stack.first->termType, tokterm);
 
-	StackDispose(&stack);*/
+	StackDispose(&stack);
 
 	
 	/**
