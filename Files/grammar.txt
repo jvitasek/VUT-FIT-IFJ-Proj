@@ -60,7 +60,7 @@ Gramatika pro vyrazy
 50) <ARG_N>		->	, arg <ARG_N>
 51) <ARG_N>		->	E
 52) <EXPR>		->	<EXPR> + <EXPR>
-53)<EXPR>		->	<EXPR> - <EXPR>
+53) <EXPR>		->	<EXPR> - <EXPR>
 54) <EXPR>		->	<EXPR> * <EXPR>
 55) <EXPR>		->	<EXPR> / <EXPR>
 56) <EXPR>		->	<EXPR> < <EXPR>
