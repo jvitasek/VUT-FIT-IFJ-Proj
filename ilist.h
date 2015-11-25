@@ -71,22 +71,22 @@ typedef enum {
 	/*
 	* Instrunkce pro vestavene funkce
 	*/
-	I_LENGTH;
-	I_SUBSTR;
-	I_CONCAT;
-	I_FIND;
-	I_SORT; 
-} tInstruction;
+	I_LENGTH,
+	I_SUBSTR,
+	I_CONCAT,
+	I_FIND,
+	I_SORT 
+} tInstCode;
 
 /*
  * Struktura reprezentujici 3AC instrukci
  */
 typedef struct Inst 
 {
-	int InstType; // typ instrukce
-	void *addr1; // adresa 1
-	void *addr2; // adresa 2
-	void *addr3; // adresa 3
+	tInstCode instType; // typ instrukce
+	void *op1; // operand 1
+	void *op2; // operand 2
+	void *res; // result
 } tInst;
 
 /*

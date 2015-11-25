@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "error.h"
-#include "ial.h"
+
 #include "parser.h"
 #include "expression.h"
 
@@ -262,6 +262,8 @@ int getPrecSymbol(int ter1, int ter2)
  * Funkcia, ktora nam generuje pomocne premenne $x,
  * do ktorych sa budu ukladat medzivypocty pri generovani 3AK.
  * 
+ * @param	var	 	String vytvaranej premennej.
+ * @param 	counter	Pocitadlo potrebne pri tvorbe pomocnych premennych.
  */
 void generateVariable(string *var, int *counter)
 {
@@ -276,10 +278,21 @@ void generateVariable(string *var, int *counter)
 	(*counter)++;
 }
 
+void generateInst(tInstCode instType, void *op1, void *op2, void *res)
+{
+	//tInst inst;
+	//inst.instType = instType;
+	//inst.op1 = op1;
+	//inst.op2 = op2;
+	//inst.res = res;
+	//listInsertLast(list,inst);	// list instrukci trba vytvorit v parsru
+}
+
 /**
  * Hlavni funkce vyrazu.
  * @param  input Soubor obsahujici vstupni kod.
  * @param  attr  String lexemu.
+ * @param  count Pocitadlo potrebne pri tvorbe pomocnych premennych.
  * @return       Index do enumerace chyb.
  */
 TError expr(FILE *input, string *attr, int semi_or_par, int *count)

@@ -39,7 +39,7 @@ void listFree(tListOfInstr *L) {
 int listInsertLast(tListOfInstr *L, tInst I) {
 // vlozi novou instruci na konec seznamu
   tListItem *newItem;
-  newItem = malloc(sizeof(tListItem))
+  newItem = malloc(sizeof(tListItem));
   if (newItem == NULL)
      return EINT;
 
