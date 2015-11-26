@@ -185,6 +185,13 @@ TstackElemPtr StackTop(Tstack *stack)
 		printf("StackTop in progress.\n");
 	#endif
 	TstackElemPtr tempPtr = NULL;
+	if ((tempPtr = malloc(sizeof(struct TstackElem))) == NULL)
+	{
+		fprintf(stderr, "Chyba pri malloc.\n");
+		error = ERUN_UNINIT;
+		return error;
+	}
+
 	tempPtr = stack->top;
 	tempPtr->Lptr = stack->top->Lptr;
 	tempPtr->Rptr = stack->top->Rptr;
@@ -192,20 +199,28 @@ TstackElemPtr StackTop(Tstack *stack)
 	tempPtr->idType = stack->top->idType;
 	tempPtr->data = stack->top->data;
 
+	#ifdef DEBUG
 	printf("lptr: %d\n", tempPtr->Lptr);
+	#endif
 
 	// na vrcholu zasobniku muze byt i neterm. nebo <
 	while (tempPtr->termType > PDollar)
 	{
+		#ifdef DEBUG
 		printf("term type: %d\n", tempPtr->termType);
+		#endif
 		if(tempPtr->Lptr != NULL)
 		{
+			#ifdef DEBUG
 			printf("neni null\n");
+			#endif
 			tempPtr = tempPtr->Lptr;
 		}
 		else
 		{
+			#ifdef DEBUG
 			printf("je null\n");
+			#endif
 			return tempPtr;
 		}
 	}
@@ -240,6 +255,9 @@ int StackShift(Tstack *stack, int tokterm)
 	temp->Lptr = tempTop;
 	temp->Rptr = tempTop->Rptr;
 	temp->idType = Tother;
+	tempTop->Rptr = temp;
+	tempTop->Rptr->Lptr = temp;
+
 	
 	if (tempTop == stack->top)
 	{
@@ -255,7 +273,9 @@ int StackShift(Tstack *stack, int tokterm)
 	// pushnu token na zasobnik
 	if ((error = StackPush(stack, tokterm)) != ENOP)
 	{
+		#ifdef DEBUG
 		fprintf(stderr, "Chyba pri StackPush.\n");
+		#endif
 		StackDispose(stack);
 		return error;
 	}
@@ -517,7 +537,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count)
 	TError error = ENOTFOUND;
 	TstackElemPtr tempStack = NULL;
 	//char *tempData = NULL;
-	int tokterm;
+	int tokterm = 0;
 
 	#ifdef DEBUG
 	printf("expr\n");
@@ -575,6 +595,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count)
 		#endif
 		//tempStack = StackTop(&stack); // nejvrchnejsi terminal na zasobniku
 		
+		int index = 0;
 		do {
 			//tempStack = NULL;
 			tempStack = StackTop(&stack); // nejvrchnejsi terminal na zasobniku
@@ -585,6 +606,9 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count)
 			#ifdef DEBUG
 				whatsInStacks(&stack);
 			#endif
+
+			printf("%d: prc symbol: %d\n", index, getPrecSymbol(tempStack->termType, tokterm));
+			++index;
 			switch (getPrecSymbol(tempStack->termType, tokterm))
 			{				
 				case equal:
@@ -676,9 +700,10 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count)
 				break;
 				default:
 					// OTHER ALGO
+					fprintf(stderr, "DIE!\n");
 				break;			
 			}
-			tempStack = StackTop(&stack);
+			//stempStack = StackTop(&stack);
 			printf("TOKEN TYPE: %d\n", token.type);
 
 		} while(!((stack.top->termType == PDollar) && (tokToTerm(token.type) == PDollar)));
