@@ -201,12 +201,13 @@ TstackElemPtr StackTop(Tstack *stack)
 		if(tempPtr->Lptr != NULL)
 		{
 			printf("neni null\n");
+			tempPtr = tempPtr->Lptr;
 		}
 		else
 		{
 			printf("je null\n");
+			return tempPtr;
 		}
-		tempPtr = tempPtr->Lptr;
 	}
 
 	return tempPtr;
@@ -296,7 +297,7 @@ void whatsInStacks(Tstack *stack)
 	temp->idType = stack->first->idType;
 	temp->data = stack->first->data;
 	
-	printf("|--DNO-\t-termType- -%d-\t-idType- -%d-\t-akt. token-\n", 
+	printf("|--DNO-\t-termType- -%d-\t-idType- -%d-\t-akt. token- -%d--|\n", 
 		temp->termType, temp->idType, token.type);
 	
 	while (temp->Rptr != NULL)
@@ -572,19 +573,16 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count)
 		#ifdef DEBUG
 			printf("Resim vyraz ukonceny strednikem.\n");
 		#endif
-		tempStack = StackTop(&stack); // nejvrchnejsi terminal na zasobniku
+		//tempStack = StackTop(&stack); // nejvrchnejsi terminal na zasobniku
 		
 		do {
 			//tempStack = NULL;
-			//tempStack = StackTop(&stack); // nejvrchnejsi terminal na zasobniku
-			#ifdef DEBUG
-				printf("V poho?.\n");
-			#endif
+			tempStack = StackTop(&stack); // nejvrchnejsi terminal na zasobniku
+
 			// prevedu si token na term (PSymbols)
 			tokterm = tokToTerm(token.type);
 
 			#ifdef DEBUG
-				printf("Po do\n");
 				whatsInStacks(&stack);
 			#endif
 			switch (getPrecSymbol(tempStack->termType, tokterm))
@@ -681,7 +679,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count)
 				break;			
 			}
 			tempStack = StackTop(&stack);
-							printf("Konec do\n");
+			printf("TOKEN TYPE: %d\n", token.type);
 
 		} while(!((stack.top->termType == PDollar) && (tokToTerm(token.type) == PDollar)));
 	}
