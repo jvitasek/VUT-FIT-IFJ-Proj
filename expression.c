@@ -185,12 +185,27 @@ TstackElemPtr StackTop(Tstack *stack)
 		printf("StackTop in progress.\n");
 	#endif
 	TstackElemPtr tempPtr = NULL;
-
 	tempPtr = stack->top;
+	tempPtr->Lptr = stack->top->Lptr;
+	tempPtr->Rptr = stack->top->Rptr;
+	tempPtr->termType = stack->top->termType;
+	tempPtr->idType = stack->top->idType;
+	tempPtr->data = stack->top->data;
+
+	printf("lptr: %d\n", tempPtr->Lptr);
 
 	// na vrcholu zasobniku muze byt i neterm. nebo <
 	while (tempPtr->termType > PDollar)
 	{
+		printf("term type: %d\n", tempPtr->termType);
+		if(tempPtr->Lptr != NULL)
+		{
+			printf("neni null\n");
+		}
+		else
+		{
+			printf("je null\n");
+		}
 		tempPtr = tempPtr->Lptr;
 	}
 
@@ -281,13 +296,13 @@ void whatsInStacks(Tstack *stack)
 	temp->idType = stack->first->idType;
 	temp->data = stack->first->data;
 	
-	printf("|--DNO-\t-termType- -%d-\t-idType- -%d-\t-akt. token- -%d--|\n", 
+	printf("|--DNO-\t-termType- -%d-\t-idType- -%d-\t-akt. token-\n", 
 		temp->termType, temp->idType, token.type);
 	
 	while (temp->Rptr != NULL)
 	{
 		temp = temp->Rptr;
-		printf("|--%d.-\t-termType- -%d-\t-idType- -%d-\t-akt. token- -%d--|\n", 
+		printf("|--%d. -\t-termType- -%d-\t-idType- -%d-\t-akt. token- -%d--|\n", 
 			i, temp->termType, temp->idType, token.type);
 		i++;
 	}
