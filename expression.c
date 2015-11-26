@@ -54,6 +54,9 @@ int preceden_tab[16][16] = {
  */
 int StackInit(Tstack *stack)
 {
+	#ifdef DEBUG
+		printf("StackInit in progress.\n");
+	#endif
 	if (stack == NULL)
 	{
 		error = ERUN_UNINIT;
@@ -90,6 +93,9 @@ int StackInit(Tstack *stack)
  */
 void StackDispose(Tstack *stack)
 {
+	#ifdef DEBUG
+		printf("StackDispose in progress.\n");
+	#endif
 	TstackElemPtr tempPtr2;
 	tempPtr2 = stack->top;
 
@@ -108,11 +114,14 @@ void StackDispose(Tstack *stack)
  */
 void StackPop(Tstack *stack)
 {
-	TstackElemPtr tempPtr3 = NULL;
+	#ifdef DEBUG
+		printf("StackPop in progress.\n");
+	#endif
+	TstackElemPtr tempPtr = NULL;
 
 	if (stack->top != NULL)
 	{
-		tempPtr3 = stack->top;
+		tempPtr = stack->top;
 		if (stack->top->data != NULL)
 		{
 			free(stack->top->data);
@@ -130,7 +139,7 @@ void StackPop(Tstack *stack)
 			stack->top->Rptr = NULL;
 		}
 
-		free(tempPtr3);
+		free(tempPtr);
 	}
 }
 
@@ -142,21 +151,24 @@ void StackPop(Tstack *stack)
  */
 int StackPush(Tstack *stack, int tokterm)
 {
-	TstackElemPtr tempPtr4;
-	tempPtr4 = malloc(sizeof(struct TstackElem));
+	#ifdef DEBUG
+		printf("StackPush in progress.\n");
+	#endif
+	TstackElemPtr tempPtr = NULL;
+	tempPtr = malloc(sizeof(struct TstackElem));
 
-	if (tempPtr4 == NULL)
+	if (tempPtr == NULL)
 	{
 		error = ERUN_UNINIT;
 		return error;
 	}
 
-	tempPtr4->termType = tokterm; ////
-	printf("StackPush - vkladam termType: %d\n", tempPtr4->termType);
-	tempPtr4->Lptr = stack->top;
-	tempPtr4->Rptr = NULL;
-	stack->top->Rptr = tempPtr4;
-	stack->top = tempPtr4;
+	tempPtr->termType = tokterm; ////
+	printf("StackPush - vkladam termType: %d\n", tempPtr->termType);
+	tempPtr->Lptr = stack->top;
+	tempPtr->Rptr = NULL;
+	stack->top->Rptr = tempPtr;
+	stack->top = tempPtr;
 
 	error = ENOP;
 	return error;
@@ -169,24 +181,72 @@ int StackPush(Tstack *stack, int tokterm)
  */
 TstackElemPtr StackTop(Tstack *stack)
 {
-	TstackElemPtr tempPtr5 = stack->top;
+	#ifdef DEBUG
+		printf("StackTop in progress.\n");
+	#endif
+	TstackElemPtr tempPtr = NULL;
+
+	tempPtr = stack->top;
 
 	// na vrcholu zasobniku muze byt i neterm. nebo <
-	while (tempPtr5->termType > PDollar)
+	while (tempPtr->termType > PDollar)
 	{
-		tempPtr5 = tempPtr5->Lptr;
+		tempPtr = tempPtr->Lptr;
 	}
 
-	return tempPtr5;
+	return tempPtr;
 }
 
 /**
  * Pridani handle na zasobnik a pushnuti tokenu.
  * @param  stack Zasobnik termu.
- * @return       .
+ * @return       ENOP v pripade uspechu.
  */
-int StackShift(Tstack *stack);
-/*** @TODO ****/
+int StackShift(Tstack *stack, int tokterm)
+{
+	#ifdef DEBUG
+		printf("StackShift in progress.\n");
+	#endif
+
+	TstackElemPtr temp = NULL;
+	TstackElemPtr tempTop = StackTop(stack); // zasobnik s nejvrchnejsim termem
+
+	if ((temp = malloc(sizeof(struct TstackElem))) == NULL)
+	{
+		fprintf(stderr, "Chyba pri malloc.\n");
+		error = ERUN_UNINIT;
+		return error;
+	}
+
+	// vlozeni handle za term
+	temp->termType = PLessReduc; 
+	temp->data = NULL;
+	temp->Lptr = tempTop;
+	temp->Rptr = tempTop->Rptr;
+	temp->idType = Tother;
+	
+	if (tempTop == stack->top)
+	{
+		stack->top = temp;
+	}
+	else
+	{
+		tempTop->Rptr->Lptr = temp;
+	}
+
+	tempTop->Rptr = temp;
+
+	// pushnu token na zasobnik
+	if ((error = StackPush(stack, tokterm)) != ENOP)
+	{
+		fprintf(stderr, "Chyba pri StackPush.\n");
+		StackDispose(stack);
+		return error;
+	}
+
+	error = ENOP;
+	return error;
+}
 
 /**
  * Kontrola, jestli je zasobnik prazdny.
@@ -204,6 +264,35 @@ int StackEmpty(Tstack *stack)
 	
 	return error;
 }
+
+#ifdef DEBUG
+/**
+ * Pomocna funkce pro vypis celeho zasobniku.
+ * @param stack [description]
+ */
+void whatsInStacks(Tstack *stack)
+{
+	int i = 1;
+	TstackElemPtr temp = stack->first;
+
+	temp->Lptr = stack->first->Lptr;
+	temp->Rptr = stack->first->Rptr;
+	temp->termType = stack->first->termType;
+	temp->idType = stack->first->idType;
+	temp->data = stack->first->data;
+	
+	printf("|--DNO-\t-termType- -%d-\t-idType- -%d-\t-akt. token- -%d--|\n", 
+		temp->termType, temp->idType, token.type);
+	
+	while (temp->Rptr != NULL)
+	{
+		temp = temp->Rptr;
+		printf("|--%d.-\t-termType- -%d-\t-idType- -%d-\t-akt. token- -%d--|\n", 
+			i, temp->termType, temp->idType, token.type);
+		i++;
+	}
+}
+#endif
 
 /**
 * Funkce vraci index do tabulky
@@ -254,6 +343,112 @@ int getPrecSymbol(int ter1, int ter2)
 	return preceden_tab[ter1][ter2];
 }
 
+/**
+ * Funkce pro hledani pravidla pro vyrazy.
+ * @param  stack Zasobnik termu.
+ * @return       ENOP v pripade uspechu.
+ */
+TError findRule(Tstack *stack, ruleType rule)
+{
+	TstackElemPtr tempPtr = NULL;
+
+	switch(rule)
+	{
+		case ADD_RULE:	// E -> E + E
+			if ((stack->top->termType != PNonTerm) || 
+				(stack->top->Lptr->Lptr->termType != PNonTerm))
+			{
+				fprintf(stderr, "Chyba pravidla pro scitani.\n");
+				error = ESYN;
+				return error;
+			}
+
+			/**
+			 * @todo 3AC, Ilist
+			 */
+			
+			#ifdef DEBUG
+			 	printf("Pravidlo add pred pop\n");
+				whatsInStacks(stack);
+			#endif
+			// nejdrive se zbavim: < E + E (4x pop)
+			StackPop(stack);
+			StackPop(stack);
+			StackPop(stack);
+			StackPop(stack);
+
+			// pushnu neterminal na zasobnik
+			if ((error = StackPush(stack, PNonTerm)) != ENOP)
+			{
+				fprintf(stderr, "Chyba pri StackPush.\n");
+				StackDispose(stack);
+				return error;
+			}
+			#ifdef DEBUG
+			 	printf("Pravidlo add po pop a push\n");
+				whatsInStacks(stack);
+			#endif
+
+			error = ENOP;
+		break;
+		case SUB_RULE:	// E -> E - E
+
+		break;
+		case MUL_RULE:	// E -> E * E
+
+		break;
+		case DIV_RULE:	// E -> E / E
+
+		break;
+		case LESSGREAT_RULE: // E -> E > E, E -> E >= E, ...
+
+		break;
+		case EQ_RULE:		// E -> E == E, E -> E != E
+
+		break;
+		case PAR_RULE:	// E -> (E)
+
+		break;
+		case ID_E_RULE:	// E -> i ... i pro string, int, double
+			if ((tempPtr = malloc(sizeof(struct TstackElem))) == NULL)
+			{
+				fprintf(stderr, "Chyba pri malloc.\n");
+				error = ERUN_UNINIT;
+				return error;
+			}
+			
+			tempPtr->termType = PNonTerm;
+			tempPtr->idType = stack->top->idType;
+			tempPtr->data = NULL;
+			
+			#ifdef DEBUG
+			 	printf("Pravidlo ID_E_RULE pred pop\n");
+				whatsInStacks(stack);
+			#endif
+
+			// nejdrive se zbavim: < i (2x pop)
+			StackPop(stack);
+			StackPop(stack);
+
+			// nastavim vrchol zasobniku
+			tempPtr->Rptr = NULL;
+			tempPtr->Lptr = stack->top->Rptr;
+			stack->top->Rptr = tempPtr;
+			stack->top = tempPtr;
+			#ifdef DEBUG
+			 	printf("Pravidlo ID_E_RULE po pop.\n");
+				whatsInStacks(stack);
+			#endif
+
+			error = ENOP;
+		break;
+		case FUNC_RULE:
+
+		break;
+	}
+
+	return error;
+}
 
 /**
  * Funkcia, ktora nam generuje pomocne premenne $x,
@@ -303,8 +498,8 @@ void generateInst(tInstCode instType, void *op1, void *op2, void *res)
 TError expr(FILE *input, string *attr, int semi_or_par, int *count)
 {
 	counteerVar = count;
-	
-	//TstackElemPtr tempStack = NULL;
+	TError error = ENOTFOUND;
+	TstackElemPtr tempStack = NULL;
 	//char *tempData = NULL;
 	int tokterm;
 
@@ -312,8 +507,12 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count)
 	printf("expr\n");
 	#endif
 
-	TError error = ENOTFOUND;
-
+	if ((tempStack = malloc(sizeof(struct TstackElem))) == NULL)
+	{
+		fprintf(stderr, "Chyba pri malloc.\n");
+		error = ERUN_UNINIT;
+		return error;
+	}
 	// 45: <EXPR> -> ( <EXPR> )
 	/*if(token.type == T_LeftParenthesis)
 	{
@@ -340,148 +539,156 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count)
 		}
 	}*/
 
-	int index = 0;
-
-	if ((error = StackInit(&stack)) == ENOP)
+	// inicializace zasobniku 
+	if ((error = StackInit(&stack)) != ENOP)
 	{
-		fprintf(stderr, "Inicializace v poho\n");
-	}
-	else
-	{
-		fprintf(stderr, "Inicializace \n");
+		fprintf(stderr, "Inicializace se nezdarila\n");
 		StackDispose(&stack);
 
 		error = EINT;
 		return error;
 	}
 
-	// prevedu si token na term (PSymbols)
-	tokterm = tokToTerm(token.type);
-
-	// if ((error = StackPush(&stack, tokterm)) != ENOP)
-	// {
-	// 	/* code */
-	// }
-
-
-
-	// podivam se do precedencni tabulky a vratim z ni hledany symbol
-	
-	// ukonceno strednikem
+	/**
+	 * Zpracovavani vyrazu ukonceneho strednikem.
+	 */
 	if(semi_or_par == 0)
 	{
-		TstackElemPtr temp = NULL;
-
+		#ifdef DEBUG
+			printf("Resim vyraz ukonceny strednikem.\n");
+		#endif
+		tempStack = StackTop(&stack); // nejvrchnejsi terminal na zasobniku
+		
 		do {
-			switch (getPrecSymbol(stack.top->termType, tokterm))
-			{
+			//tempStack = NULL;
+			//tempStack = StackTop(&stack); // nejvrchnejsi terminal na zasobniku
+			#ifdef DEBUG
+				printf("V poho?.\n");
+			#endif
+			// prevedu si token na term (PSymbols)
+			tokterm = tokToTerm(token.type);
+
+			#ifdef DEBUG
+				printf("Po do\n");
+				whatsInStacks(&stack);
+			#endif
+			switch (getPrecSymbol(tempStack->termType, tokterm))
+			{				
 				case equal:
-					// EQUAL ALGO
-					StackPush(&stack, tokterm);
+					if ((error = StackPush(&stack, tokterm)) != ENOP)
+					{
+						fprintf(stderr, "Chyba pri StackPush.\n");
+						StackDispose(&stack);
+						return error;
+					}
 					getNextToken(input, attr);
 				break;
 				case less:
-					// LESS ALGO
-					StackPush(&stack, PLessReduc);
-					StackPush(&stack, tokterm);
+					#ifdef DEBUG
+						printf("Case less.\n");
+					#endif
+					if ((error = StackShift(&stack, tokterm)) != ENOP)
+					{
+						fprintf(stderr, "Chyba pri StackShift.\n");
+						StackDispose(&stack);
+						return error;
+					}
 					getNextToken(input, attr);
 				break;
 				case great:
-					// GREAT ALGO
-					temp->Lptr = NULL;
-					temp->Rptr = NULL;
-					temp->termType = none;
-					temp->idType = Tother;
-					temp->data = NULL;
-					do
-					{
-						if(temp->Lptr != NULL)
-						{
-							temp = temp->Lptr;
-						}
-						else
-						{
-							temp = stack.top->Lptr;
-						}
-					} while(temp->termType != PLessReduc);
+					#ifdef DEBUG
+						printf("Case great.\n");
+					#endif
 
-
-					if(temp->Rptr->termType == PIden)
+					switch(tempStack->termType)
 					{
-						/**
-						 * @todo redukce
-						 */
+						case PPlus:
+							if ((error = findRule(&stack, ADD_RULE)) != ENOP)
+							{
+								StackDispose(&stack);
+								return error;
+							}
+						break;
+						case PMinus:
+							/**
+							 * @todo pravidlo subRule()
+							 */
+						break;
+						case PMul:
+							/**
+							 * @todo pravidlo mulRule()
+							 */
+						break;
+						case PDiv:
+							/**
+							 * @todo pravidlo divRule()
+							 */
+						break;
+						case PLess:
+						case PGreat:
+						case PLessEq:
+						case PGreatEq:
+							/**
+							 * @todo pravidlo comp1Rule()
+							 */
+						break;
+						case PEqual:
+						case PNotEq:
+							/**
+							 * @todo pravidlo comp2Rule()
+							 */
+						break;
+						case PRightP:
+							/**
+							 * @todo pravidlo parRule()
+							 */
+						break;
+						case PIden:
+							if ((error = findRule(&stack, ID_E_RULE)) != ENOP)
+							{
+								StackDispose(&stack);
+								return error;
+							}
+						break;
+
 					}
-					else
-					{
-						switch(temp->Rptr->Rptr->termType)
-						{
-							case PPlus:
-								/**
-								 * @todo pravidlo addRule()
-								 */
-							break;
-							case PMinus:
-								/**
-								 * @todo pravidlo subRule()
-								 */
-							break;
-							case PMul:
-								/**
-								 * @todo pravidlo mulRule()
-								 */
-							break;
-							case PDiv:
-								/**
-								 * @todo pravidlo divRule()
-								 */
-							break;
-							case PLess:
-							case PGreat:
-							case PLessEq:
-							case PGreatEq:
-								/**
-								 * @todo pravidlo comp1Rule()
-								 */
-							break;
-							case PEqual:
-							case PNotEq:
-								/**
-								 * @todo pravidlo comp2Rule()
-								 */
-							break;
-							case PRightP:
-								/**
-								 * @todo pravidlo parRule()
-								 */
-							break;
-							case PIden:
-								/**
-								 * @todo pravidlo idRule()
-								 */
-							break;
-
-						}
-					}
-					free(temp);
 				break;
 				case empty:
+					#ifdef DEBUG
+						printf("Empty - CHYBA.\n");
+					#endif
+
 					StackDispose(&stack);
 					return ESYN;
 				break;
 				default:
 					// OTHER ALGO
-				break;
+				break;			
 			}
-		} while((stack.top->termType == PDollar) && (tokToTerm(token.type) == PDollar));
+			tempStack = StackTop(&stack);
+							printf("Konec do\n");
+
+		} while(!((stack.top->termType == PDollar) && (tokToTerm(token.type) == PDollar)));
 	}
-	// ukonceno pravou zavorkou
+	/**
+	 * Zpracovavani vyrazu ukonceneho pravou zavorkou.
+	 */
 	else if(semi_or_par == 1)
 	{
-		TstackElemPtr temp = NULL;
+		#ifdef DEBUG
+			printf("Resim vyraz ukonceny pravou zavorkou.\n");
+		#endif
+
+		TstackElemPtr temp = NULL; // pomocny zasobnik
+
 		// leva zavorka jiz nactena
 		int counter = 1;
 		do {
+			tempStack = StackTop(&stack); // nejvrchnejsi terminal na zasobniku
+
+			// prevedu si token na term (PSymbols)
+			tokterm = tokToTerm(token.type);
+
 			switch (getPrecSymbol(stack.top->termType, tokterm))
 			{
 				case equal:
@@ -591,12 +798,15 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count)
 					// OTHER ALGO
 				break;
 			}
+			#ifdef DEBUG
+			whatsInStacks(&stack);
+			#endif
 		} while((stack.top->termType == PDollar) && (tokToTerm(token.type) == PRightP) && (counter == 0));
 	}
 
-	printf("index = %d, stack type %d, token type %d,\n"
+	printf("stack termType %d, prave nacteny token %d,\n"
 		"stack top %d, stack first %d tokterm %d\n"
-		, index, stack.first->termType, token.type, stack.top->termType, 
+		, stack.first->termType, token.type, stack.top->termType, 
 		stack.first->termType, tokterm);
 
 	StackDispose(&stack);

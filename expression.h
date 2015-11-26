@@ -14,8 +14,10 @@
 #include <stdlib.h>
 #include "ial.h"
 #include "ilist.h"
-//#include ""
 
+/**
+ * Mozne symboly ve vyrazech.
+ */
 typedef enum PSymbols {
 	PPlus,    // 0 +
 	PMinus,   // 1 -
@@ -42,6 +44,24 @@ typedef enum PSymbols {
 	none
 } PSymbols;
 
+/**
+ * Pravidla pro vyrazy.
+ */
+typedef enum ruleType {
+	ADD_RULE,	// E -> E + E
+	SUB_RULE,	// E -> E - E
+	MUL_RULE,	// E -> E * E
+	DIV_RULE,	// E -> E / E
+	LESSGREAT_RULE, // E -> E > E, E -> E >= E, ...
+	EQ_RULE,		// E -> E == E, E -> E != E
+	PAR_RULE,	// E -> (E)
+	ID_E_RULE,	// E -> i ... i pro string, int, double
+	FUNC_RULE	// E -> f(E) ... @todo f(E,E) ...
+} ruleType;
+
+/**
+ * Typy termu.
+ */
 typedef enum hashType {  
 	Tstring,	// 0 string
 	Tdouble,	// 1 double
@@ -50,6 +70,9 @@ typedef enum hashType {
 	Tother	// 4 jiny
 } hashType;
 
+/**
+ * Zasobnik s ukazatelem na prvek pred a za
+ */
 typedef struct TstackElem {
 	struct TstackElem *Lptr;
 	struct TstackElem *Rptr;
@@ -57,6 +80,7 @@ typedef struct TstackElem {
 	hashType idType;
 	char *data;
 } *TstackElemPtr;
+
 
 typedef struct Tstack {
 	TstackElemPtr first;
@@ -68,7 +92,7 @@ void StackDispose(Tstack *stack);
 void StackPop(Tstack *stack);
 int StackPush(Tstack *stack, int tokterm);
 TstackElemPtr StackTop(Tstack *stack);
-int StackShift(Tstack *stack/*, T_Token token*/);
+int StackShift(Tstack *stack, int tokterm);
 int StackEmpty(Tstack *stack);
 void generateVariable(string *var, int *counter);
 void generateInst(tInstCode instType, void *op1, void *op2, void *res);
