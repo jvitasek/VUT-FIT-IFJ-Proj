@@ -156,34 +156,11 @@ int StackPop(Tstack *stack)
 	error = ENOP;
 	TstackElemPtr tempPtr = NULL;
 
-	/*if (stack->top != NULL)
-	{
-		tempPtr = stack->top;
-		if (stack->top->data != NULL)
-		{
-			free(stack->top->data);
-
-		}
-
-		if (stack->top == stack->first)
-		{
-			stack->top = NULL;
-			stack->first = NULL;
-		}
-		else
-		{
-			stack->top = stack->top->Lptr;
-			stack->top->Rptr = NULL;
-		}
-
-		free(tempPtr);
-	}*/
-
 	if (stack->top != NULL)
 	{
-		#ifdef DEBUG
-			printf("StackPop ... stack->top != NULL.\n");
-		#endif
+		//#ifdef DEBUG
+		//	printf("StackPop ... stack->top != NULL.\n");
+		//#endif
 		tempPtr = stack->top;
 
 		if (stack->top->data != NULL)
@@ -280,42 +257,6 @@ TstackElemPtr StackTop(Tstack *stack)
 	#ifdef DEBUG
 		printf("StackTop in progress.\n");
 	#endif
-	/*TstackElemPtr tempPtr = NULL;
-	if ((tempPtr = malloc(sizeof(struct TstackElem))) == NULL)
-	{
-		fprintf(stderr, "Chyba pri malloc.\n");
-		error = ERUN_UNINIT;
-		return;
-	}
-
-	tempPtr = stack->top;
-	tempPtr->Lptr = stack->top->Lptr;
-	tempPtr->Rptr = stack->top->Rptr;
-	tempPtr->termType = stack->top->termType;
-	tempPtr->idType = stack->top->idType;
-	tempPtr->data = stack->top->data;*/
-
-	// na vrcholu zasobniku muze byt i neterm. nebo <
-	/*while (tempPtr->termType > PDollar)
-	{
-		#ifdef DEBUG
-		printf("term type: %d\n", tempPtr->termType);
-		#endif
-		if(tempPtr->Lptr != NULL)
-		{
-			#ifdef DEBUG
-			printf("neni null\n");
-			#endif
-			tempPtr = tempPtr->Lptr;
-		}
-		else
-		{
-			#ifdef DEBUG
-			printf("je null\n");
-			#endif
-			return tempPtr;
-		}
-	}*/
 
 	TstackElemPtr tempPtr = NULL;
 	if ((tempPtr = malloc(sizeof(struct TstackElem))) == NULL)
@@ -698,31 +639,6 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count)
 		error = ERUN_UNINIT;
 		return error;
 	}
-	// 45: <EXPR> -> ( <EXPR> )
-	/*if(token.type == T_LeftParenthesis)
-	{
-		getNextToken(input, attr);
-		error = expr(input, attr);
-		#ifdef DEBUG
-		printf("expr: expr vratilo: %d\n", error);
-		#endif
-		if(error == ENOP)
-		{
-			getNextToken(input, attr);
-			if(token.type == T_RightParenthesis)
-			{
-				return ENOP;
-			}
-			else
-			{
-				return ESYN;
-			}
-		}
-		else if(error == ESYN)
-		{
-			return error;
-		}
-	}*/
 
 	// inicializace zasobniku 
 	if ((error = StackInit(&stack)) != ENOP)
@@ -733,7 +649,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count)
 		error = EINT;
 		return error;
 	}
-	int i = 0;
+
 	/**
 	 * Zpracovavani vyrazu ukonceneho strednikem.
 	 */
@@ -853,10 +769,23 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count)
 					fprintf(stderr, "DIE!\n");
 				break;			
 			}
-			//tempStack = StackTop(&stack);
+			tempStack = StackTop(&stack);
+			
+			#ifdef DEBUG
+				printf("----- ---- --%d.-- ?? KONEC WHILE DO ?? -- ---- -----\n", index);
+				if ((tempStack->termType == PDollar) && (tokToTerm(token.type) == PDollar))
+				{
+					printf("-KONCIM!!!! Stack top == DOLAR a akt. token == DOLAR -.\n");
+				}
+				else
+				{
+					printf("-NE-KONCIM!! protoze stack.top->term: %d a akt. token: %d\n", 
+						tempStack->termType, tokToTerm(token.type));
+				}
+				printf("-------------------------------------------------------\n");
+			#endif
 
-		} while(i++ != 3);
-		//while(!((stack.top->termType == PDollar) && (token.type == T_Semicolon)));
+		} while(!((tempStack->termType == PDollar) && (tokToTerm(token.type) == PDollar)));
 	}
 	/**
 	 * Zpracovavani vyrazu ukonceneho pravou zavorkou.
