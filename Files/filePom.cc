@@ -1,3 +1,3 @@
 double main() {
-	return b+c+x;
+	return b+c;
 }
