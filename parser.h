@@ -16,6 +16,7 @@ TError parse(FILE *input, string *attr); // P: 1
 
 // POM. FUNKCE
 void getNextToken(FILE *input, string *attr);
+void outputSymbolTable(tHTable* ptrht);
 TError initSTable();
 
 // PRAVIDLA

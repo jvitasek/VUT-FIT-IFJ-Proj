@@ -15,7 +15,7 @@
 #include "parser.h"
 #include "expression.h"
 
-#define DEBUG 1
+//#define DEBUG 1
 
 int *counteerVar;	// sluzi pri tvorbe pomocnych premennych
 
@@ -1052,14 +1052,14 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count)
 			// kontrola zavorek
 			if(tokterm == PRightP)
 			{
-				counter--;
+				--counter;
 				#ifdef DEBUG
 				printf("##### DEKREMENTUJU COUNTER, NYNI: %d\n", counter);
 				#endif
 			}
 			else if(tokterm == PLeftP)
 			{
-				counter++;
+				++counter;
 				#ifdef DEBUG
 				printf("##### INKREMENTUJU COUNTER, NYNI: %d\n", counter);
 				#endif
@@ -1143,6 +1143,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count)
 							/**
 							 * @todo pravidlo parRule()
 							 */
+							
 						break;
 						case PIden:
 							if ((error = findRule(&stack, ID_E_RULE)) != ENOP)
@@ -1155,19 +1156,11 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count)
 					}
 				break;
 				case empty:
-					if(counter == -1 && tokterm == PRightP)
+					if(counter == -1)
 					{
-						#ifdef DEBUG
-						printf("##### KONCIM, COUNTER JE -1\n");
-						#endif
+						StackDispose(&stack);
 						return ENOP;
 					}
-					else if(tokterm == PRightP)
-					{
-						getNextToken(input, attr);
-						continue;
-					}
-
 					#ifdef DEBUG
 						printf("Empty - CHYBA.\n");
 					#endif
