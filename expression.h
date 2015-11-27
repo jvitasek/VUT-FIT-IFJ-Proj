@@ -88,8 +88,8 @@ typedef struct Tstack {
 } Tstack;
 
 int StackInit(Tstack *stack); // inicialzace zasobniku
-void StackDispose(Tstack *stack);	
-void StackPop(Tstack *stack);
+int StackDispose(Tstack *stack);	
+int StackPop(Tstack *stack);
 int StackPush(Tstack *stack, int tokterm);
 TstackElemPtr StackTop(Tstack *stack);
 int StackShift(Tstack *stack, int tokterm);

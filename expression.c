@@ -31,15 +31,15 @@ int preceden_tab[16][16] = {
 //	  +		-			*   /      ==     !=    <=      >=     >      <      id    f    (      )      ,       $
 	{great, great, less, less, great, great, great, great, great, great, less, less, less, empty, empty, great},		// +
 	{great, great, less, less, great, great, great, great, great, great, less, less, less, empty, empty, great},		// -
-	{great, great, less, less, great, great, great, great, great, great, less, less, less, empty, empty, great},		// *
-	{great, great, less, less, great, great, great, great, great, great, less, less, less, empty, empty, great},		// /
-	{great, great, less, less, great, great, great, great, great, great, less, less, less, empty, empty, great},		// ==
-	{great, great, less, less, great, great, great, great, great, great, less, less, less, empty, empty, great},		// !=
-	{great, great, less, less, great, great, great, great, great, great, less, less, less, empty, empty, great},		// <=
-	{great, great, less, less, great, great, great, great, great, great, less, less, less, empty, empty, great},		// >=
-	{great, great, less, less, great, great, great, great, great, great, less, less, less, empty, empty, great},		// >
-	{great, great, less, less, great, great, great, great, great, great, less, less, less, empty, empty, great},		// <
-	{great, great, less, less, great, great, great, great, great, great, empty, empty, empty, great, great, great},	// id
+	{great, great, great, great, great, great, great, great, great, great, less, less, less, empty, empty, great},		// *
+	{great, great, great, great, great, great, great, great, great, great, less, less, less, empty, empty, great},		// /
+	{less, less, less, less, great, great, great, great, great, great, less, less, less, empty, empty, great},			// ==
+	{less, less, less, less, great, great, great, great, great, great, less, less, less, empty, empty, great},			// !=
+	{less, less, less, less, great, great, great, great, great, great, less, less, less, empty, empty, great},			// <=
+	{less, less, less, less, great, great, great, great, great, great, less, less, less, empty, empty, great},			// >=
+	{less, less, less, less, great, great, great, great, great, great, less, less, less, empty, empty, great},			// >
+	{less, less, less, less, great, great, great, great, great, great, less, less, less, empty, empty, great},			// <
+	{great, great, great, great, great, great, great, great, great, great, empty, empty, empty, great, great, great},	// id
 	{empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, equal, empty, empty, empty},	// f
 	{less, less, less, less, less, less, less, less, less, less, less, empty, less, equal, equal, great},					// (
 	{great, great, great, great, great, great, great, great, great, great, empty, empty, empty, great, empty, great},	// )
@@ -68,9 +68,15 @@ int StackInit(Tstack *stack)
 
 	stack->top = NULL;
 	stack->first = NULL;
+	if (((stack->top = malloc(sizeof(struct TstackElem))) == NULL) || 
+		((stack->first = malloc(sizeof(struct TstackElem))) == NULL))
+	{
+		fprintf(stderr, "Chyba pri malloc.\n");
+		error = ERUN_UNINIT;
+		return error;
+	}
 
 	TstackElemPtr tempPtr = NULL;
-
 	if ((tempPtr = malloc(sizeof(struct TstackElem))) == NULL)
 	{
 		fprintf(stderr, "Chyba pri malloc.\n");
@@ -103,14 +109,23 @@ int StackInit(Tstack *stack)
  * Zruseni zasobniku.
  * @param stack 	Zasobnik termu.
  */
-void StackDispose(Tstack *stack)
+int StackDispose(Tstack *stack)
 {
 	#ifdef DEBUG
 		printf("StackDispose in progress.\n");
 	#endif
-	TstackElemPtr tempPtr;
-	tempPtr = stack->top;
 
+	error = ENOP;
+	TstackElemPtr tempPtr;
+
+	if ((tempPtr = malloc(sizeof(struct TstackElem))) == NULL)
+	{
+		fprintf(stderr, "Chyba pri malloc.\n");
+		error = ERUN_UNINIT;
+		return error;
+	}
+
+	// postupne rusim vsechny prvky na zasobniku
 	while (stack->top != NULL)
 	{
 		if (stack->top->data != NULL)
@@ -124,20 +139,24 @@ void StackDispose(Tstack *stack)
 
 	stack->first = NULL;
 	stack->top = NULL;
+
+	return error;
 }
 
 /**
  * Vrati dalsi token ze vstupu
  * @param stack 	Zasobnik termu.
  */
-void StackPop(Tstack *stack)
+int StackPop(Tstack *stack)
 {
 	#ifdef DEBUG
 		printf("StackPop in progress.\n");
 	#endif
+
+	error = ENOP;
 	TstackElemPtr tempPtr = NULL;
 
-	if (stack->top != NULL)
+	/*if (stack->top != NULL)
 	{
 		tempPtr = stack->top;
 		if (stack->top->data != NULL)
@@ -158,7 +177,51 @@ void StackPop(Tstack *stack)
 		}
 
 		free(tempPtr);
+	}*/
+
+	if (stack->top != NULL)
+	{
+		#ifdef DEBUG
+			printf("StackPop ... stack->top != NULL.\n");
+		#endif
+		tempPtr = stack->top;
+
+		if (stack->top->data != NULL)
+		{
+			free(stack->top->data);
+		}
+
+		if (stack->top->Lptr != NULL)
+		{
+			#ifdef DEBUG
+				printf("StackPop mazu vrchol zasobniku.\n");
+			#endif
+			stack->top = stack->top->Lptr;
+			stack->top->Rptr = NULL;
+
+			free(tempPtr);
+		}
+		else if (stack->top == stack->first)
+		{
+			#ifdef DEBUG
+				printf("StackPop stack->top == stack->first.\n");
+			#endif
+			stack->top = NULL;
+			stack->first = NULL;
+		}
+		else
+		{
+			#ifdef DEBUG
+				printf("StackPop ... ELSE!!.\n");
+			#endif
+		}
 	}
+	else
+	{
+		fprintf(stderr, "Chyba StackPop!\n");
+	}
+
+	return error;
 }
 
 /**
@@ -172,21 +235,36 @@ int StackPush(Tstack *stack, int tokterm)
 	#ifdef DEBUG
 		printf("StackPush in progress.\n");
 	#endif
-	TstackElemPtr tempPtr = NULL;
-	tempPtr = malloc(sizeof(struct TstackElem));
 
-	if (tempPtr == NULL)
+	TstackElemPtr tempPtr = NULL;
+	
+	if ((tempPtr = malloc(sizeof(struct TstackElem))) == NULL)
 	{
 		error = ERUN_UNINIT;
 		return error;
 	}
 
-	tempPtr->termType = tokterm; ////
-	printf("StackPush - vkladam termType: %d\n", tempPtr->termType);
-	tempPtr->Lptr = stack->top;
-	tempPtr->Rptr = NULL;
-	stack->top->Rptr = tempPtr;
-	stack->top = tempPtr;
+	#ifdef DEBUG
+		printf("StackPush - vkladam termType: %d\n", tempPtr->termType);
+	#endif
+
+	tempPtr->termType = tokterm;
+
+	// vkladame teprve 1. prvek
+	if (stack->top->Lptr == NULL)
+	{
+		stack->first->Rptr = tempPtr;
+		tempPtr->Lptr = stack->first;
+		tempPtr->Rptr = NULL;
+		stack->top = tempPtr;
+	}
+	else
+	{
+		stack->top->Rptr = tempPtr;
+		tempPtr->Lptr = stack->top;
+		tempPtr->Rptr = NULL;
+		stack->top = tempPtr;
+	}
 
 	error = ENOP;
 	return error;
@@ -202,27 +280,23 @@ TstackElemPtr StackTop(Tstack *stack)
 	#ifdef DEBUG
 		printf("StackTop in progress.\n");
 	#endif
-	TstackElemPtr tempPtr = NULL;
-	/*if ((tempPtr = malloc(sizeof(struct TstackElem))) == NULL)
+	/*TstackElemPtr tempPtr = NULL;
+	if ((tempPtr = malloc(sizeof(struct TstackElem))) == NULL)
 	{
 		fprintf(stderr, "Chyba pri malloc.\n");
 		error = ERUN_UNINIT;
 		return;
-	}*/
+	}
 
 	tempPtr = stack->top;
 	tempPtr->Lptr = stack->top->Lptr;
 	tempPtr->Rptr = stack->top->Rptr;
 	tempPtr->termType = stack->top->termType;
 	tempPtr->idType = stack->top->idType;
-	tempPtr->data = stack->top->data;
-
-	#ifdef DEBUG
-	printf("lptr: %d\n", tempPtr->Lptr);
-	#endif
+	tempPtr->data = stack->top->data;*/
 
 	// na vrcholu zasobniku muze byt i neterm. nebo <
-	while (tempPtr->termType > PDollar)
+	/*while (tempPtr->termType > PDollar)
 	{
 		#ifdef DEBUG
 		printf("term type: %d\n", tempPtr->termType);
@@ -241,6 +315,58 @@ TstackElemPtr StackTop(Tstack *stack)
 			#endif
 			return tempPtr;
 		}
+	}*/
+
+	TstackElemPtr tempPtr = NULL;
+	if ((tempPtr = malloc(sizeof(struct TstackElem))) == NULL)
+	{
+		fprintf(stderr, "Chyba pri malloc.\n");
+		error = ERUN_UNINIT;
+	}
+
+	// terminal je hned na vrcholu zasobniku
+	if (stack->top->termType <= PDollar)
+	{
+		return stack->top;
+	}
+	// terminal neni na vrcholu zasobniku a existuje prvek vlevo
+	else if (stack->top->Lptr != NULL)
+	{	
+		// prvek pod vrcholem obsahuje terminal
+		if (stack->top->Lptr->termType <= PDollar)
+		{
+			return stack->top->Lptr;
+		}
+		// vytvorim pomocny prvek (2. ze shora) a hledam terminal hloubeji
+		else
+		{
+			tempPtr = stack->top->Lptr;
+			tempPtr->Lptr = stack->top->Lptr->Lptr;
+			tempPtr->Rptr = stack->top;
+			tempPtr->termType = stack->top->Lptr->termType;
+			tempPtr->idType = stack->top->Lptr->idType;
+			tempPtr->data = stack->top->Lptr->data;
+
+			while(tempPtr->termType > PDollar)
+			{
+				// existuje prvek vlevo
+				if (tempPtr->Lptr != NULL)
+				{
+					tempPtr = tempPtr->Lptr;
+				}
+				// chyba, uz neni kde hledat
+				else
+				{
+					error = ESYN;
+					return; ///////////////////////////////////////////////////
+				}
+			}
+		}
+	}
+	// chyba
+	else
+	{
+		error = ESYN;
 	}
 
 	return tempPtr;
@@ -335,16 +461,21 @@ void whatsInStacks(Tstack *stack)
 	temp->idType = stack->top->idType;
 	temp->data = stack->top->data;
 	
-	printf("|--VRCHOL- -termType- -%d-\t-idType- -%d-\t-akt. token- -%d--|\n", 
-		temp->termType, temp->idType, token.type);
+	printf("|--VRCHOL- -top->termType- -%d-\t-top->idType- -%d-\t-akt. token- -%d--|\n"
+		"|--VRCHOL- -termType- -%d-\t-idType- -%d-\t\t-akt. token- -%d--|\n", 
+		stack->top->termType, stack->top->idType, tokToTerm(token.type),
+		temp->termType, temp->idType, tokToTerm(token.type));
 	
 	while (temp->Lptr != NULL)
 	{
 		temp = temp->Lptr;
-		printf("|--%d. -\t-termType- -%d-\t-idType- -%d-\t-akt. token- -%d--|\n", 
-			i, temp->termType, temp->idType, token.type);
+		printf("|--%d.-\t\t-termType- -%d-\t-idType- -%d-\t\t-akt. token- -%d--|\n", 
+			i, temp->termType, temp->idType, tokToTerm(token.type));
 		i++;
 	}
+
+	printf("|--FIRST- -first->termType- -%d- -first->idType- -%d-\t-akt. token- -%d--|\n", 
+		stack->first->termType, stack->first->idType, tokToTerm(token.type));
 }
 #endif
 
@@ -622,11 +753,10 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count)
 			tokterm = tokToTerm(token.type);
 
 			#ifdef DEBUG
+				printf("----- ---- --- --%d.-- Cyklus while do-- --- ---- -----\n", index);
 				whatsInStacks(&stack);
+				printf("-------------------------------------------------------\n");
 			#endif
-
-			printf("--Cyklus while do--\n--index %d: prc symbol: [%d][%d]--\n", 
-				index, tempStack->termType, tokterm);
 
 			++index;
 			switch (getPrecSymbol(tempStack->termType, tokterm))
@@ -723,11 +853,9 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count)
 					fprintf(stderr, "DIE!\n");
 				break;			
 			}
-			//stempStack = StackTop(&stack);
-			printf("--Cyklus while do--\n--stack.top->termType: %d, token.type: %d--\n", 
-				stack.top->termType, token.type);
+			//tempStack = StackTop(&stack);
 
-		} while(i++ != 2);
+		} while(i++ != 3);
 		//while(!((stack.top->termType == PDollar) && (token.type == T_Semicolon)));
 	}
 	/**
