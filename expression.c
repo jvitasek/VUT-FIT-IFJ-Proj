@@ -41,7 +41,7 @@ int preceden_tab[16][16] = {
 	{less, less, less, less, great, great, great, great, great, great, less, less, less, great, great, great},			// <
 	{great, great, great, great, great, great, great, great, great, great, empty, empty, empty, great, great, great},	// id
 	{empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, equal, empty, empty, empty},	// f
-	{less, less, less, less, less, less, less, less, less, less, less, empty, less, equal, equal, great},					// (
+	{less, less, less, less, less, less, less, less, less, less, less, empty, less, equal, equal, empty},					// (
 	{great, great, great, great, great, great, great, great, great, great, empty, empty, empty, great, empty, great},	// )
 	{empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, less, less, empty, equal, equal, empty},	// ,
 	{less, less, less, less, less, less, less, less, less, less, less, empty, less, less, empty, empty}					// $
