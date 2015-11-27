@@ -8,7 +8,7 @@
  * 			xvalec00 – Dusan Valecky
  */
 
-#define DEBUG 1
+//#define DEBUG 1
 //#define SEM_CHECK 1
 
 #include <stdio.h>
@@ -586,6 +586,38 @@ TError stmt(FILE *input, string *attr)
 					return error;
 				}
 			}
+			// konstanta
+			else if((error = realtype()) == ENOP)
+			{
+				getNextToken(input, attr);
+				error = cin_id_n(input, attr);
+				#ifdef DEBUG
+				printf("stmt: cin_id_n vratilo: %d\n", error);
+				#endif
+				// neni potreba kontrolovat, zda pravidlo
+				// proslo na epsilon, negetujeme dalsi token
+				if(error == ENOP || error == EEMPTY)
+				{
+					if(error == ENOP)
+					{
+						// ?????????????????????????????????? @todo mozny bug
+						//getNextToken(input, attr);
+					}
+
+					if(token.type == T_Semicolon)
+					{
+						return ENOP;
+					}
+					else
+					{
+						return ESYN;
+					}
+				}
+				else if(error == ESYN)
+				{
+					return error;
+				}
+			}
 			else
 			{
 				return ESYN;
@@ -649,7 +681,7 @@ TError stmt(FILE *input, string *attr)
 		// KONEC SEMANTICKE ANALYZY
 		#endif
 		getNextToken(input, attr);
-		if(token.type == T_Equal)
+		if(token.type == T_Assig)
 		{
 			getNextToken(input, attr);
 			error = fcall_or_assign(input, attr);
@@ -874,9 +906,27 @@ TError cout_term(FILE *input, string *attr)
 			return error;
 		}
 	}
-	/**
-	 * @todo pravidlo na cout konstant (doub, str, integ)
-	 */
+	// konstanta
+	else if((error = realtype()) == ENOP)
+	{
+		getNextToken(input, attr);
+		error = cout_term_n(input, attr);
+		#ifdef DEBUG
+		printf("cout_term: cout_term_n vratilo: %d\n", error);
+		#endif
+		// neni potreba kontrolovat, zda pravidlo
+		// proslo na epsilon, negetujeme dalsi token
+		if(error == ENOP || error == EEMPTY)
+		{
+			error = ENOP;
+			return error;
+		}
+		else if(error == ESYN)
+		{
+			return error;
+		}
+	}
+
 	return error;
 }
 
@@ -962,6 +1012,26 @@ TError cin_id_n(FILE *input, string *attr)
 				return error;
 			}
 		}
+		// konstanta
+		else if((error = realtype()) == ENOP)
+		{
+			getNextToken(input, attr);
+			error = cin_id_n(input, attr);
+			#ifdef DEBUG
+			printf("cin_id_n: cin_id_n vratilo: %d\n", error);
+			#endif
+			// neni potreba kontrolovat, zda pravidlo
+			// proslo na epsilon, negetujeme dalsi token
+			if(error == ENOP || error == EEMPTY)
+			{
+				error = ENOP;
+				return error;
+			}
+			else if(error == ESYN)
+			{
+				return error;
+			}
+		}
 		else
 		{
 			return ESYN;
@@ -998,7 +1068,7 @@ TError assign(FILE *input, string *attr)
 		// KONEC SEMANTICKE ANALYZY
 		#endif
 		getNextToken(input, attr);
-		if(token.type == T_Equal)
+		if(token.type == T_Assig)
 		{
 			getNextToken(input, attr);
 			error = expr(input, attr, 1, &counterVar);
@@ -1133,7 +1203,7 @@ TError init(FILE *input, string *attr)
 	#endif
 	TError error = ENOTFOUND;
 	// 6: <INIT> -> = <EXPR>
-	if(token.type == T_Equal)
+	if(token.type == T_Assig)
 	{
 		getNextToken(input, attr);
 		error = expr(input, attr, 0, &counterVar);
@@ -1397,6 +1467,24 @@ TError type()
 	// 9: <TYPE> ->	double
 	// 10: <TYPE> -> string 
 	if(token.type == T_Double || token.type == T_String || token.type == T_Int)
+	{
+		return ENOP;
+	}
+	return error;
+}
+
+/**
+ * Simuluje pravidla, ktera nemame v gramatice.
+ * @return Index do enumerace chyb.
+ */
+TError realtype()
+{
+	#ifdef DEBUG
+	printf("realtype\n");
+	#endif
+	TError error = ENOTFOUND;
+	// P: UNDEF
+	if(token.type == T_Doub || token.type == T_Str || token.type == T_Integ)
 	{
 		return ENOP;
 	}
