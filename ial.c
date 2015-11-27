@@ -128,7 +128,7 @@ void heapSort (char* a) {
  * @param  key [description]
  * @return     [description]
  */
-int hashCode (tKey key) {
+int hashCode (char* key) {
 	int retval = 1;
 	int keylen = strlen(key);
 	for ( int i=0; i<keylen; i++ )
@@ -159,7 +159,7 @@ void htInit (tHTable* ptrht) {
  * @param  key   [description]
  * @return       [description]
  */
-tHTItem* htSearch (tHTable* ptrht, tKey key) {
+tHTItem* htSearch (tHTable* ptrht, char* key) {
 
 	// pokud bude tabulka neinicializovaná
 	if ((*ptrht) == NULL) {
@@ -171,11 +171,11 @@ tHTItem* htSearch (tHTable* ptrht, tKey key) {
 
 	// prochazi jednotlive synonyma v tabulce, pokud najde synonymum se spravnym klicem vrati ukazatel na nej
 	while (item != NULL) {
-		if (item -> key == key) {
+		if (item->key == key) {
 			return item; // nasli jsme
 		}
 		else {
-			item = item -> ptrnext;
+			item = item->ptrnext;
 		}
 	}
 
@@ -190,7 +190,7 @@ tHTItem* htSearch (tHTable* ptrht, tKey key) {
  * @param key   [description]
  * @param data  [description]
  */
-void htInsert (tHTable* ptrht, tKey key, tData data) {
+void htInsert (tHTable* ptrht, char* key, tData data) {
 
 	if ((*ptrht) == NULL) {
 		return;
@@ -200,15 +200,15 @@ void htInsert (tHTable* ptrht, tKey key, tData data) {
 
 	if (item != NULL) {		
 		// pokud jsem polozku nasel, tak prepisu data
-		item -> data = data;
+		item->data = data;
 		return;
 	}
 	else {
 		// pokud jsem polozku nenasel, tak vytvorim a zaradim na zacatek
 		tHTItem *itemNew = malloc(sizeof(struct tHTItem));
-		itemNew -> key = key;
-		itemNew -> data = data;
-		itemNew -> ptrnext = (*ptrht)[hashCode(key)];
+		itemNew->key = key;
+		itemNew->data = data;
+		itemNew->ptrnext = (*ptrht)[hashCode(key)];
 		(*ptrht)[hashCode(key)] = itemNew;
 	}
 }
@@ -221,13 +221,13 @@ void htInsert (tHTable* ptrht, tKey key, tData data) {
  * @param  key   [description]
  * @return       [description]
  */
-tData* htRead (tHTable* ptrht, tKey key) {
+tData* htRead (tHTable* ptrht, char* key) {
 
 	tHTItem* item = htSearch(ptrht, key); // najdu prvek podle klice
 
 	if (item != NULL) {
 		// nalezen v tabulce zaznam s timto klicem
-		return &(item -> data);
+		return &(item->data);
 	}
 	else {
 		// polozka nenalezena vratim NULL
@@ -240,7 +240,7 @@ tData* htRead (tHTable* ptrht, tKey key) {
  * @param ptrht [description]
  * @param key   [description]
  */
-void htDelete (tHTable* ptrht, tKey key) {
+void htDelete (tHTable* ptrht, char* key) {
 
 	if ((*ptrht) == NULL) {
 		return;
@@ -251,18 +251,18 @@ void htDelete (tHTable* ptrht, tKey key) {
 	tHTItem* item = itemDelete;
 
 	while (itemDelete != NULL) {
-		if (itemDelete -> key == key) {
+		if (itemDelete->key == key) {
 			if (itemDelete != (*ptrht)[code]) {				
-				item -> ptrnext = itemDelete -> ptrnext;
+				item->ptrnext = itemDelete->ptrnext;
 			}
 			else {
-				(*ptrht)[code] = itemDelete -> ptrnext;
+				(*ptrht)[code] = itemDelete->ptrnext;
 			}
 			free(itemDelete);
 			return;
 		}
 		item = itemDelete;
-		itemDelete = itemDelete -> ptrnext;
+		itemDelete = itemDelete->ptrnext;
 	}
 	return;
 }
@@ -282,7 +282,7 @@ void htClearAll (tHTable* ptrht) {
 	// prochazime pres celou tabulku
 	for (int i = 0; i < HTSIZE; i++) {
 		while ((*ptrht)[i] != NULL) {
-			item = ((*ptrht)[i]) -> ptrnext;
+			item = ((*ptrht)[i])->ptrnext;
 			free((*ptrht)[i]);
 			(*ptrht)[i] = item;
 		}
@@ -382,21 +382,8 @@ int find(string s, string search)
  */
 string sort(string s)
 {
-	/**
-	 * @todo Jarda
-	 */
+	char *temp = s.str;
+	heapSort(temp);
+	s = toString(temp);
 	return s;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

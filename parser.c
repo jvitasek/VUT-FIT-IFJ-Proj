@@ -9,6 +9,7 @@
  */
 
 #define DEBUG 1
+//#define SEM_CHECK 1
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -21,15 +22,22 @@
 
 int counterVar = 1;		// globalna premenna, ktora sluzi pri tvorbe pomocnych premennych na medzivypocty
 
-tHTable* globalTS;
+tHTable* localTable;
 tHTItem* item;
+tHTItem* stored = NULL; // helper
 /**
  * @todo deklarace instruction listu
  */
 int line = 1;
+char *funcname;
+
+const char* kw[KW] = {
+	"auto", "cin", "cout", "double", "else",
+	"for", "if", "int", "return", "string"
+};
 
 /**
- * Vrati dalsi token ze vstupu
+ * Vrati dalsi token ze vstupu.
  * @param input Soubor obsahujici vstupni kod.
  * @param attr  String lexemu.
  */
@@ -41,6 +49,25 @@ void getNextToken(FILE *input, string *attr)
 		print_error(ELEX, token.line);
 		exit(1);
 	}
+}
+
+/**
+ * Zkontroluje, zda je vlozeny retezec klicove slovo.
+ * @param  attr String lexemu.
+ * @return      0 pokud neni, 1 pokud je.
+ */
+int checkKeyword(char *test)
+{
+	int idx = 0;
+	while(idx <= KW)
+	{
+		if(strcmp(kw[idx], test) == 0)
+		{
+			return 1;
+		}
+		++idx;
+	}
+	return 0;
 }
 
 /**
@@ -73,6 +100,7 @@ TError parse(FILE *input, string *attr)
 	#ifdef DEBUG
 	printf("parse: func_n vratilo: %d\n", error);
 	#endif
+
 	if(error == ENOP || error == EEMPTY)
 	{
 		error = ENOP;
@@ -154,6 +182,36 @@ TError func(FILE *input, string *attr)
 		getNextToken(input, attr);
 		if(token.type == T_Id)
 		{
+			#ifdef SEM_CHECK
+			// SEMANTICKA ANALYZA
+			if(attr->str != NULL)
+			{
+				if(checkKeyword(attr->str) == 1)
+				{
+					return ESYN;
+				}
+
+			}
+			
+			// ulozeni nazvu funkce
+			int length = strlen(attr->str);
+			if((funcname = malloc(length + 1)) == NULL)
+			{
+				return EINT;
+			}
+			funcname = attr->str;
+			tData data;
+			data.type = FUNC;
+			data.timesUsed = 0;
+			htInsert(localTable, funcname, data);
+
+			/**
+			 * @todo inicializace lokalni tabulky symbolu
+			 * @todo vlozeni teto funkce do tabulky symbolu
+			 */
+			// KONEC SEMANTICKE ANALYZY
+			#endif
+
 			getNextToken(input, attr);
 			error = par_def_list(input, attr);
 			#ifdef DEBUG
@@ -383,7 +441,6 @@ TError stmt(FILE *input, string *attr)
 			if(error == ENOP)
 			{
 				getNextToken(input, attr);
-				printf("### dalsi token po expr: %d\n", token.type);
 				error = comm_seq(input, attr);
 				#ifdef DEBUG
 				printf("stmt: comm_seq vratilo: %d\n", error);
@@ -493,6 +550,13 @@ TError stmt(FILE *input, string *attr)
 			getNextToken(input, attr);
 			if(token.type == T_Id)
 			{
+				#ifdef SEM_CHECK
+				// SEMANTICKA ANALYZA
+				/**
+				 * todo kontrola, zda id existuje v tabulce symbolu
+				 */
+				// KONEC SEMANTICKE ANALYZY
+				#endif
 				getNextToken(input, attr);
 				error = cin_id_n(input, attr);
 				#ifdef DEBUG
@@ -577,6 +641,13 @@ TError stmt(FILE *input, string *attr)
 	// 29) <STMT> -> id = <FCALL_OR_ASSIGN>
 	else if(token.type == T_Id)
 	{
+		#ifdef SEM_CHECK
+		// SEMANTICKA ANALYZA
+		/**
+		 * todo kontrola, zda id existuje v tabulce symbolu
+		 */
+		// KONEC SEMANTICKE ANALYZY
+		#endif
 		getNextToken(input, attr);
 		if(token.type == T_Equal)
 		{
@@ -624,6 +695,13 @@ TError params(FILE *input, string *attr)
 		getNextToken(input, attr);
 		if(token.type == T_Id)
 		{
+			#ifdef SEM_CHECK
+			// SEMANTICKA ANALYZA
+			/**
+			 * todo vlozeni do tabulky symbolu funkce
+			 */
+			// KONEC SEMANTICKE ANALYZY
+			#endif
 			getNextToken(input, attr);
 			error = params_n(input, attr);
 			#ifdef DEBUG
@@ -683,6 +761,13 @@ TError params_n(FILE *input, string *attr)
 			getNextToken(input, attr);
 			if(token.type == T_Id)
 			{
+				#ifdef SEM_CHECK
+				// SEMANTICKA ANALYZA
+				/**
+				 * todo vkladani do tabulky symbolu funkce
+				 */
+				// KONEC SEMANTICKE ANALYZY
+				#endif
 				getNextToken(input, attr);
 				error = params_n(input, attr);
 				#ifdef DEBUG
@@ -765,6 +850,13 @@ TError cout_term(FILE *input, string *attr)
 	// 39: <COUT_TERM> -> id <COUT_TERM_N>
 	if(token.type == T_Id)
 	{
+		#ifdef SEM_CHECK
+		// SEMANTICKA ANALYZA
+		/**
+		 * todo kontrola, zda id existuje v tabulce symbolu
+		 */
+		// KONEC SEMANTICKE ANALYZY
+		#endif
 		getNextToken(input, attr);
 		error = cout_term_n(input, attr);
 		#ifdef DEBUG
@@ -846,6 +938,13 @@ TError cin_id_n(FILE *input, string *attr)
 		getNextToken(input, attr);
 		if(token.type == T_Id)
 		{
+			#ifdef SEM_CHECK
+			// SEMANTICKA ANALYZA
+			/**
+			 * todo kontrola, zda id existuje v tabulce symbolu
+			 */
+			// KONEC SEMANTICKE ANALYZY
+			#endif
 			getNextToken(input, attr);
 			error = cin_id_n(input, attr);
 			#ifdef DEBUG
@@ -891,6 +990,13 @@ TError assign(FILE *input, string *attr)
 	// 36: <ASSIGN> -> id = <EXPR> 
 	if(token.type == T_Id)
 	{
+		#ifdef SEM_CHECK
+		// SEMANTICKA ANALYZA
+		/**
+		 * todo kontrola, zda id existuje v tabulce symbolu
+		 */
+		// KONEC SEMANTICKE ANALYZY
+		#endif
 		getNextToken(input, attr);
 		if(token.type == T_Equal)
 		{
@@ -943,6 +1049,17 @@ TError var_def(FILE *input, string *attr)
 		getNextToken(input, attr);
 		if(token.type == T_Id)
 		{
+			#ifdef SEM_CHECK
+			// SEMANTICKA ANALYZA
+			if(attr->str != NULL)
+			{
+				tData data;
+				data.type = VAR;
+				data.timesUsed = 0;
+				htInsert(localTable, attr->str, data);
+			}
+			// KONEC SEMANTICKE ANALYZY
+			#endif
 			getNextToken(input, attr);
 			error = init(input, attr);
 			#ifdef DEBUG
@@ -950,7 +1067,7 @@ TError var_def(FILE *input, string *attr)
 			#endif
 			if(error == ENOP || error == EEMPTY)
 			{
-				return error;
+				return ENOP;
 			}
 			else if(error == ESYN)
 			{
@@ -968,6 +1085,17 @@ TError var_def(FILE *input, string *attr)
 		getNextToken(input, attr);
 		if(token.type == T_Id)
 		{
+			#ifdef SEM_CHECK
+			// SEMANTICKA ANALYZA
+			if(attr->str != NULL)
+			{
+				tData data;
+				data.type = VAR;
+				data.timesUsed = 0;
+				htInsert(localTable, attr->str, data);
+			}
+			// KONEC SEMANTICKE ANALYZY
+			#endif	
 			getNextToken(input, attr);
 			error = init(input, attr);
 			#ifdef DEBUG
@@ -977,7 +1105,7 @@ TError var_def(FILE *input, string *attr)
 			// proslo na epsilon, negetujeme dalsi token
 			if(error == ENOP || error == EEMPTY)
 			{
-				return error;
+				return ENOP;
 			}
 			else if(error == ESYN)
 			{
@@ -1096,6 +1224,13 @@ TError fcall_or_assign(FILE *input, string *attr)
 	// 31: <FCALL_OR_ASSIGN> -> id ( <TERMS> );
 	else if(token.type == T_Id)
 	{
+		#ifdef SEM_CHECK
+		// SEMANTICKA ANALYZA
+		/**
+		 * @todo kontrola, zda id existuje v tabulce symbolu
+		 */
+		// KONEC SEMANTICKE ANALYZY
+		#endif
 		getNextToken(input, attr);
 		if(token.type == T_LeftParenthesis)
 		{
@@ -1156,6 +1291,17 @@ TError terms(FILE *input, string *attr)
 	// 32) <TERMS> -> id <TERMS_N>
 	if(token.type == T_Id)
 	{
+		#ifdef SEM_CHECK
+		// SEMANTICKA ANALYZA
+		if(attr->str != NULL)
+		{
+			tData data;
+			data.type = VAR;
+			data.timesUsed = 0;
+			htInsert(localTable, attr->str, data);
+		}
+		// KONEC SEMANTICKE ANALYZY
+		#endif
 		getNextToken(input, attr);
 		error = terms_n(input, attr);
 		#ifdef DEBUG
@@ -1197,6 +1343,17 @@ TError terms_n(FILE *input, string *attr)
 		getNextToken(input, attr);
 		if(token.type == T_Id)
 		{
+			#ifdef SEM_CHECK
+			// SEMANTICKA ANALYZA
+			if(attr->str != NULL)
+			{
+				tData data;
+				data.type = VAR;
+				data.timesUsed = 0;
+				htInsert(localTable, attr->str, data);
+			}
+			// KONEC SEMANTICKE ANALYZY
+			#endif
 			getNextToken(input, attr);
 			error = terms_n(input, attr);
 			#ifdef DEBUG
@@ -1258,7 +1415,8 @@ TError initSTable()
 	if(item != NULL)
 	{
 		item->key = "*UNDEF*";
-		item->data = -1;
+		item->data.type = 0;
+		item->data.timesUsed = 0;
 		item->ptrnext = NULL;
 	}
 	else
@@ -1267,12 +1425,12 @@ TError initSTable()
 		return error;
 	}
 
-	globalTS = NULL;
-	globalTS = (tHTable*) malloc(sizeof(tHTable));
-	if(globalTS != NULL)
+	localTable = NULL;
+	localTable = (tHTable*) malloc(sizeof(tHTable));
+	if(localTable != NULL)
 	{
-		for (int i=0; i<MAX_HTSIZE; (*globalTS)[i++] = item);
-		htInit(globalTS);
+		for (int i=0; i<MAX_HTSIZE; (*localTable)[i++] = item);
+		htInit(localTable);
 	}
 	else
 	{
@@ -1283,21 +1441,20 @@ TError initSTable()
 }
 
 /**
- * [vypisCelouTabulku description]
+ * [outputSymbolTable description]
  * @param ptrht [description]
  */
-void vypisCelouTabulku( tHTable* ptrht ) {
-	
+void outputSymbolTable(tHTable* ptrht)
+{
 	printf ("------------HASH TABLE--------------\n");
 	for ( int i=0; i<HTSIZE; i++ ) {
 		printf ("%i:",i);
 		tHTItem* ptr = (*ptrht)[i];
 		while ( ptr != NULL ) {
-			printf (" (%s,%.2f)",ptr->key,ptr->data);
+			printf (" (%s,%d,%d)", ptr->key, ptr->data.type, ptr->data.timesUsed);
 			ptr = ptr->ptrnext;
 		}
 		printf ("\n");
 	}
-	
 	printf ("------------------------------------\n");
 }

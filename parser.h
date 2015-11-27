@@ -10,12 +10,15 @@
  
 #include "ial.h"
 #include <stdbool.h>
+#define KW 10
  
  // HLAVNI FUNKCE
 TError parse(FILE *input, string *attr); // P: 1
 
 // POM. FUNKCE
 void getNextToken(FILE *input, string *attr);
+int checkKeyword(char *test);
+void outputSymbolTable(tHTable* ptrht);
 TError initSTable();
 
 // PRAVIDLA
