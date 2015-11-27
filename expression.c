@@ -493,10 +493,10 @@ TError findRule(Tstack *stack, ruleType rule)
 			 * @todo 3AC, Ilist
 			 */
 			
-			#ifdef DEBUG
-			 	printf("Pravidlo ADD pred pop\n");
-				whatsInStacks(stack);
-			#endif
+			//#ifdef DEBUG
+			// 	printf("Pravidlo ADD pred pop\n");
+			//	whatsInStacks(stack);
+			//#endif
 			// nejdrive se zbavim: < E + E (4x pop)
 			StackPop(stack);
 			StackPop(stack);
@@ -517,24 +517,210 @@ TError findRule(Tstack *stack, ruleType rule)
 
 			error = ENOP;
 		break;
+
 		case SUB_RULE:	// E -> E - E
+			if ((stack->top->termType != PNonTerm) || 
+				(stack->top->Lptr->Lptr->termType != PNonTerm))
+			{
+				fprintf(stderr, "Chyba pravidla pro odcitani.\n");
+				error = ESYN;
+				return error;
+			}
 
+			/**
+			 * @todo 3AC, Ilist
+			 */
+			
+			//#ifdef DEBUG
+			// 	printf("Pravidlo ADD pred pop\n");
+			//	whatsInStacks(stack);
+			//#endif
+			
+			// nejdrive se zbavim: < E - E (4x pop)
+			StackPop(stack);
+			StackPop(stack);
+			StackPop(stack);
+			StackPop(stack);
+
+			// pushnu neterminal na zasobnik
+			if ((error = StackPush(stack, PNonTerm)) != ENOP)
+			{
+				fprintf(stderr, "Chyba pri StackPush.\n");
+				StackDispose(stack);
+				return error;
+			}
+			#ifdef DEBUG
+			 	printf("Pravidlo SUB_RULE po pop a push\n");
+				whatsInStacks(stack);
+			#endif
+
+			error = ENOP;
 		break;
+
 		case MUL_RULE:	// E -> E * E
+			if ((stack->top->termType != PNonTerm) || 
+				(stack->top->Lptr->Lptr->termType != PNonTerm))
+			{
+				fprintf(stderr, "Chyba pravidla pro nasobeni.\n");
+				error = ESYN;
+				return error;
+			}
 
+			/**
+			 * @todo 3AC, Ilist
+			 */
+			
+			//#ifdef DEBUG
+			// 	printf("Pravidlo ADD pred pop\n");
+			//	whatsInStacks(stack);
+			//#endif
+			
+			// nejdrive se zbavim: < E * E (4x pop)
+			StackPop(stack);
+			StackPop(stack);
+			StackPop(stack);
+			StackPop(stack);
+
+			// pushnu neterminal na zasobnik
+			if ((error = StackPush(stack, PNonTerm)) != ENOP)
+			{
+				fprintf(stderr, "Chyba pri StackPush.\n");
+				StackDispose(stack);
+				return error;
+			}
+			#ifdef DEBUG
+			 	printf("Pravidlo MUL_RULE po pop a push\n");
+				whatsInStacks(stack);
+			#endif
+
+			error = ENOP;
 		break;
+
 		case DIV_RULE:	// E -> E / E
+			if ((stack->top->termType != PNonTerm) || 
+				(stack->top->Lptr->Lptr->termType != PNonTerm))
+			{
+				fprintf(stderr, "Chyba pravidla pro deleni.\n");
+				error = ESYN;
+				return error;
+			}
 
+			/**
+			 * @todo 3AC, Ilist
+			 */
+			
+			//#ifdef DEBUG
+			// 	printf("Pravidlo ADD pred pop\n");
+			//	whatsInStacks(stack);
+			//#endif
+			
+			// nejdrive se zbavim: < E / E (4x pop)
+			StackPop(stack);
+			StackPop(stack);
+			StackPop(stack);
+			StackPop(stack);
+
+			// pushnu neterminal na zasobnik
+			if ((error = StackPush(stack, PNonTerm)) != ENOP)
+			{
+				fprintf(stderr, "Chyba pri StackPush.\n");
+				StackDispose(stack);
+				return error;
+			}
+			#ifdef DEBUG
+			 	printf("Pravidlo DIV_RULE po pop a push\n");
+				whatsInStacks(stack);
+			#endif
+
+			error = ENOP;
 		break;
+
 		case LESSGREAT_RULE: // E -> E > E, E -> E >= E, ...
+			if ((stack->top->termType != PNonTerm) || 
+				(stack->top->Lptr->Lptr->termType != PNonTerm))
+			{
+				fprintf(stderr, "Chyba pravidla pro porovnavani ( <, > ).\n");
+				error = ESYN;
+				return error;
+			}
 
+			/**
+			 * @todo 3AC, Ilist
+			 */
+			
+			//#ifdef DEBUG
+			// 	printf("Pravidlo ADD pred pop\n");
+			//	whatsInStacks(stack);
+			//#endif
+			
+			// nejdrive se zbavim: < E (<, >, <=, >=) E (4x pop)
+			StackPop(stack);
+			StackPop(stack);
+			StackPop(stack);
+			StackPop(stack);
+
+			// pushnu neterminal na zasobnik
+			if ((error = StackPush(stack, PNonTerm)) != ENOP)
+			{
+				fprintf(stderr, "Chyba pri StackPush.\n");
+				StackDispose(stack);
+				return error;
+			}
+			#ifdef DEBUG
+			 	printf("Pravidlo LESSGREAT_RULE po pop a push\n");
+				whatsInStacks(stack);
+			#endif
+
+			error = ENOP;
 		break;
+
 		case EQ_RULE:		// E -> E == E, E -> E != E
+			if ((stack->top->termType != PNonTerm) || 
+				(stack->top->Lptr->Lptr->termType != PNonTerm))
+			{
+				fprintf(stderr, "Chyba pravidla pro porovnavani ( ==, != ).\n");
+				error = ESYN;
+				return error;
+			}
 
+			/**
+			 * @todo 3AC, Ilist
+			 */
+			
+			//#ifdef DEBUG
+			// 	printf("Pravidlo ADD pred pop\n");
+			//	whatsInStacks(stack);
+			//#endif
+			
+			// nejdrive se zbavim: < E (==, !=) E (4x pop)
+			StackPop(stack);
+			StackPop(stack);
+			StackPop(stack);
+			StackPop(stack);
+
+			// pushnu neterminal na zasobnik
+			if ((error = StackPush(stack, PNonTerm)) != ENOP)
+			{
+				fprintf(stderr, "Chyba pri StackPush.\n");
+				StackDispose(stack);
+				return error;
+			}
+			#ifdef DEBUG
+			 	printf("Pravidlo EQ_RULE po pop a push\n");
+				whatsInStacks(stack);
+			#endif
+
+			error = ENOP;
 		break;
+
 		case PAR_RULE:	// E -> (E)
-
+			/**
+			 * 
+			 * .@TODO pravidlo E -> (E) !!!!!!!!
+			 * 
+			 */
 		break;
+
 		case ID_E_RULE:	// E -> i ... i pro string, int, double
 			if ((tempPtr = malloc(sizeof(struct TstackElem))) == NULL)
 			{
@@ -545,12 +731,12 @@ TError findRule(Tstack *stack, ruleType rule)
 			
 			tempPtr->termType = PNonTerm;
 			tempPtr->idType = stack->top->idType;
-			tempPtr->data = NULL;
+			tempPtr->data = NULL; /////////////////// zatim NULL
 			
-			#ifdef DEBUG
-			 	printf("Pravidlo ID_E_RULE pred pop\n");
-				whatsInStacks(stack);
-			#endif
+			//#ifdef DEBUG
+			//	printf("Pravidlo ID_E_RULE pred pop\n");
+			//	whatsInStacks(stack);
+			//#endif
 
 			// nejdrive se zbavim: < i (2x pop)
 			StackPop(stack);
@@ -568,8 +754,13 @@ TError findRule(Tstack *stack, ruleType rule)
 
 			error = ENOP;
 		break;
-		case FUNC_RULE:
 
+		case FUNC_RULE:
+			/**
+			 *
+			 * .@TODO pravidlo pro funkci !!!!!!!!
+			 * 
+			 */
 		break;
 	}
 
@@ -713,37 +904,49 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count)
 							}
 						break;
 						case PMinus:
-							/**
-							 * @todo pravidlo subRule()
-							 */
+							if ((error = findRule(&stack, SUB_RULE)) != ENOP)
+							{
+								StackDispose(&stack);
+								return error;
+							}
 						break;
 						case PMul:
-							/**
-							 * @todo pravidlo mulRule()
-							 */
+							if ((error = findRule(&stack, MUL_RULE)) != ENOP)
+							{
+								StackDispose(&stack);
+								return error;
+							}
 						break;
 						case PDiv:
-							/**
-							 * @todo pravidlo divRule()
-							 */
+							if ((error = findRule(&stack, DIV_RULE)) != ENOP)
+							{
+								StackDispose(&stack);
+								return error;
+							}
 						break;
 						case PLess:
 						case PGreat:
 						case PLessEq:
 						case PGreatEq:
-							/**
-							 * @todo pravidlo comp1Rule()
-							 */
+							if ((error = findRule(&stack, LESSGREAT_RULE)) != ENOP)
+							{
+								StackDispose(&stack);
+								return error;
+							}
 						break;
 						case PEqual:
 						case PNotEq:
-							/**
-							 * @todo pravidlo comp2Rule()
-							 */
+							if ((error = findRule(&stack, EQ_RULE)) != ENOP)
+							{
+								StackDispose(&stack);
+								return error;
+							}
 						break;
-						case PRightP:
+						case PLeftP:
 							/**
-							 * @todo pravidlo parRule()
+							 * 
+							 * @todo pravidlo PAR_RULE (E)
+							 * 
 							 */
 						break;
 						case PIden:
@@ -753,7 +956,13 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count)
 								return error;
 							}
 						break;
-
+						case PIdFun:
+							/**
+							 * 
+							 * @todo pravidlo f()
+							 * 
+							 */
+						break;
 					}
 				break;
 				case empty:
@@ -921,10 +1130,10 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count)
 		} while((stack.top->termType == PDollar) && (tokToTerm(token.type) == PRightP) && (counter == 0));
 	}
 
-	printf("stack termType %d, prave nacteny token %d,\n"
+	/*printf("stack termType %d, prave nacteny token %d,\n"
 		"stack top %d, stack first %d tokterm %d\n"
 		, stack.first->termType, token.type, stack.top->termType, 
-		stack.first->termType, tokterm);
+		stack.first->termType, tokterm);*/
 
 	StackDispose(&stack);
 
