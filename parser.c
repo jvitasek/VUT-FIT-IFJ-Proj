@@ -8,7 +8,7 @@
  * 			xvalec00 – Dusan Valecky
  */
 
-#define DEBUG 1
+//#define DEBUG 1
 //#define SEM_CHECK 1
 
 #include <stdio.h>
@@ -681,7 +681,7 @@ TError stmt(FILE *input, string *attr)
 		// KONEC SEMANTICKE ANALYZY
 		#endif
 		getNextToken(input, attr);
-		if(token.type == T_Equal)
+		if(token.type == T_Assig)
 		{
 			getNextToken(input, attr);
 			error = fcall_or_assign(input, attr);
@@ -1068,7 +1068,7 @@ TError assign(FILE *input, string *attr)
 		// KONEC SEMANTICKE ANALYZY
 		#endif
 		getNextToken(input, attr);
-		if(token.type == T_Equal)
+		if(token.type == T_Assig)
 		{
 			getNextToken(input, attr);
 			error = expr(input, attr, 1, &counterVar);
@@ -1203,7 +1203,7 @@ TError init(FILE *input, string *attr)
 	#endif
 	TError error = ENOTFOUND;
 	// 6: <INIT> -> = <EXPR>
-	if(token.type == T_Equal)
+	if(token.type == T_Assig)
 	{
 		getNextToken(input, attr);
 		error = expr(input, attr, 0, &counterVar);
