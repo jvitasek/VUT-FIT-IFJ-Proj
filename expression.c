@@ -15,7 +15,7 @@
 #include "parser.h"
 #include "expression.h"
 
-#define DEBUG 1
+//#define DEBUG 1
 
 int *counteerVar;	// sluzi pri tvorbe pomocnych premennych
 
