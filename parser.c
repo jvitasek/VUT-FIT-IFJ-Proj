@@ -383,6 +383,7 @@ TError stmt(FILE *input, string *attr)
 			if(error == ENOP)
 			{
 				getNextToken(input, attr);
+				printf("### dalsi token po expr: %d\n", token.type);
 				error = comm_seq(input, attr);
 				#ifdef DEBUG
 				printf("stmt: comm_seq vratilo: %d\n", error);
