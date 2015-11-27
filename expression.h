@@ -87,13 +87,13 @@ typedef struct Tstack {
 	TstackElemPtr top;
 } Tstack;
 
-int StackInit(Tstack *stack); // inicialzace zasobniku
-int StackDispose(Tstack *stack);	
-int StackPop(Tstack *stack);
-int StackPush(Tstack *stack, int tokterm);
+TError StackInit(Tstack *stack); // inicialzace zasobniku
+TError StackDispose(Tstack *stack);	
+TError StackPop(Tstack *stack);
+TError StackPush(Tstack *stack, int tokterm);
 TstackElemPtr StackTop(Tstack *stack);
-int StackShift(Tstack *stack, int tokterm);
-int StackEmpty(Tstack *stack);
+TError StackShift(Tstack *stack, int tokterm);
+TError StackEmpty(Tstack *stack);
 int tokToTerm(int tokenType);
 TError findRule(Tstack *stack, ruleType rule);
 void generateVariable(string *var, int *counter);
