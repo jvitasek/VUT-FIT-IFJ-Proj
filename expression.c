@@ -22,7 +22,6 @@ int *counteerVar;	// sluzi pri tvorbe pomocnych premennych
 //tHTable* globalTS;
 PSymbols *exprStr;
 Tstack stack;
-TError error;
 
 /**
  * Precedencni tabulka 
@@ -52,8 +51,10 @@ int preceden_tab[16][16] = {
  * @param  stack Zasobnik termu.
  * @return       ENOP v pripade uspechu.
  */
-int StackInit(Tstack *stack)
+TError StackInit(Tstack *stack)
 {
+	TError error = ENOP;
+
 	#ifdef DEBUG
 		printf("StackInit in progress.\n");
 	#endif
@@ -102,20 +103,20 @@ int StackInit(Tstack *stack)
 	#ifdef DEBUG
 		printf("StackInit tempPtr->termType: %d.\n", tempPtr->termType);
 	#endif
-	return ENOP;
+	return error;
 }
 
 /**
  * Zruseni zasobniku.
  * @param stack 	Zasobnik termu.
  */
-int StackDispose(Tstack *stack)
+TError StackDispose(Tstack *stack)
 {
+	TError error = ENOP;
 	#ifdef DEBUG
 		printf("StackDispose in progress.\n");
 	#endif
 
-	error = ENOP;
 	TstackElemPtr tempPtr;
 
 	if ((tempPtr = malloc(sizeof(struct TstackElem))) == NULL)
@@ -147,13 +148,13 @@ int StackDispose(Tstack *stack)
  * Vrati dalsi token ze vstupu
  * @param stack 	Zasobnik termu.
  */
-int StackPop(Tstack *stack)
+TError StackPop(Tstack *stack)
 {
+	TError error = ENOP;
 	#ifdef DEBUG
 		printf("StackPop in progress.\n");
 	#endif
 
-	error = ENOP;
 	TstackElemPtr tempPtr = NULL;
 
 	if (stack->top != NULL)
@@ -207,8 +208,9 @@ int StackPop(Tstack *stack)
  * @param  tokterm Terminal prevedeny z tokenu.
  * @return       ENOP v pripade uspechu.
  */
-int StackPush(Tstack *stack, int tokterm)
+TError StackPush(Tstack *stack, int tokterm)
 {
+	TError error = ENOP;
 	#ifdef DEBUG
 		printf("StackPush in progress.\n");
 	#endif
@@ -254,6 +256,8 @@ int StackPush(Tstack *stack, int tokterm)
  */
 TstackElemPtr StackTop(Tstack *stack)
 {
+	TError error = ENOP;
+
 	#ifdef DEBUG
 		printf("StackTop in progress.\n");
 	#endif
@@ -298,8 +302,8 @@ TstackElemPtr StackTop(Tstack *stack)
 				// chyba, uz neni kde hledat
 				else
 				{
-					error = ESYN;
-					return; ///////////////////////////////////////////////////
+					tempPtr = NULL;
+					return tempPtr; ///////////////////////////////////////////////////
 				}
 			}
 		}
@@ -318,14 +322,20 @@ TstackElemPtr StackTop(Tstack *stack)
  * @param  stack Zasobnik termu.
  * @return       ENOP v pripade uspechu.
  */
-int StackShift(Tstack *stack, int tokterm)
+TError StackShift(Tstack *stack, int tokterm)
 {
+	TError error = ENOP;
 	#ifdef DEBUG
 		printf("StackShift in progress.\n");
 	#endif
 
 	TstackElemPtr temp = NULL;
 	TstackElemPtr tempTop = StackTop(stack); // zasobnik s nejvrchnejsim termem
+	if(tempTop == NULL)
+	{
+		error = ESYN;
+		return error;
+	}
 
 	if ((temp = malloc(sizeof(struct TstackElem))) == NULL)
 	{
@@ -374,9 +384,9 @@ int StackShift(Tstack *stack, int tokterm)
  * @param  stack Zasobnik termu.
  * @return       ENOP v pripade true.
  */
-int StackEmpty(Tstack *stack)
+TError StackEmpty(Tstack *stack)
 {
-	error = -5;
+	TError error = ENOP;
 
 	if (stack->top == stack->first)
 	{
@@ -476,6 +486,7 @@ int getPrecSymbol(int ter1, int ter2)
  */
 TError findRule(Tstack *stack, ruleType rule)
 {
+	TError error = ENOTFOUND;
 	TstackElemPtr tempPtr = NULL;
 
 	switch(rule)
@@ -664,6 +675,11 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count)
 		do {
 			//tempStack = NULL;
 			tempStack = StackTop(&stack); // nejvrchnejsi terminal na zasobniku
+			if(tempStack == NULL)
+			{
+				error = ESYN;
+				return error;
+			}
 
 			// prevedu si token na term (PSymbols)
 			tokterm = tokToTerm(token.type);
@@ -770,6 +786,11 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count)
 				break;			
 			}
 			tempStack = StackTop(&stack);
+			if(tempStack == NULL)
+			{
+				error = ESYN;
+				return error;
+			}
 			
 			#ifdef DEBUG
 				printf("----- ---- --%d.-- ?? KONEC WHILE DO ?? -- ---- -----\n", index);
@@ -802,6 +823,11 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count)
 		int counter = 1;
 		do {
 			tempStack = StackTop(&stack); // nejvrchnejsi terminal na zasobniku
+			if(tempStack == NULL)
+			{
+				error = ESYN;
+				return error;
+			}
 
 			// prevedu si token na term (PSymbols)
 			tokterm = tokToTerm(token.type);
@@ -928,11 +954,9 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count)
 
 	StackDispose(&stack);
 
-	
 	/**
 	 * @todo dodelat dalsi pravidla, jinak vzdy vraci ENOP
 	 */
-	error = ENOP;
 	return error;
 }
 
