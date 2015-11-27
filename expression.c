@@ -59,6 +59,9 @@ int StackInit(Tstack *stack)
 	#endif
 	if (stack == NULL)
 	{
+		#ifdef DEBUG
+			printf("StackInit stack == NULL.\n");
+		#endif
 		error = ERUN_UNINIT;
 		return error;
 	}
@@ -66,24 +69,33 @@ int StackInit(Tstack *stack)
 	stack->top = NULL;
 	stack->first = NULL;
 
-	TstackElemPtr tempPtr1 = NULL;
-	tempPtr1 = malloc(sizeof(struct TstackElem));
-	if (tempPtr1 != NULL)
+	TstackElemPtr tempPtr = NULL;
+
+	if ((tempPtr = malloc(sizeof(struct TstackElem))) == NULL)
 	{
-		tempPtr1->Lptr = NULL;
-		tempPtr1->Rptr = NULL;
-		tempPtr1->termType = PDollar;
-		tempPtr1->idType = Tother;
-		tempPtr1->data = NULL;
-		stack->first = tempPtr1;
-		stack->top = tempPtr1;
+		fprintf(stderr, "Chyba pri malloc.\n");
+		error = ERUN_UNINIT;
+		return error;
+	}
+
+	if (tempPtr != NULL)
+	{
+		tempPtr->Lptr = NULL;
+		tempPtr->Rptr = NULL;
+		tempPtr->termType = PDollar;
+		tempPtr->idType = Tother;
+		tempPtr->data = NULL;
+		stack->first = tempPtr;
+		stack->top = tempPtr;
 	}
 	else
 	{
 		error = EINT;
 		return error;
 	}
-
+	#ifdef DEBUG
+		printf("StackInit tempPtr->termType: %d.\n", tempPtr->termType);
+	#endif
 	return ENOP;
 }
 
@@ -96,16 +108,22 @@ void StackDispose(Tstack *stack)
 	#ifdef DEBUG
 		printf("StackDispose in progress.\n");
 	#endif
-	TstackElemPtr tempPtr2;
-	tempPtr2 = stack->top;
+	TstackElemPtr tempPtr;
+	tempPtr = stack->top;
 
 	while (stack->top != NULL)
 	{
-		tempPtr2 = stack->top;
+		if (stack->top->data != NULL)
+		{
+			free(stack->top->data);
+		}
+		tempPtr = stack->top;
 		stack->top = stack->top->Lptr;
-		free(tempPtr2);
+		free(tempPtr);
 	}
+
 	stack->first = NULL;
+	stack->top = NULL;
 }
 
 /**
@@ -185,12 +203,12 @@ TstackElemPtr StackTop(Tstack *stack)
 		printf("StackTop in progress.\n");
 	#endif
 	TstackElemPtr tempPtr = NULL;
-	if ((tempPtr = malloc(sizeof(struct TstackElem))) == NULL)
+	/*if ((tempPtr = malloc(sizeof(struct TstackElem))) == NULL)
 	{
 		fprintf(stderr, "Chyba pri malloc.\n");
 		error = ERUN_UNINIT;
-		return error;
-	}
+		return;
+	}*/
 
 	tempPtr = stack->top;
 	tempPtr->Lptr = stack->top->Lptr;
@@ -251,12 +269,12 @@ int StackShift(Tstack *stack, int tokterm)
 
 	// vlozeni handle za term
 	temp->termType = PLessReduc; 
+	temp->idType = Tother;
 	temp->data = NULL;
 	temp->Lptr = tempTop;
 	temp->Rptr = tempTop->Rptr;
-	temp->idType = Tother;
-	tempTop->Rptr = temp;
-	tempTop->Rptr->Lptr = temp;
+	/*tempTop->Rptr = temp;
+	tempTop->Rptr->Lptr = temp;*/
 
 	
 	if (tempTop == stack->top)
@@ -309,20 +327,20 @@ int StackEmpty(Tstack *stack)
 void whatsInStacks(Tstack *stack)
 {
 	int i = 1;
-	TstackElemPtr temp = stack->first;
+	TstackElemPtr temp = stack->top;
 
-	temp->Lptr = stack->first->Lptr;
-	temp->Rptr = stack->first->Rptr;
-	temp->termType = stack->first->termType;
-	temp->idType = stack->first->idType;
-	temp->data = stack->first->data;
+	temp->Lptr = stack->top->Lptr;
+	temp->Rptr = stack->top->Rptr;
+	temp->termType = stack->top->termType;
+	temp->idType = stack->top->idType;
+	temp->data = stack->top->data;
 	
-	printf("|--DNO-\t-termType- -%d-\t-idType- -%d-\t-akt. token- -%d--|\n", 
+	printf("|--VRCHOL- -termType- -%d-\t-idType- -%d-\t-akt. token- -%d--|\n", 
 		temp->termType, temp->idType, token.type);
 	
-	while (temp->Rptr != NULL)
+	while (temp->Lptr != NULL)
 	{
-		temp = temp->Rptr;
+		temp = temp->Lptr;
 		printf("|--%d. -\t-termType- -%d-\t-idType- -%d-\t-akt. token- -%d--|\n", 
 			i, temp->termType, temp->idType, token.type);
 		i++;
@@ -374,7 +392,7 @@ int tokToTerm(int tokenType)
 int getPrecSymbol(int ter1, int ter2)
 {
 	#ifdef DEBUG
-	printf("[%d][%d]\n", ter1, ter2);
+	printf("getPrecSymbol([%d][%d])\n", ter1, ter2);
 	#endif
 	return preceden_tab[ter1][ter2];
 }
@@ -404,7 +422,7 @@ TError findRule(Tstack *stack, ruleType rule)
 			 */
 			
 			#ifdef DEBUG
-			 	printf("Pravidlo add pred pop\n");
+			 	printf("Pravidlo ADD pred pop\n");
 				whatsInStacks(stack);
 			#endif
 			// nejdrive se zbavim: < E + E (4x pop)
@@ -421,7 +439,7 @@ TError findRule(Tstack *stack, ruleType rule)
 				return error;
 			}
 			#ifdef DEBUG
-			 	printf("Pravidlo add po pop a push\n");
+			 	printf("Pravidlo ADD po pop a push\n");
 				whatsInStacks(stack);
 			#endif
 
@@ -584,7 +602,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count)
 		error = EINT;
 		return error;
 	}
-
+	int i = 0;
 	/**
 	 * Zpracovavani vyrazu ukonceneho strednikem.
 	 */
@@ -607,7 +625,9 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count)
 				whatsInStacks(&stack);
 			#endif
 
-			printf("%d: prc symbol: %d\n", index, getPrecSymbol(tempStack->termType, tokterm));
+			printf("--Cyklus while do--\n--index %d: prc symbol: [%d][%d]--\n", 
+				index, tempStack->termType, tokterm);
+
 			++index;
 			switch (getPrecSymbol(tempStack->termType, tokterm))
 			{				
@@ -704,9 +724,11 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count)
 				break;			
 			}
 			//stempStack = StackTop(&stack);
-			printf("TOKEN TYPE: %d\n", token.type);
+			printf("--Cyklus while do--\n--stack.top->termType: %d, token.type: %d--\n", 
+				stack.top->termType, token.type);
 
-		} while(!((stack.top->termType == PDollar) && (tokToTerm(token.type) == PDollar)));
+		} while(i++ != 2);
+		//while(!((stack.top->termType == PDollar) && (token.type == T_Semicolon)));
 	}
 	/**
 	 * Zpracovavani vyrazu ukonceneho pravou zavorkou.
