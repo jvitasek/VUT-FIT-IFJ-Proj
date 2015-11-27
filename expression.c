@@ -1094,6 +1094,9 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count)
 		counter = 1;
 		int index = 0;
 
+		// prevedu si token na term (PSymbols)
+		tokterm = tokToTerm(token.type);	
+
 		do {
 			//tempStack = NULL;
 			tempStack = StackTop(&stack); // nejvrchnejsi terminal na zasobniku
@@ -1102,10 +1105,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count)
 				error = ESYN;
 				return error;
 			}
-
-			// prevedu si token na term (PSymbols)
-			tokterm = tokToTerm(token.type);			
-
+			
 			// kontrola zavorek
 			if(tokterm == PRightP)
 			{
@@ -1264,24 +1264,32 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count)
 				return error;
 			}
 
-			tokterm = tokToTerm(token.type);
+			if (tokterm != PDollar)
+			{
+				tokterm = tokToTerm(token.type);
+			}
+
 			// pokud je counter 0, mame odpovidajici pocet zavorek a zaroven
 			// pokud je na vstupu ")" jedna se o ukoncovaci znak
 			if (counter == 0 && tokterm == PRightP)
 			{
-				tokterm = PDollar;
-			}
+				#ifdef DEBUG
+					printf("MENIM PRIGHTP NA $.\n");
+				#endif
+				tokterm = PDollar;				
+			}	
+			
 			
 			#ifdef DEBUG
 				printf("----- ---- --%d.-- ?? KONEC WHILE DO ?? -- ---- -----\n", index);
-				if ((tempStack->termType == PDollar) && (tokToTerm(token.type) == PDollar))
+				if ((tempStack->termType == PDollar) && (tokterm == PDollar))
 				{
 					printf("-KONCIM!!!! Stack top == DOLAR a akt. token == DOLAR -.\n");
 				}
 				else
 				{
 					printf("-NE-KONCIM!! protoze stack.top->term: %d a akt. token: %d\n", 
-						tempStack->termType, tokToTerm(token.type));
+						tempStack->termType, tokterm);
 				}
 				printf("-------------------------------------------------------\n");
 				printf("############# COUTNER STATE: %d #############\n", counter);
