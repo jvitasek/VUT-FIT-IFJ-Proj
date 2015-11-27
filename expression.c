@@ -617,7 +617,7 @@ TError findRule(Tstack *stack, ruleType rule)
 
 			// nastavim vrchol zasobniku
 			tempPtr->Rptr = NULL;
-			tempPtr->Lptr = stack->top->Rptr;
+			tempPtr->Lptr = stack->top;
 			stack->top->Rptr = tempPtr;
 			stack->top = tempPtr;
 			#ifdef DEBUG

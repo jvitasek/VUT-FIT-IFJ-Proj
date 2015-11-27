@@ -1,3 +1,3 @@
-double main( int a , double ah) {
-	int a = 5;
+double main() {
+	return b+c+x;
 }
