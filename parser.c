@@ -378,6 +378,7 @@ TError stmt(FILE *input, string *attr)
 			error = expr(input, attr, 1, &counterVar);
 			#ifdef DEBUG
 			printf("stmt: expr vratilo: %d\n", error);
+			printf("### token po expr: %d\n", token.type);
 			#endif
 			if(error == ENOP)
 			{
