@@ -15,7 +15,7 @@
 #include "parser.h"
 #include "expression.h"
 
-//#define DEBUG 1
+#define DEBUG 1
 
 int *counteerVar;	// sluzi pri tvorbe pomocnych premennych
 
@@ -1052,7 +1052,9 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count)
 				break;
 				default:
 					// OTHER ALGO
-					fprintf(stderr, "DIE!\n");
+					fprintf(stderr, "Chyba vyrazu.\n");
+					error = ESYN;
+					return error;
 				break;			
 			}
 			tempStack = StackTop(&stack);
@@ -1093,10 +1095,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count)
 		
 		counter = 1;
 		int index = 0;
-
-		// prevedu si token na term (PSymbols)
-		tokterm = tokToTerm(token.type);	
-
+		
 		do {
 			//tempStack = NULL;
 			tempStack = StackTop(&stack); // nejvrchnejsi terminal na zasobniku
@@ -1105,6 +1104,9 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count)
 				error = ESYN;
 				return error;
 			}
+
+			// prevedu si token na term (PSymbols)
+			tokterm = tokToTerm(token.type);	
 			
 			// kontrola zavorek
 			if(tokterm == PRightP)
@@ -1129,7 +1131,6 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count)
 			#endif
 
 			++index;
-
 			switch (getPrecSymbol(tempStack->termType, tokterm))
 			{				
 				case equal:
@@ -1223,26 +1224,13 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count)
 					}
 				break;
 				case empty:
-					/*if(counter == -1 && tokterm == PRightP)
-					{
-						#ifdef DEBUG
-						printf("##### KONCIM, COUNTER JE -1\n");
-						#endif
-						return ENOP;
-					}
-					else if(tokterm == PRightP)
-					{
-						getNextToken(input, attr);
-						continue;
-					}*/
-					if (counter == 0 && tokterm == PRightP)
+					if (counter == 0 && tokterm == PDollar)
 					{
 						#ifdef DEBUG
 							printf("Empty - Prevadim \")\" na $.\n");
-						#endif
-						tokterm = PDollar;
-						continue;
+						#endif					
 					}
+
 
 					#ifdef DEBUG
 						printf("Empty - CHYBA.\n");
@@ -1253,7 +1241,9 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count)
 				break;
 				default:
 					// OTHER ALGO
-					fprintf(stderr, "DIE!\n");
+					fprintf(stderr, "Chyba vyrazu.\n");
+					error = ESYN;
+					return error;
 				break;			
 			}
 
@@ -1264,22 +1254,17 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count)
 				return error;
 			}
 
-			if (tokterm != PDollar)
-			{
-				tokterm = tokToTerm(token.type);
-			}
+			//tokterm = tokToTerm(token.type);
 
-			// pokud je counter 0, mame odpovidajici pocet zavorek a zaroven
-			// pokud je na vstupu ")" jedna se o ukoncovaci znak
-			if (counter == 0 && tokterm == PRightP)
+			if (stack.top->termType == PNonTerm && stack.top->Lptr->termType == PDollar && counter < 0)
 			{
 				#ifdef DEBUG
-					printf("MENIM PRIGHTP NA $.\n");
+					printf("Koncim!!.\n");
 				#endif
-				tokterm = PDollar;				
-			}	
-			
-			
+				error = ENOP;
+				return error;				
+			}
+						
 			#ifdef DEBUG
 				printf("----- ---- --%d.-- ?? KONEC WHILE DO ?? -- ---- -----\n", index);
 				if ((tempStack->termType == PDollar) && (tokterm == PDollar))
