@@ -914,14 +914,14 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count)
 			{
 				counter--;
 				#ifdef DEBUG
-				printf("##### DEKREMENTUJU COUNTER, NYNI: %d\n", counter);
+				printf("##### DEKREMENTUJU COUNTER, NYNI: %d\n", counter);
 				#endif
 			}
 			else if(tokterm == PLeftP)
 			{
 				counter++;
 				#ifdef DEBUG
-				printf("##### INKREMENTUJU COUNTER, NYNI: %d\n", counter);
+				printf("##### INKREMENTUJU COUNTER, NYNI: %d\n", counter);
 				#endif
 			}
 
@@ -1052,9 +1052,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count)
 				break;
 				default:
 					// OTHER ALGO
-					fprintf(stderr, "Chyba vyrazu.\n");
-					error = ESYN;
-					return error;
+					fprintf(stderr, "DIE!\n");
 				break;			
 			}
 			tempStack = StackTop(&stack);
@@ -1095,7 +1093,10 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count)
 		
 		counter = 1;
 		int index = 0;
-		
+
+		// prevedu si token na term (PSymbols)
+		tokterm = tokToTerm(token.type);	
+
 		do {
 			//tempStack = NULL;
 			tempStack = StackTop(&stack); // nejvrchnejsi terminal na zasobniku
@@ -1104,23 +1105,20 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count)
 				error = ESYN;
 				return error;
 			}
-
-			// prevedu si token na term (PSymbols)
-			tokterm = tokToTerm(token.type);	
 			
 			// kontrola zavorek
 			if(tokterm == PRightP)
 			{
 				counter--;
 				#ifdef DEBUG
-				printf("##### DEKREMENTUJU COUNTER, NYNI: %d\n", counter);
+				printf("##### DEKREMENTUJU COUNTER, NYNI: %d\n", counter);
 				#endif
 			}
 			else if(tokterm == PLeftP)
 			{
 				counter++;
 				#ifdef DEBUG
-				printf("##### INKREMENTUJU COUNTER, NYNI: %d\n", counter);
+				printf("##### INKREMENTUJU COUNTER, NYNI: %d\n", counter);
 				#endif
 			}
 
@@ -1131,6 +1129,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count)
 			#endif
 
 			++index;
+
 			switch (getPrecSymbol(tempStack->termType, tokterm))
 			{				
 				case equal:
@@ -1224,13 +1223,26 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count)
 					}
 				break;
 				case empty:
-					if (counter == 0 && tokterm == PDollar)
+					/*if(counter == -1 && tokterm == PRightP)
+					{
+						#ifdef DEBUG
+						printf("##### KONCIM, COUNTER JE -1\n");
+						#endif
+						return ENOP;
+					}
+					else if(tokterm == PRightP)
+					{
+						getNextToken(input, attr);
+						continue;
+					}*/
+					if (counter == 0 && tokterm == PRightP)
 					{
 						#ifdef DEBUG
 							printf("Empty - Prevadim \")\" na $.\n");
-						#endif					
+						#endif
+						tokterm = PDollar;
+						continue;
 					}
-
 
 					#ifdef DEBUG
 						printf("Empty - CHYBA.\n");
@@ -1241,9 +1253,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count)
 				break;
 				default:
 					// OTHER ALGO
-					fprintf(stderr, "Chyba vyrazu.\n");
-					error = ESYN;
-					return error;
+					fprintf(stderr, "DIE!\n");
 				break;			
 			}
 
@@ -1254,17 +1264,21 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count)
 				return error;
 			}
 
-			//tokterm = tokToTerm(token.type);
+			if (tokterm != PDollar)
+			{
+				tokterm = tokToTerm(token.type);
+			}
 
-			if (stack.top->termType == PNonTerm && stack.top->Lptr->termType == PDollar && counter < 0)
+			// pokud je counter 0, mame odpovidajici pocet zavorek a zaroven
+			// pokud je na vstupu ")" jedna se o ukoncovaci znak
+			if (counter == 0 && tokterm == PRightP)
 			{
 				#ifdef DEBUG
-					printf("Koncim!!.\n");
+					printf("MENIM PRIGHTP NA $.\n");
 				#endif
-				error = ENOP;
-				return error;				
+				tokterm = PDollar;
 			}
-						
+			
 			#ifdef DEBUG
 				printf("----- ---- --%d.-- ?? KONEC WHILE DO ?? -- ---- -----\n", index);
 				if ((tempStack->termType == PDollar) && (tokterm == PDollar))
@@ -1295,4 +1309,3 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count)
 	 */
 	return error;
 }
-
