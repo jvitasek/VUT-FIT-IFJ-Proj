@@ -1047,12 +1047,14 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count)
 						printf("Empty - CHYBA.\n");
 					#endif
 
+					fprintf(stderr, "Chyba vyrazu.\n");
 					StackDispose(&stack);
 					return ESYN;
 				break;
 				default:
-					// OTHER ALGO
-					fprintf(stderr, "DIE!\n");
+					fprintf(stderr, "Chyba vyrazu.\n");
+					error = ESYN;
+					return error;
 				break;			
 			}
 			tempStack = StackTop(&stack);
@@ -1105,20 +1107,25 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count)
 				error = ESYN;
 				return error;
 			}
+
+			if (tokterm != PDollar)
+			{
+				tokterm = tokToTerm(token.type);
+			}
 			
 			// kontrola zavorek
 			if(tokterm == PRightP)
 			{
 				counter--;
 				#ifdef DEBUG
-				printf("##### DEKREMENTUJU COUNTER, NYNI: %d\n", counter);
+				printf("##### DEKREMENTUJU COUNTER, NYNI: %d, tokterm: %d!!!!\n", counter, tokterm);
 				#endif
 			}
 			else if(tokterm == PLeftP)
 			{
 				counter++;
 				#ifdef DEBUG
-				printf("##### INKREMENTUJU COUNTER, NYNI: %d\n", counter);
+				printf("##### INKREMENTUJU COUNTER, NYNI: %d, tokterm: %d!!!\n", counter, tokterm);
 				#endif
 			}
 
@@ -1235,25 +1242,28 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count)
 						getNextToken(input, attr);
 						continue;
 					}*/
-					if (counter == 0 && tokterm == PRightP)
+
+					/*if (counter == 0 && tokterm == PRightP)
 					{
 						#ifdef DEBUG
 							printf("Empty - Prevadim \")\" na $.\n");
 						#endif
 						tokterm = PDollar;
 						continue;
-					}
+					}*/
 
 					#ifdef DEBUG
 						printf("Empty - CHYBA.\n");
 					#endif
 
+					fprintf(stderr, "Chyba vyrazu.\n");
 					StackDispose(&stack);
 					return ESYN;
 				break;
 				default:
-					// OTHER ALGO
-					fprintf(stderr, "DIE!\n");
+					fprintf(stderr, "Chyba vyrazu.\n");
+					error = ESYN;
+					return error;
 				break;			
 			}
 
@@ -1264,20 +1274,23 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count)
 				return error;
 			}
 
-			if (tokterm != PDollar)
-			{
-				tokterm = tokToTerm(token.type);
-			}
-
 			// pokud je counter 0, mame odpovidajici pocet zavorek a zaroven
 			// pokud je na vstupu ")" jedna se o ukoncovaci znak
-			if (counter == 0 && tokterm == PRightP)
+			/*if (counter == 0 && tokterm == PRightP)
 			{
 				#ifdef DEBUG
 					printf("MENIM PRIGHTP NA $.\n");
 				#endif
 				tokterm = PDollar;
+			}*/
+
+			if (stack.top->termType == PNonTerm && 
+				stack.top->Lptr->termType == PDollar && counter <= 0)
+ 			{
+ 				error = ENOP;
+				return error;				
 			}
+
 			
 			#ifdef DEBUG
 				printf("----- ---- --%d.-- ?? KONEC WHILE DO ?? -- ---- -----\n", index);
