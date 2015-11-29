@@ -8,7 +8,7 @@
  * 			xvalec00 – Dusan Valecky
  */
 
-#define DEBUG 1
+//#define DEBUG 1
 //#define SEM_CHECK 1
 
 #include <stdio.h>
@@ -24,12 +24,10 @@ int counterVar = 1;		// globalna premenna, ktora sluzi pri tvorbe pomocnych prem
 
 tHTable* localTable;
 tHTItem* item;
-tHTItem* stored = NULL; // helper
 /**
  * @todo deklarace instruction listu
  */
 int line = 1;
-char *funcname;
 
 const char* kw[KW] = {
 	"auto", "cin", "cout", "double", "else",
@@ -97,6 +95,7 @@ TError parse(FILE *input, string *attr)
 	}
 	// 1: <PROGRAM> -> <FUNC_N>
 	error = func_n(input, attr);
+	outputSymbolTable(localTable);
 	#ifdef DEBUG
 	printf("parse: func_n vratilo: %d\n", error);
 	#endif
@@ -182,35 +181,17 @@ TError func(FILE *input, string *attr)
 		getNextToken(input, attr);
 		if(token.type == T_Id)
 		{
-			#ifdef SEM_CHECK
 			// SEMANTICKA ANALYZA
-			if(attr->str != NULL)
-			{
-				if(checkKeyword(attr->str) == 1)
-				{
-					return ESYN;
-				}
-
-			}
-			
-			// ulozeni nazvu funkce
-			int length = strlen(attr->str);
-			if((funcname = malloc(length + 1)) == NULL)
-			{
-				return EINT;
-			}
-			funcname = attr->str;
 			tData data;
 			data.type = FUNC;
 			data.timesUsed = 0;
-			htInsert(localTable, funcname, data);
+			htInsert(localTable, attr->str, data);
 
 			/**
 			 * @todo inicializace lokalni tabulky symbolu
 			 * @todo vlozeni teto funkce do tabulky symbolu
 			 */
 			// KONEC SEMANTICKE ANALYZY
-			#endif
 
 			getNextToken(input, attr);
 			error = par_def_list(input, attr);
