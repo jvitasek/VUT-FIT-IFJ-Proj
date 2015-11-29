@@ -22,7 +22,6 @@ int *counteerVar;	// sluzi pri tvorbe pomocnych premennych
 //tHTable* globalTS;
 PSymbols *exprStr;
 Tstack stack;
-PSymbols popped;
 
 /**
  * Precedencni tabulka.
@@ -175,7 +174,6 @@ TError StackPop(Tstack *stack)
 			#endif
 			stack->top = stack->top->Lptr;
 			stack->top->Rptr = NULL;
-			popped = tempPtr->termType;
 			free(tempPtr);
 		}
 		else if (stack->top == stack->first)
@@ -196,6 +194,8 @@ TError StackPop(Tstack *stack)
 	else
 	{
 		fprintf(stderr, "Chyba StackPop!\n");
+		error = ESYN;
+		return error;
 	}
 
 	return error;
@@ -379,23 +379,6 @@ TError StackShift(Tstack *stack, int tokterm)
 	}
 
 	error = ENOP;
-	return error;
-}
-
-/**
- * Kontrola, jestli je zasobnik prazdny.
- * @param  stack Zasobnik termu.
- * @return error	Navratova hodnota chyby.
- */
-TError StackEmpty(Tstack *stack)
-{
-	TError error = ENOP;
-
-	if (stack->top == stack->first)
-	{
-		error = ENOP;
-	}
-	
 	return error;
 }
 
@@ -779,7 +762,7 @@ TError findRule(Tstack *stack, ruleType rule)
  * @param	var	 	String vytvaranej premennej.
  * @param 	counter	Pocitadlo potrebne pri tvorbe pomocnych premennych.
  */
-void generateVariable(string *var, int *counter)
+/*void generateVariable(string *var, int *counter)
 {
 	strClear(var);
 	strAppend(var,'$');
@@ -790,7 +773,7 @@ void generateVariable(string *var, int *counter)
 		i = i / 10;
 	}
 	(*counter)++;
-}
+}*/
 
 /**
  * Funkcia, ktora vytvori a vlozi novu instrukciu do zoznamu instrukcii.
@@ -800,15 +783,15 @@ void generateVariable(string *var, int *counter)
  * @param  op2		 Operand2 (ukazatel do tabulky sumbolov)
  * @param  res		 Vysledok
  */
-void generateInst(tInstCode instType, void *op1, void *op2, void *res)
+/*void generateInst(tInstCode instType, void *op1, void *op2, void *res)
 {
-	//tInst inst;
-	//inst.instType = instType;
-	//inst.op1 = op1;
-	//inst.op2 = op2;
-	//inst.res = res;
-	//listInsertLast(list,inst);	// list instrukci trba vytvorit v parsru
-}
+	tInst inst;
+	inst.instType = instType;
+	inst.op1 = op1;
+	inst.op2 = op2;
+	inst.res = res;
+	listInsertLast(list,inst);	// list instrukci trba vytvorit v parsru
+}*/
 
 /**
  * Hlavni funkce vyrazu.
@@ -993,6 +976,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count)
 							 * 
 							 */
 						break;
+						default: break;
 					}
 				break;
 				case empty:
@@ -1190,6 +1174,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count)
 								return error;
 							}
 						break;
+						default: break;
 					}
 				break;
 				case empty:
