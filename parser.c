@@ -1254,55 +1254,8 @@ TError fcall_or_assign(FILE *input, string *attr)
 	printf("fcall_or_assign\n");
 	#endif
 	TError error = ENOTFOUND;
-	// 31: <FCALL_OR_ASSIGN> -> id ( <TERMS> );
-	if(token.type == T_Id)
-	{
-		#ifdef SEM_CHECK
-		// SEMANTICKA ANALYZA
-		/**
-		 * @todo kontrola, zda id existuje v tabulce symbolu
-		 */
-		// KONEC SEMANTICKE ANALYZY
-		#endif
-		getNextToken(input, attr);
-		if(token.type == T_LeftParenthesis)
-		{
-			getNextToken(input, attr);
-			error = terms(input, attr);
-			#ifdef DEBUG
-			printf("fcall_or_assign: terms vratilo: %d\n", error);
-			#endif
-			if(error == ENOP || error == EEMPTY)
-			{
-				if(token.type == T_RightParenthesis)
-				{
-					getNextToken(input, attr);
-					if(token.type == T_Semicolon)
-					{
-						return ENOP;
-					}
-					else
-					{
-						return ESYN;
-					}
-				}
-				else
-				{
-					return ESYN;
-				}
-			}
-			else if(error == ESYN)
-			{
-				return error;
-			}
-		}
-		else
-		{
-			return ESYN;
-		}
-	}
 	// 30: <FCALL_OR_ASSIGN> -> <EXPR> ;
-	else if((error = expr(input, attr, 0, &counterVar)) == ENOP || error == ESYN)
+	if((error = expr(input, attr, 0, &counterVar)) == ENOP || error == ESYN)
 	{
 		#ifdef DEBUG
 		printf("fcall_or_assign: expr vratilo: %d\n", error);

@@ -124,8 +124,7 @@ TError StackDispose(Tstack *stack)
 	if ((tempPtr = malloc(sizeof(struct TstackElem))) == NULL)
 	{
 		fprintf(stderr, "Chyba pri malloc.\n");
-		error = ERUN_UNINIT;
-		return error;
+		exit(EINT);
 	}
 
 	// postupne rusim vsechny prvky na zasobniku
