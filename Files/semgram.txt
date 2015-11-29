@@ -1,0 +1,22 @@
+SEMANTICKA PRAVIDLA
+
+1: int + int = int
+2: int - int = int
+3: int * int = int
+4: int / int = int
+5: double + int = double
+6: double - int = double
+7: double * int = double
+8: double / int = double
+9: int + double = double
+10: int - double = double
+11: int * double = double
+12: int / double = double
+13: double + double = double
+14: double - double = double
+15: double * double = double
+16: double / double = double
+
+
+POVOLENE KONVERZE
+int -> double

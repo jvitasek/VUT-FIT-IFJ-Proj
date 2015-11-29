@@ -196,6 +196,8 @@ void htInsert (tHTable* ptrht, char* key, tData data) {
 		return;
 	}
 
+	printf("KEY: %s\n", key);
+
 	tHTItem *item = htSearch(ptrht, key); // najdeme polozku
 
 	if (item != NULL) {		

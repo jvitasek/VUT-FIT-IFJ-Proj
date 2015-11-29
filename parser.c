@@ -96,6 +96,7 @@ TError parse(FILE *input, string *attr)
 	// 1: <PROGRAM> -> <FUNC_N>
 	error = func_n(input, attr);
 	outputSymbolTable(localTable);
+	htClearAll(localTable);
 	#ifdef DEBUG
 	printf("parse: func_n vratilo: %d\n", error);
 	#endif
@@ -186,6 +187,7 @@ TError func(FILE *input, string *attr)
 			data.type = FUNC;
 			data.timesUsed = 0;
 			htInsert(localTable, attr->str, data);
+
 
 			/**
 			 * @todo inicializace lokalni tabulky symbolu
