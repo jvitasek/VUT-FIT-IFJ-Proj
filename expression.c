@@ -25,7 +25,7 @@ Tstack stack;
 PSymbols popped;
 
 /**
- * Precedencni tabulka 
+ * Precedencni tabulka.
  */
 int preceden_tab[16][16] = {
 //	  +		-			*   /      ==     !=    <=      >=     >      <      id    f    (      )      ,       $
@@ -110,6 +110,7 @@ TError StackInit(Tstack *stack)
 /**
  * Zruseni zasobniku.
  * @param stack 	Zasobnik termu.
+ * @return error	Navratova hodnota chyby.
  */
 TError StackDispose(Tstack *stack)
 {
@@ -148,6 +149,7 @@ TError StackDispose(Tstack *stack)
 /**
  * Vrati dalsi token ze vstupu
  * @param stack 	Zasobnik termu.
+ * @return error	Navratova hodnota chyby.
  */
 TError StackPop(Tstack *stack)
 {
@@ -160,9 +162,6 @@ TError StackPop(Tstack *stack)
 
 	if (stack->top != NULL)
 	{
-		//#ifdef DEBUG
-		//	printf("StackPop ... stack->top != NULL.\n");
-		//#endif
 		tempPtr = stack->top;
 
 		if (stack->top->data != NULL)
@@ -207,7 +206,7 @@ TError StackPop(Tstack *stack)
  * Vlozeni tokenu na zasobnik.
  * @param  stack   Zasobnik termu.
  * @param  tokterm Terminal prevedeny z tokenu.
- * @return       ENOP v pripade uspechu.
+ * @return error	Navratova hodnota chyby.
  */
 TError StackPush(Tstack *stack, int tokterm)
 {
@@ -328,7 +327,7 @@ TstackElemPtr StackTop(Tstack *stack)
 /**
  * Pridani handle na zasobnik a pushnuti tokenu.
  * @param  stack Zasobnik termu.
- * @return       ENOP v pripade uspechu.
+ * @return error	Navratova hodnota chyby.
  */
 TError StackShift(Tstack *stack, int tokterm)
 {
@@ -358,9 +357,6 @@ TError StackShift(Tstack *stack, int tokterm)
 	temp->data = NULL;
 	temp->Lptr = tempTop;
 	temp->Rptr = tempTop->Rptr;
-	/*tempTop->Rptr = temp;
-	tempTop->Rptr->Lptr = temp;*/
-
 	
 	if (tempTop == stack->top)
 	{
@@ -390,7 +386,7 @@ TError StackShift(Tstack *stack, int tokterm)
 /**
  * Kontrola, jestli je zasobnik prazdny.
  * @param  stack Zasobnik termu.
- * @return       ENOP v pripade true.
+ * @return error	Navratova hodnota chyby.
  */
 TError StackEmpty(Tstack *stack)
 {
@@ -407,7 +403,7 @@ TError StackEmpty(Tstack *stack)
 #ifdef DEBUG
 /**
  * Pomocna funkce pro vypis celeho zasobniku.
- * @param stack [description]
+ * @param stack
  */
 void whatsInStacks(Tstack *stack)
 {
@@ -489,8 +485,8 @@ int getPrecSymbol(int ter1, int ter2)
 
 /**
  * Funkce pro hledani pravidla pro vyrazy.
- * @param  stack Zasobnik termu.
- * @return       ENOP v pripade uspechu.
+ * @param  stack 	Zasobnik termu.
+ * @return error	Navratova hodnota chyby.
  */
 TError findRule(Tstack *stack, ruleType rule)
 {
@@ -512,10 +508,6 @@ TError findRule(Tstack *stack, ruleType rule)
 			 * @todo 3AC, Ilist
 			 */
 			
-			//#ifdef DEBUG
-			// 	printf("Pravidlo ADD pred pop\n");
-			//	whatsInStacks(stack);
-			//#endif
 			// nejdrive se zbavim: < E + E (4x pop)
 			StackPop(stack);			
 			StackPop(stack);			
@@ -549,12 +541,7 @@ TError findRule(Tstack *stack, ruleType rule)
 
 			/**
 			 * @todo 3AC, Ilist
-			 */
-			
-			//#ifdef DEBUG
-			// 	printf("Pravidlo ADD pred pop\n");
-			//	whatsInStacks(stack);
-			//#endif
+			 */			
 			
 			// nejdrive se zbavim: < E - E (4x pop)
 			StackPop(stack);
@@ -588,12 +575,7 @@ TError findRule(Tstack *stack, ruleType rule)
 
 			/**
 			 * @todo 3AC, Ilist
-			 */
-			
-			//#ifdef DEBUG
-			// 	printf("Pravidlo ADD pred pop\n");
-			//	whatsInStacks(stack);
-			//#endif
+			 */			
 			
 			// nejdrive se zbavim: < E * E (4x pop)
 			StackPop(stack);
@@ -629,11 +611,6 @@ TError findRule(Tstack *stack, ruleType rule)
 			 * @todo 3AC, Ilist
 			 */
 			
-			//#ifdef DEBUG
-			// 	printf("Pravidlo ADD pred pop\n");
-			//	whatsInStacks(stack);
-			//#endif
-			
 			// nejdrive se zbavim: < E / E (4x pop)
 			StackPop(stack);
 			StackPop(stack);
@@ -668,11 +645,6 @@ TError findRule(Tstack *stack, ruleType rule)
 			 * @todo 3AC, Ilist
 			 */
 			
-			//#ifdef DEBUG
-			// 	printf("Pravidlo ADD pred pop\n");
-			//	whatsInStacks(stack);
-			//#endif
-			
 			// nejdrive se zbavim: < E (<, >, <=, >=) E (4x pop)
 			StackPop(stack);
 			StackPop(stack);
@@ -706,11 +678,6 @@ TError findRule(Tstack *stack, ruleType rule)
 			/**
 			 * @todo 3AC, Ilist
 			 */
-			
-			//#ifdef DEBUG
-			// 	printf("Pravidlo ADD pred pop\n");
-			//	whatsInStacks(stack);
-			//#endif
 			
 			// nejdrive se zbavim: < E (==, !=) E (4x pop)
 			StackPop(stack);
@@ -776,11 +743,6 @@ TError findRule(Tstack *stack, ruleType rule)
 			tempPtr->termType = PNonTerm;
 			tempPtr->idType = stack->top->idType;
 			tempPtr->data = NULL; /////////////////// zatim NULL
-			
-			//#ifdef DEBUG
-			//	printf("Pravidlo ID_E_RULE pred pop\n");
-			//	whatsInStacks(stack);
-			//#endif
 
 			// nejdrive se zbavim: < i (2x pop)
 			StackPop(stack);			
@@ -802,7 +764,7 @@ TError findRule(Tstack *stack, ruleType rule)
 		case FUNC_RULE:
 			/**
 			 *
-			 * .@TODO pravidlo pro funkci !!!!!!!!
+			 * @TODO pravidlo pro funkci !!!!!!!!
 			 * 
 			 */
 		break;
@@ -873,6 +835,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count)
 	{
 		fprintf(stderr, "Chyba pri malloc.\n");
 		error = ERUN_UNINIT;
+		StackDispose(&stack);
 		return error;
 	}
 
@@ -894,15 +857,14 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count)
 		#ifdef DEBUG
 			printf("Resim vyraz ukonceny strednikem.\n");
 		#endif
-		//tempStack = StackTop(&stack); // nejvrchnejsi terminal na zasobniku
 		
 		int index = 0;
 		do {
-			//tempStack = NULL;
 			tempStack = StackTop(&stack); // nejvrchnejsi terminal na zasobniku
 			if(tempStack == NULL)
 			{
 				error = ESYN;
+				StackDispose(&stack);
 				return error;
 			}
 
@@ -1054,6 +1016,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count)
 				default:
 					fprintf(stderr, "Chyba vyrazu.\n");
 					error = ESYN;
+					StackDispose(&stack);
 					return error;
 				break;			
 			}
@@ -1061,6 +1024,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count)
 			if(tempStack == NULL)
 			{
 				error = ESYN;
+				StackDispose(&stack);
 				return error;
 			}
 
@@ -1100,11 +1064,11 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count)
 		tokterm = tokToTerm(token.type);	
 
 		do {
-			//tempStack = NULL;
 			tempStack = StackTop(&stack); // nejvrchnejsi terminal na zasobniku
 			if(tempStack == NULL)
 			{
 				error = ESYN;
+				StackDispose(&stack);
 				return error;
 			}
 
@@ -1230,28 +1194,6 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count)
 					}
 				break;
 				case empty:
-					/*if(counter == -1 && tokterm == PRightP)
-					{
-						#ifdef DEBUG
-						printf("##### KONCIM, COUNTER JE -1\n");
-						#endif
-						return ENOP;
-					}
-					else if(tokterm == PRightP)
-					{
-						getNextToken(input, attr);
-						continue;
-					}*/
-
-					/*if (counter == 0 && tokterm == PRightP)
-					{
-						#ifdef DEBUG
-							printf("Empty - Prevadim \")\" na $.\n");
-						#endif
-						tokterm = PDollar;
-						continue;
-					}*/
-
 					#ifdef DEBUG
 						printf("Empty - CHYBA.\n");
 					#endif
@@ -1263,6 +1205,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count)
 				default:
 					fprintf(stderr, "Chyba vyrazu.\n");
 					error = ESYN;
+					StackDispose(&stack);
 					return error;
 				break;			
 			}
@@ -1271,23 +1214,15 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count)
 			if(tempStack == NULL)
 			{
 				error = ESYN;
+				StackDispose(&stack);
 				return error;
 			}
-
-			// pokud je counter 0, mame odpovidajici pocet zavorek a zaroven
-			// pokud je na vstupu ")" jedna se o ukoncovaci znak
-			/*if (counter == 0 && tokterm == PRightP)
-			{
-				#ifdef DEBUG
-					printf("MENIM PRIGHTP NA $.\n");
-				#endif
-				tokterm = PDollar;
-			}*/
 
 			if (stack.top->termType == PNonTerm && 
 				stack.top->Lptr->termType == PDollar && counter <= 0)
  			{
  				error = ENOP;
+ 				StackDispose(&stack);
 				return error;				
 			}
 
@@ -1310,15 +1245,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count)
 		} while(!((tempStack->termType == PDollar) && (tokterm == PDollar)));
 	}
 
-	/*printf("stack termType %d, prave nacteny token %d,\n"
-		"stack top %d, stack first %d tokterm %d\n"
-		, stack.first->termType, token.type, stack.top->termType, 
-		stack.first->termType, tokterm);*/
-
 	StackDispose(&stack);
 
-	/**
-	 * @todo dodelat dalsi pravidla, jinak vzdy vraci ENOP
-	 */
 	return error;
 }
