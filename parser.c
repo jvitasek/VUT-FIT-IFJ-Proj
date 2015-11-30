@@ -168,6 +168,10 @@ TError func(FILE *input)
 
 			// SEMANTICKA ANALYZA
 			
+
+			// precti timesUsed podle
+			// pokud neni
+
 			tData data;
 			data.type = FUNC;
 			data.timesUsed = 0;
@@ -398,7 +402,7 @@ TError stmt(FILE *input)
 		if(token.type == T_LeftParenthesis)
 		{
 			getNextToken(input, &attr);
-			error = expr(input, &attr, 1, &counterVar);
+			error = expr(input, &attr, 1, &counterVar, &localTable);
 			#ifdef DEBUG
 			printf("stmt: expr vratilo: %d\n", error);
 			printf("### token po expr: %d\n", token.type);
@@ -443,7 +447,7 @@ TError stmt(FILE *input)
 			if(error == ENOP)
 			{
 				getNextToken(input, &attr);
-				error = expr(input, &attr, 0, &counterVar);
+				error = expr(input, &attr, 0, &counterVar, &localTable);
 				#ifdef DEBUG
 				printf("stmt: expr vratilo: %d\n", error);
 				#endif
@@ -810,7 +814,7 @@ TError ret(FILE *input)
 	if(token.type == T_Return)
 	{
 		getNextToken(input, &attr);
-		error = expr(input, &attr, 0, &counterVar);
+		error = expr(input, &attr, 0, &counterVar, &localTable);
 		#ifdef DEBUG
 		printf("ret: expr vratilo: %d\n", error);
 		#endif
@@ -1030,7 +1034,7 @@ TError assign(FILE *input)
 		if(token.type == T_Assig)
 		{
 			getNextToken(input, &attr);
-			error = expr(input, &attr, 1, &counterVar);
+			error = expr(input, &attr, 1, &counterVar, &localTable);
 			#ifdef DEBUG
 			printf("assign: expr vratilo: %d\n", error);
 			#endif
@@ -1165,7 +1169,7 @@ TError init(FILE *input)
 	if(token.type == T_Assig)
 	{
 		getNextToken(input, &attr);
-		error = expr(input, &attr, 0, &counterVar);
+		error = expr(input, &attr, 0, &counterVar, &localTable);
 		#ifdef DEBUG
 		printf("init: expr vratilo: %d\n", error);
 		#endif
@@ -1236,7 +1240,7 @@ TError fcall_or_assign(FILE *input)
 	#endif
 	TError error = ENOTFOUND;
 	// 30: <FCALL_OR_ASSIGN> -> <EXPR> ;
-	if((error = expr(input, &attr, 0, &counterVar)) == ENOP || error == ESYN)
+	if((error = expr(input, &attr, 0, &counterVar, &localTable)) == ENOP || error == ESYN)
 	{
 		#ifdef DEBUG
 		printf("fcall_or_assign: expr vratilo: %d\n", error);
@@ -1275,8 +1279,6 @@ TError fcall(FILE *input)
 			error = terms(input);
 			if(error == ENOP || error == EEMPTY)
 			{
-				//getNextToken(input, &attr);
-				// semicolon nebo right parenth
 				if(token.type == T_RightParenthesis)
 				{
 					getNextToken(input, &attr);

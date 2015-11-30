@@ -801,7 +801,7 @@ TError findRule(Tstack *stack, ruleType rule)
  * @param  count Pocitadlo potrebne pri tvorbe pomocnych premennych.
  * @return       Index do enumerace chyb.
  */
-TError expr(FILE *input, string *attr, int semi_or_par, int *count)
+TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **localTable)
 {
 	counteerVar = count;
 	TError error = ENOTFOUND;
