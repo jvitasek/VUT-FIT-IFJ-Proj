@@ -30,8 +30,9 @@ LL gramatika
 27)	<STMT>			->	cout << <COUT_TERM>;
 28)	<STMT>			->	<RETURN>
 29)	<STMT>			->	id = <FCALL_OR_ASSIGN>
-30)	<FCALL_OR_ASSIGN>	->	<EXPR> ;
-31)	<FCALL_OR_ASSIGN>	->	id ( <TERMS> );
+30) <FCALL_OR_ASSIGN>-> <EXPR> ;
+31) <FCALL_OR_ASSIGN>-> id ( <TERMS> );
+
 
 32)	<TERMS>		-> 	id <TERMS_N>
 33)	<TERMS>		-> 	E

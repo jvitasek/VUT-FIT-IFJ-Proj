@@ -81,7 +81,7 @@ TError parse(FILE *input)
 	printf("parse: func_n vratilo: %d\n", error);
 	#endif
 
-	outputSymbolTable(localTable);
+	//outputSymbolTable(localTable);
 	htClearAll(localTable);
 
 	if(error == ENOP || error == EEMPTY)
@@ -635,14 +635,6 @@ TError stmt(FILE *input)
 		 */
 		// KONEC SEMANTICKE ANALYZY
 		#endif
-		// 30) <STMT> -> <FCALL>
-		if((error = fcall(input)) == ENOP || error == ESYN)
-		{
-			#ifdef DEBUG
-			printf("stmt: fcall vratilo: %d\n", error);
-			#endif
-			return error;
-		}
 		getNextToken(input, &attr);
 		if(token.type == T_Assig)
 		{
@@ -1257,58 +1249,6 @@ TError fcall_or_assign(FILE *input)
 	return error;
 }
 
-
-/**
- * [fcall description]
- * @param  input [description]
- * @return       [description]
- */
-TError fcall(FILE *input)
-{
-	#ifdef DEBUG
-	printf("fcall\n");
-	#endif
-	TError error = ENOTFOUND;
-	// 31b: <FCALL> -> id ( <TERMS> );
-	if(token.type == T_Id)
-	{
-		getNextToken(input, &attr);
-		if(token.type == T_LeftParenthesis)
-		{
-			getNextToken(input, &attr);
-			error = terms(input);
-			if(error == ENOP || error == EEMPTY)
-			{
-				if(token.type == T_RightParenthesis)
-				{
-					getNextToken(input, &attr);
-					if(token.type == T_Semicolon)
-					{
-						error = ENOP;
-						return error;
-					}
-					else
-					{
-						return ESYN;
-					}
-				}
-				else
-				{
-					return ESYN;
-				}
-			}
-			else if(error == ESYN)
-			{
-				return error;
-			}
-		}
-		else
-		{
-			return ESYN;
-		}
-	}
-	return error;
-}
 
 /**
  * Simuluje pravidla 32 a 33.
