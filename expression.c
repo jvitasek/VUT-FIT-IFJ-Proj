@@ -809,7 +809,6 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count)
 	int counter = 0; // pro pocitani zavorek
 	//char *tempData = NULL;
 	int tokterm = 0;
-	printf("%s\n",attr->str);
 	#ifdef DEBUG
 	printf("expr\n");
 	#endif
