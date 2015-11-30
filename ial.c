@@ -209,7 +209,8 @@ void htInsert (tHTable* ptrht, char* key, tData data) {
 	{
 		// pokud jsem polozku nenasel, tak vytvorim a zaradim na zacatek
 		tHTItem *itemNew = malloc(sizeof(struct tHTItem));
-		itemNew->key = key;
+		itemNew->key = (char *) malloc(sizeof(char)*strlen(key));
+		strcpy(itemNew->key,key);
 		itemNew->data = data;
 		itemNew->ptrnext = (*ptrht)[hashCode(key)];
 		printf("HASH: %d\n", hashCode(key));
