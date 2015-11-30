@@ -17,22 +17,22 @@
 int main(int argc, char **argv)
 {
 	FILE *input;
-	string attr;		// vytvorime si string
-	strInit(&attr);		// inicializujeme string
+	//string attr;		// vytvorime si string
+	//strInit(&attr);		// inicializujeme string
 	if((argc < 2) || (argc > 2))		// kontrola ci bol zadany spravny pocet parametrov na prikaz. riadke
 	{
-		strFree(&attr);
+		//strFree(&attr);
 		print_error(ERUN_IN, 0);
 	}
 	
 	if((input = (fopen(argv[1],"r"))) == 0)		// otvorime vstupny subor na citanie
 	{
-		strFree(&attr);
+		//strFree(&attr);
 		print_error(ERUN_IN, 0);
 	}
 
 	int result;
-	result = parse(input, &attr); // syntakticka analyza
+	result = parse(input); // syntakticka analyza
 	switch(result)
 	{
 		case ENOP:
@@ -47,7 +47,7 @@ int main(int argc, char **argv)
 			 */
 			print_error(result, token.line);
 			fclose(input);
-			strFree(&attr);
+			//strFree(&attr);
 			return -result;
 		break;
 	}
@@ -60,7 +60,7 @@ int main(int argc, char **argv)
 	 * @todo uvolneni instruction listu
 	 */
 	fclose(input);		// zavre vstupny subor
-	strFree(&attr);		// uvolni string z pamete
+	//strFree(&attr);		// uvolni string z pamete
 	return 0;
 }
 

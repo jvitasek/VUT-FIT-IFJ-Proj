@@ -20,6 +20,8 @@
 #include "ial.h"
 #include "expression.h"
 
+string attr; //vytvorime si string
+
 int counterVar = 1;		// globalna premenna, ktora sluzi pri tvorbe pomocnych premennych na medzivypocty
 tHTable* localTable;
 tHTItem* item;
@@ -73,27 +75,27 @@ int checkKeyword(char *test)
  * @param  attr  String lexemu.
  * @return       Index do enumerace chyb.
  */
-TError parse(FILE *input, string *attr)
+TError parse(FILE *input)
 {
 	#ifdef DEBUG
 	printf("parse\n");
 	#endif
 	TError error = ESYN;
-
+	strInit(&attr);		// inicializujeme string
 	// inicializace TS
 	if(initSTable() != ENOP)
 	{
 		return error;
 	}
 
-	getNextToken(input, attr);
+	getNextToken(input, &attr);
 	// prazdny soubor
 	if(token.type == T_EOF)
 	{
 		return ESYN;
 	}
 	// 1: <PROGRAM> -> <FUNC_N>
-	error = func_n(input, attr);
+	error = func_n(input);
 	#ifdef DEBUG
 	printf("parse: func_n vratilo: %d\n", error);
 	#endif
@@ -118,22 +120,22 @@ TError parse(FILE *input, string *attr)
  * @param  attr  String lexemu.
  * @return       Index do enumerace chyb.
  */
-TError func_n(FILE *input, string *attr)
+TError func_n(FILE *input)
 {
 	#ifdef DEBUG
 	printf("func_n\n");
 	#endif
 	TError error = ENOTFOUND;
 	// 2: <FUNC_N> -> <FUNC> <FUNC_N>
-	error = func(input, attr);
+	error = func(input);
 	#ifdef DEBUG
 	printf("func_n: func vratilo: %d\n", error);
 	#endif
 	if(error == ENOP)
 	{
 		// <FUNC>
-		getNextToken(input, attr);
-		error = func_n(input, attr);
+		getNextToken(input, &attr);
+		error = func_n(input);
 		#ifdef DEBUG
 		printf("func_n: func_n vratilo: %d\n", error);
 		#endif
@@ -166,7 +168,7 @@ TError func_n(FILE *input, string *attr)
  * Simuluje pravidlo 11.
  * @return Index do enumerace chyb.
  */
-TError func(FILE *input, string *attr)
+TError func(FILE *input)
 {
 	#ifdef DEBUG
 	printf("func\n");
@@ -179,7 +181,7 @@ TError func(FILE *input, string *attr)
 	#endif
 	if(error == ENOP)
 	{
-		getNextToken(input, attr);
+		getNextToken(input, &attr);
 		if(token.type == T_Id)
 		{
 
@@ -188,7 +190,7 @@ TError func(FILE *input, string *attr)
 			/**
 			 * @todo kontrola, zda nazev funkce neni keyword
 			 */
-			if(checkKeyword(attr->str) == 1)
+			if(checkKeyword(attr.str) == 1)
 			{
 				error = ESEM;
 				return error;
@@ -197,9 +199,9 @@ TError func(FILE *input, string *attr)
 			tData data;
 			data.type = FUNC;
 			data.timesUsed = 0;
-			if(attr->str != NULL)
+			if(attr.str != NULL)
 			{
-				htInsert(localTable, strGetStr(attr), data);
+				htInsert(localTable, strGetStr(&attr), data);
 				outputSymbolTable(localTable);
 			}
 			
@@ -212,15 +214,15 @@ TError func(FILE *input, string *attr)
 			// KONEC SEMANTICKE ANALYZY
 
 
-			getNextToken(input, attr);
-			error = par_def_list(input, attr);
+			getNextToken(input, &attr);
+			error = par_def_list(input);
 			#ifdef DEBUG
 			printf("func: par_def_list vratilo: %d\n", error);
 			#endif
 			if(error == ENOP)
 			{
-				getNextToken(input, attr);
-				error = dec_or_def(input, attr);
+				getNextToken(input, &attr);
+				error = dec_or_def(input);
 				#ifdef DEBUG
 				printf("func: dec_or_def vratilo: %d\n", error);
 				#endif
@@ -249,7 +251,7 @@ TError func(FILE *input, string *attr)
  * @param  attr  String lexemu.
  * @return       Index do enumerace chyb.
  */
-TError par_def_list(FILE *input, string *attr)
+TError par_def_list(FILE *input)
 {
 	#ifdef DEBUG
 	printf("par_def_list\n");
@@ -258,8 +260,8 @@ TError par_def_list(FILE *input, string *attr)
 	// 14: <PAR_DEF_LIST> -> ( <PARAMS> )
 	if(token.type == T_LeftParenthesis)
 	{
-		getNextToken(input, attr);
-		error = params(input, attr);
+		getNextToken(input, &attr);
+		error = params(input);
 		#ifdef DEBUG
 		printf("par_def_list: params vratilo: %d\n", error);
 		#endif
@@ -292,14 +294,14 @@ TError par_def_list(FILE *input, string *attr)
  * @param  attr  String lexemu.
  * @return       Index do enumerace chyb.
  */
-TError dec_or_def(FILE *input, string *attr)
+TError dec_or_def(FILE *input)
 {
 	#ifdef DEBUG
 	printf("dec_or_def\n");
 	#endif
 	TError error = ENOTFOUND;
 	// 12: <DEC_OR_DEF> -> <COMM_SEQ>
-	error = comm_seq(input, attr);
+	error = comm_seq(input);
 	#ifdef DEBUG
 	printf("dec_or_def: comm_seq vratilo: %d\n", error);
 	#endif
@@ -325,7 +327,7 @@ TError dec_or_def(FILE *input, string *attr)
  * @param  attr  String lexemu.
  * @return       Index do enumerace chyb.
  */
-TError comm_seq(FILE *input, string *attr)
+TError comm_seq(FILE *input)
 {
 	#ifdef DEBUG
 	printf("comm_seq\n");
@@ -334,8 +336,8 @@ TError comm_seq(FILE *input, string *attr)
 	// 19: <COMM_SEQ> -> { <STMT_LIST> }
 	if(token.type == T_LeftBrace)
 	{
-		getNextToken(input, attr);
-		error = stmt_list(input, attr);
+		getNextToken(input, &attr);
+		error = stmt_list(input);
 		#ifdef DEBUG
 		printf("comm_seq: stmt_list vratilo: %d\n", error);
 		#endif
@@ -364,21 +366,21 @@ TError comm_seq(FILE *input, string *attr)
  * @param  attr  String lexemu.
  * @return       Index do enumerace chyb.
  */
-TError stmt_list(FILE *input, string *attr)
+TError stmt_list(FILE *input)
 {
 	#ifdef DEBUG
 	printf("stmt_list\n");
 	#endif
 	TError error = ENOTFOUND;
 	// 20: <STMT_LIST> -> <STMT> <STMT_LIST>
-	error = stmt(input, attr);
+	error = stmt(input);
 	#ifdef DEBUG
 	printf("stmt_list: stmt vratilo: %d\n", error);
 	#endif
 	if(error == ENOP)
 	{
-		getNextToken(input, attr);
-		error = stmt_list(input, attr);
+		getNextToken(input, &attr);
+		error = stmt_list(input);
 		#ifdef DEBUG
 		printf("stmt_list: stmt_list vratilo: %d\n", error);
 		#endif
@@ -412,7 +414,7 @@ TError stmt_list(FILE *input, string *attr)
  * @param  attr  String lexemu.
  * @return       Index do enumerace chyb.
  */
-TError stmt(FILE *input, string *attr)
+TError stmt(FILE *input)
 {
 	#ifdef DEBUG
 	printf("stmt\n");
@@ -421,19 +423,19 @@ TError stmt(FILE *input, string *attr)
 	// 22: <STMT> -> if ( <EXPR> ) <COMM_SEQ> <IF_N>
 	if(token.type == T_If)
 	{
-		getNextToken(input, attr);
+		getNextToken(input, &attr);
 		if(token.type == T_LeftParenthesis)
 		{
-			getNextToken(input, attr);
-			error = expr(input, attr, 1, &counterVar);
+			getNextToken(input, &attr);
+			error = expr(input, &attr, 1, &counterVar);
 			#ifdef DEBUG
 			printf("stmt: expr vratilo: %d\n", error);
 			printf("### token po expr: %d\n", token.type);
 			#endif
 			if(error == ENOP)
 			{
-				getNextToken(input, attr);
-				error = comm_seq(input, attr);
+				getNextToken(input, &attr);
+				error = comm_seq(input);
 				#ifdef DEBUG
 				printf("stmt: comm_seq vratilo: %d\n", error);
 				#endif
@@ -459,32 +461,32 @@ TError stmt(FILE *input, string *attr)
 	// 23: <STMT> -> for( <VAR_DEF> <EXPR> <ASSIGN> ) <COMM_SEQ>
 	else if(token.type == T_For)
 	{
-		getNextToken(input, attr);
+		getNextToken(input, &attr);
 		if(token.type == T_LeftParenthesis)
 		{
-			getNextToken(input, attr);
-			error = var_def(input, attr);
+			getNextToken(input, &attr);
+			error = var_def(input);
 			#ifdef DEBUG
 			printf("stmt: var_def vratilo: %d\n", error);
 			#endif
 			if(error == ENOP)
 			{
-				getNextToken(input, attr);
-				error = expr(input, attr, 0, &counterVar);
+				getNextToken(input, &attr);
+				error = expr(input, &attr, 0, &counterVar);
 				#ifdef DEBUG
 				printf("stmt: expr vratilo: %d\n", error);
 				#endif
 				if(error == ENOP)
 				{
-					getNextToken(input, attr);
-					error = assign(input, attr);
+					getNextToken(input, &attr);
+					error = assign(input);
 					#ifdef DEBUG
 					printf("stmt: assign vratilo: %d\n", error);
 					#endif
 					if(error == ENOP)
 					{
-						getNextToken(input, attr);
-						error = comm_seq(input, attr);
+						getNextToken(input, &attr);
+						error = comm_seq(input);
 						#ifdef DEBUG
 						printf("stmt: comm_seq vratilo: %d\n", error);
 						#endif
@@ -518,7 +520,7 @@ TError stmt(FILE *input, string *attr)
 		}
 	}
 	// 24: <STMT> -> <COMM_SEQ>
-	else if((error = comm_seq(input, attr)) == ENOP || error == ESYN)
+	else if((error = comm_seq(input)) == ENOP || error == ESYN)
 	{
 		#ifdef DEBUG
 		printf("stmt: comm_seq vratilo: %d\n", error);
@@ -526,7 +528,7 @@ TError stmt(FILE *input, string *attr)
 		return error;
 	}
 	// 25: <STMT> -> <VAR_DEF>
-	else if((error = var_def(input, attr)) == ENOP || error == ESYN)
+	else if((error = var_def(input)) == ENOP || error == ESYN)
 	{
 		#ifdef DEBUG
 		printf("stmt: var_def vratilo: %d\n", error);
@@ -536,10 +538,10 @@ TError stmt(FILE *input, string *attr)
 	// 26: <STMT> -> cin >> id <CIN_ID_N>;
 	else if(token.type == T_Cin)
 	{
-		getNextToken(input, attr);
+		getNextToken(input, &attr);
 		if(token.type == T_RightShift)
 		{
-			getNextToken(input, attr);
+			getNextToken(input, &attr);
 			if(token.type == T_Id)
 			{
 				#ifdef SEM_CHECK
@@ -549,8 +551,8 @@ TError stmt(FILE *input, string *attr)
 				 */
 				// KONEC SEMANTICKE ANALYZY
 				#endif
-				getNextToken(input, attr);
-				error = cin_id_n(input, attr);
+				getNextToken(input, &attr);
+				error = cin_id_n(input);
 				#ifdef DEBUG
 				printf("stmt: cin_id_n vratilo: %d\n", error);
 				#endif
@@ -575,8 +577,8 @@ TError stmt(FILE *input, string *attr)
 			// konstanta
 			else if((error = realtype()) == ENOP)
 			{
-				getNextToken(input, attr);
-				error = cin_id_n(input, attr);
+				getNextToken(input, &attr);
+				error = cin_id_n(input);
 				#ifdef DEBUG
 				printf("stmt: cin_id_n vratilo: %d\n", error);
 				#endif
@@ -611,11 +613,11 @@ TError stmt(FILE *input, string *attr)
 	// 27: <STMT> -> cout << <COUT_TERM>;
 	else if(token.type == T_Cout)
 	{
-		getNextToken(input, attr);
+		getNextToken(input, &attr);
 		if(token.type == T_LeftShift)
 		{
-			getNextToken(input, attr);
-			error = cout_term(input, attr);
+			getNextToken(input, &attr);
+			error = cout_term(input);
 			#ifdef DEBUG
 			printf("stmt: cout_term vratilo: %d\n", error);
 			#endif
@@ -641,7 +643,7 @@ TError stmt(FILE *input, string *attr)
 		}
 	}
 	// 28: <STMT> -> <RETURN>
-	else if((error = ret(input, attr)) == ENOP || error == ESYN)
+	else if((error = ret(input)) == ENOP || error == ESYN)
 	{
 		#ifdef DEBUG
 		printf("stmt: ret vratilo: %d\n", error);
@@ -658,11 +660,11 @@ TError stmt(FILE *input, string *attr)
 		 */
 		// KONEC SEMANTICKE ANALYZY
 		#endif
-		getNextToken(input, attr);
+		getNextToken(input, &attr);
 		if(token.type == T_Assig)
 		{
-			getNextToken(input, attr);
-			error = fcall_or_assign(input, attr);
+			getNextToken(input, &attr);
+			error = fcall_or_assign(input);
 			#ifdef DEBUG
 			printf("stmt: fcall_or_assign vratilo: %d\n", error);
 			#endif
@@ -689,7 +691,7 @@ TError stmt(FILE *input, string *attr)
  * @param  attr  String lexemu.
  * @return       Index do enumerace chyb.
  */
-TError params(FILE *input, string *attr)
+TError params(FILE *input)
 {
 	#ifdef DEBUG
 	printf("params\n");
@@ -702,7 +704,7 @@ TError params(FILE *input, string *attr)
 	#endif
 	if(error == ENOP)
 	{
-		getNextToken(input, attr);
+		getNextToken(input, &attr);
 		if(token.type == T_Id)
 		{
 			#ifdef SEM_CHECK
@@ -712,8 +714,8 @@ TError params(FILE *input, string *attr)
 			 */
 			// KONEC SEMANTICKE ANALYZY
 			#endif
-			getNextToken(input, attr);
-			error = params_n(input, attr);
+			getNextToken(input, &attr);
+			error = params_n(input);
 			#ifdef DEBUG
 			printf("params: params_n vratilo: %d\n", error);
 			#endif
@@ -752,7 +754,7 @@ TError params(FILE *input, string *attr)
  * @param  attr  String lexemu.
  * @return       Index do enumerace chyb.
  */
-TError params_n(FILE *input, string *attr)
+TError params_n(FILE *input)
 {
 	#ifdef DEBUG
 	printf("params_n\n");
@@ -761,14 +763,14 @@ TError params_n(FILE *input, string *attr)
 	// 17: <PARAMS_N> -> , <TYPE> id <PARAMS_N>
 	if(token.type == T_Comma)
 	{
-		getNextToken(input, attr);
+		getNextToken(input, &attr);
 		error = type();
 		#ifdef DEBUG
 		printf("params_n: type vratilo: %d\n", error);
 		#endif
 		if(error == ENOP)
 		{
-			getNextToken(input, attr);
+			getNextToken(input, &attr);
 			if(token.type == T_Id)
 			{
 				#ifdef SEM_CHECK
@@ -778,8 +780,8 @@ TError params_n(FILE *input, string *attr)
 				 */
 				// KONEC SEMANTICKE ANALYZY
 				#endif
-				getNextToken(input, attr);
-				error = params_n(input, attr);
+				getNextToken(input, &attr);
+				error = params_n(input);
 				#ifdef DEBUG
 				printf("params_n: params_n vratilo: %d\n", error);
 				#endif
@@ -819,7 +821,7 @@ TError params_n(FILE *input, string *attr)
  * @param  attr  String lexemu.
  * @return       Index do enumerace chyb.
  */
-TError ret(FILE *input, string *attr)
+TError ret(FILE *input)
 {
 	#ifdef DEBUG
 	printf("ret\n");
@@ -828,8 +830,8 @@ TError ret(FILE *input, string *attr)
 	// 42: <RETURN> -> return <EXPR>;
 	if(token.type == T_Return)
 	{
-		getNextToken(input, attr);
-		error = expr(input, attr, 0, &counterVar);
+		getNextToken(input, &attr);
+		error = expr(input, &attr, 0, &counterVar);
 		#ifdef DEBUG
 		printf("ret: expr vratilo: %d\n", error);
 		#endif
@@ -851,7 +853,7 @@ TError ret(FILE *input, string *attr)
  * @param  attr  String lexemu.
  * @return       Index do enumerace chyb.
  */
-TError cout_term(FILE *input, string *attr)
+TError cout_term(FILE *input)
 {
 	#ifdef DEBUG
 	printf("cout_term\n");
@@ -867,8 +869,8 @@ TError cout_term(FILE *input, string *attr)
 		 */
 		// KONEC SEMANTICKE ANALYZY
 		#endif
-		getNextToken(input, attr);
-		error = cout_term_n(input, attr);
+		getNextToken(input, &attr);
+		error = cout_term_n(input);
 		#ifdef DEBUG
 		printf("cout_term: cout_term_n vratilo: %d\n", error);
 		#endif
@@ -887,8 +889,8 @@ TError cout_term(FILE *input, string *attr)
 	// konstanta
 	else if((error = realtype()) == ENOP)
 	{
-		getNextToken(input, attr);
-		error = cout_term_n(input, attr);
+		getNextToken(input, &attr);
+		error = cout_term_n(input);
 		#ifdef DEBUG
 		printf("cout_term: cout_term_n vratilo: %d\n", error);
 		#endif
@@ -914,7 +916,7 @@ TError cout_term(FILE *input, string *attr)
  * @param  attr  String lexemu.
  * @return       Index do enumerace chyb.
  */
-TError cout_term_n(FILE *input, string *attr)
+TError cout_term_n(FILE *input)
 {
 	#ifdef DEBUG
 	printf("cout_term_n\n");
@@ -923,8 +925,8 @@ TError cout_term_n(FILE *input, string *attr)
 	// 40: <COUT_TERM_N> -> << <COUT_TERM>
 	if(token.type == T_LeftShift)
 	{
-		getNextToken(input, attr);
-		error = cout_term(input, attr);
+		getNextToken(input, &attr);
+		error = cout_term(input);
 		#ifdef DEBUG
 		printf("cout_term_n: cout_term vratilo: %d\n", error);
 		#endif
@@ -954,7 +956,7 @@ TError cout_term_n(FILE *input, string *attr)
  * @param  attr  String lexemu.
  * @return       Index do enumerace chyb.
  */
-TError cin_id_n(FILE *input, string *attr)
+TError cin_id_n(FILE *input)
 {
 	#ifdef DEBUG
 	printf("cin_id_n\n");
@@ -963,7 +965,7 @@ TError cin_id_n(FILE *input, string *attr)
 	// 37) <CIN_ID_N> -> >> id <CIN_ID_N>
 	if(token.type == T_RightShift)
 	{
-		getNextToken(input, attr);
+		getNextToken(input, &attr);
 		if(token.type == T_Id)
 		{
 			#ifdef SEM_CHECK
@@ -973,8 +975,8 @@ TError cin_id_n(FILE *input, string *attr)
 			 */
 			// KONEC SEMANTICKE ANALYZY
 			#endif
-			getNextToken(input, attr);
-			error = cin_id_n(input, attr);
+			getNextToken(input, &attr);
+			error = cin_id_n(input);
 			#ifdef DEBUG
 			printf("cin_id_n: cin_id_n vratilo: %d\n", error);
 			#endif
@@ -993,8 +995,8 @@ TError cin_id_n(FILE *input, string *attr)
 		// konstanta
 		else if((error = realtype()) == ENOP)
 		{
-			getNextToken(input, attr);
-			error = cin_id_n(input, attr);
+			getNextToken(input, &attr);
+			error = cin_id_n(input);
 			#ifdef DEBUG
 			printf("cin_id_n: cin_id_n vratilo: %d\n", error);
 			#endif
@@ -1029,7 +1031,7 @@ TError cin_id_n(FILE *input, string *attr)
  * @param  attr  String lexemu.
  * @return       Index do enumerace chyb.
  */
-TError assign(FILE *input, string *attr)
+TError assign(FILE *input)
 {
 	#ifdef DEBUG
 	printf("assign\n");
@@ -1045,11 +1047,11 @@ TError assign(FILE *input, string *attr)
 		 */
 		// KONEC SEMANTICKE ANALYZY
 		#endif
-		getNextToken(input, attr);
+		getNextToken(input, &attr);
 		if(token.type == T_Assig)
 		{
-			getNextToken(input, attr);
-			error = expr(input, attr, 1, &counterVar);
+			getNextToken(input, &attr);
+			error = expr(input, &attr, 1, &counterVar);
 			#ifdef DEBUG
 			printf("assign: expr vratilo: %d\n", error);
 			#endif
@@ -1077,7 +1079,7 @@ TError assign(FILE *input, string *attr)
  * @param  attr  String lexemu.
  * @return       Index do enumerace chyb.
  */
-TError var_def(FILE *input, string *attr)
+TError var_def(FILE *input)
 {
 	#ifdef DEBUG
 	printf("var_def\n");
@@ -1094,7 +1096,7 @@ TError var_def(FILE *input, string *attr)
 			return error;
 		}
 
-		getNextToken(input, attr);
+		getNextToken(input, &attr);
 		if(token.type == T_Id)
 		{
 			#ifdef SEM_CHECK
@@ -1108,8 +1110,8 @@ TError var_def(FILE *input, string *attr)
 			}
 			// KONEC SEMANTICKE ANALYZY
 			#endif
-			getNextToken(input, attr);
-			error = init(input, attr);
+			getNextToken(input, &attr);
+			error = init(input);
 			#ifdef DEBUG
 			printf("var_def: init vratilo: %d\n", error);
 			#endif
@@ -1130,7 +1132,7 @@ TError var_def(FILE *input, string *attr)
 	// 5: <VAR_DEF> -> auto id <INIT>;
 	else if(token.type == T_Auto)
 	{
-		getNextToken(input, attr);
+		getNextToken(input, &attr);
 		if(token.type == T_Id)
 		{
 			#ifdef SEM_CHECK
@@ -1144,8 +1146,8 @@ TError var_def(FILE *input, string *attr)
 			}
 			// KONEC SEMANTICKE ANALYZY
 			#endif	
-			getNextToken(input, attr);
-			error = init(input, attr);
+			getNextToken(input, &attr);
+			error = init(input);
 			#ifdef DEBUG
 			printf("var_def: init vratilo: %d\n", error);
 			#endif
@@ -1174,7 +1176,7 @@ TError var_def(FILE *input, string *attr)
  * @param  attr  String lexemu.
  * @return       Index do enumerace chyb.
  */
-TError init(FILE *input, string *attr)
+TError init(FILE *input)
 {
 	#ifdef DEBUG
 	printf("init\n");
@@ -1183,8 +1185,8 @@ TError init(FILE *input, string *attr)
 	// 6: <INIT> -> = <EXPR>
 	if(token.type == T_Assig)
 	{
-		getNextToken(input, attr);
-		error = expr(input, attr, 0, &counterVar);
+		getNextToken(input, &attr);
+		error = expr(input, &attr, 0, &counterVar);
 		#ifdef DEBUG
 		printf("init: expr vratilo: %d\n", error);
 		#endif
@@ -1211,7 +1213,7 @@ TError init(FILE *input, string *attr)
  * @param  attr  String lexemu.
  * @return       Index do enumerace chyb.
  */
-TError if_n(FILE *input, string *attr)
+TError if_n(FILE *input)
 {
 	#ifdef DEBUG
 	printf("if_n\n");
@@ -1220,8 +1222,8 @@ TError if_n(FILE *input, string *attr)
 	// 43) <IF_N> -> else <COMM_SEQ>
 	if(token.type == T_Else)
 	{
-		getNextToken(input, attr);
-		error = comm_seq(input, attr);
+		getNextToken(input, &attr);
+		error = comm_seq(input);
 		#ifdef DEBUG
 		printf("if_n: comm_seq vratilo: %d\n", error);
 		#endif
@@ -1248,14 +1250,14 @@ TError if_n(FILE *input, string *attr)
  * @param  attr  String lexemu.
  * @return       Index do enumerace chyb.
  */
-TError fcall_or_assign(FILE *input, string *attr)
+TError fcall_or_assign(FILE *input)
 {
 	#ifdef DEBUG
 	printf("fcall_or_assign\n");
 	#endif
 	TError error = ENOTFOUND;
 	// 30: <FCALL_OR_ASSIGN> -> <EXPR> ;
-	if((error = expr(input, attr, 0, &counterVar)) == ENOP || error == ESYN)
+	if((error = expr(input, &attr, 0, &counterVar)) == ENOP || error == ESYN)
 	{
 		#ifdef DEBUG
 		printf("fcall_or_assign: expr vratilo: %d\n", error);
@@ -1278,7 +1280,7 @@ TError fcall_or_assign(FILE *input, string *attr)
  * @param  attr  String lexemu.
  * @return       Index do enumerace chyb.
  */
-TError terms(FILE *input, string *attr)
+TError terms(FILE *input)
 {
 	#ifdef DEBUG
 	printf("terms\n");
@@ -1298,8 +1300,8 @@ TError terms(FILE *input, string *attr)
 		}
 		// KONEC SEMANTICKE ANALYZY
 		#endif
-		getNextToken(input, attr);
-		error = terms_n(input, attr);
+		getNextToken(input, &attr);
+		error = terms_n(input);
 		#ifdef DEBUG
 		printf("terms: terms_n vratilo: %d\n", error);
 		#endif
@@ -1327,7 +1329,7 @@ TError terms(FILE *input, string *attr)
  * @param  attr  String lexemu.
  * @return       Index do enumerace chyb.
  */
-TError terms_n(FILE *input, string *attr)
+TError terms_n(FILE *input)
 {
 	#ifdef DEBUG
 	printf("terms_n\n");
@@ -1336,7 +1338,7 @@ TError terms_n(FILE *input, string *attr)
 	// 34: <TERMS_N> -> , id <TERMS_N>
 	if(token.type == T_Comma)
 	{
-		getNextToken(input, attr);
+		getNextToken(input, &attr);
 		if(token.type == T_Id)
 		{
 			#ifdef SEM_CHECK
@@ -1350,8 +1352,8 @@ TError terms_n(FILE *input, string *attr)
 			}
 			// KONEC SEMANTICKE ANALYZY
 			#endif
-			getNextToken(input, attr);
-			error = terms_n(input, attr);
+			getNextToken(input, &attr);
+			error = terms_n(input);
 			#ifdef DEBUG
 			printf("terms: terms_n vratilo: %d\n", error);
 			#endif
