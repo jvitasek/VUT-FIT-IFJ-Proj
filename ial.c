@@ -192,25 +192,27 @@ tHTItem* htSearch (tHTable* ptrht, char* key) {
  */
 void htInsert (tHTable* ptrht, char* key, tData data) {
 
-	if ((*ptrht) == NULL) {
+	if ((*ptrht) == NULL)
+	{
 		return;
 	}
 
-	printf("KEY: %s\n", key);
-
 	tHTItem *item = htSearch(ptrht, key); // najdeme polozku
 
-	if (item != NULL) {		
+	if (item != NULL)
+	{		
 		// pokud jsem polozku nasel, tak prepisu data
 		item->data = data;
 		return;
 	}
-	else {
+	else
+	{
 		// pokud jsem polozku nenasel, tak vytvorim a zaradim na zacatek
 		tHTItem *itemNew = malloc(sizeof(struct tHTItem));
 		itemNew->key = key;
 		itemNew->data = data;
 		itemNew->ptrnext = (*ptrht)[hashCode(key)];
+		printf("HASH: %d\n", hashCode(key));
 		(*ptrht)[hashCode(key)] = itemNew;
 	}
 }

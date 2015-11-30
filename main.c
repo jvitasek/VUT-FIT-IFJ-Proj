@@ -21,11 +21,13 @@ int main(int argc, char **argv)
 	strInit(&attr);		// inicializujeme string
 	if((argc < 2) || (argc > 2))		// kontrola ci bol zadany spravny pocet parametrov na prikaz. riadke
 	{
+		strFree(&attr);
 		print_error(ERUN_IN, 0);
 	}
 	
 	if((input = (fopen(argv[1],"r"))) == 0)		// otvorime vstupny subor na citanie
 	{
+		strFree(&attr);
 		print_error(ERUN_IN, 0);
 	}
 

@@ -13,7 +13,6 @@
 
 #define STR_LEN 8
 
-
 /*
  * Funkcia vytvara novy retazec.
  */

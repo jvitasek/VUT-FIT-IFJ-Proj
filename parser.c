@@ -21,7 +21,6 @@
 #include "expression.h"
 
 int counterVar = 1;		// globalna premenna, ktora sluzi pri tvorbe pomocnych premennych na medzivypocty
-
 tHTable* localTable;
 tHTItem* item;
 /**
@@ -57,7 +56,7 @@ void getNextToken(FILE *input, string *attr)
 int checkKeyword(char *test)
 {
 	int idx = 0;
-	while(idx <= KW)
+	while(idx < KW)
 	{
 		if(strcmp(kw[idx], test) == 0)
 		{
@@ -95,11 +94,12 @@ TError parse(FILE *input, string *attr)
 	}
 	// 1: <PROGRAM> -> <FUNC_N>
 	error = func_n(input, attr);
-	outputSymbolTable(localTable);
-	htClearAll(localTable);
 	#ifdef DEBUG
 	printf("parse: func_n vratilo: %d\n", error);
 	#endif
+
+	outputSymbolTable(localTable);
+	htClearAll(localTable);
 
 	if(error == ENOP || error == EEMPTY)
 	{
@@ -182,18 +182,35 @@ TError func(FILE *input, string *attr)
 		getNextToken(input, attr);
 		if(token.type == T_Id)
 		{
+
 			// SEMANTICKA ANALYZA
+			
+			/**
+			 * @todo kontrola, zda nazev funkce neni keyword
+			 */
+			if(checkKeyword(attr->str) == 1)
+			{
+				error = ESEM;
+				return error;
+			}
+			
 			tData data;
 			data.type = FUNC;
 			data.timesUsed = 0;
-			htInsert(localTable, attr->str, data);
-
-
+			if(attr->str != NULL)
+			{
+				htInsert(localTable, strGetStr(attr), data);
+				outputSymbolTable(localTable);
+			}
+			
 			/**
 			 * @todo inicializace lokalni tabulky symbolu
-			 * @todo vlozeni teto funkce do tabulky symbolu
+			 * @todo vlozeni funkce samotne do tabulky symbolu
+			 * @todo vlozeni funkce do globalni tabulky
+			 * @todo vlozeni tabulky symbolu na stack (top)
 			 */
 			// KONEC SEMANTICKE ANALYZY
+
 
 			getNextToken(input, attr);
 			error = par_def_list(input, attr);

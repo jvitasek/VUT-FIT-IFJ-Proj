@@ -129,10 +129,10 @@ TError StackDispose(Tstack *stack)
 	// postupne rusim vsechny prvky na zasobniku
 	while (stack->top != NULL)
 	{
-		if (stack->top->data != NULL)
-		{
-			free(stack->top->data);
-		}
+		// if (stack->top->data != NULL)
+		// {
+		// 	free(stack->top->data);
+		// }
 		tempPtr = stack->top;
 		stack->top = stack->top->Lptr;
 		free(tempPtr);
@@ -158,14 +158,15 @@ TError StackPop(Tstack *stack)
 
 	TstackElemPtr tempPtr = NULL;
 
+
 	if (stack->top != NULL)
 	{
 		tempPtr = stack->top;
 
-		if (stack->top->data != NULL)
-		{
-			free(stack->top->data);
-		}
+		// if (stack->top->data != NULL)
+		// {
+		// 	free(stack->top->data);
+		// }
 
 		if (stack->top->Lptr != NULL)
 		{
