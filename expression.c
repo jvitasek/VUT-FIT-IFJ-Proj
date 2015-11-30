@@ -809,6 +809,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 	int counter = 0; // pro pocitani zavorek
 	//char *tempData = NULL;
 	int tokterm = 0;
+	outputSymbolTable(*localTable);
 	#ifdef DEBUG
 	printf("expr\n");
 	#endif

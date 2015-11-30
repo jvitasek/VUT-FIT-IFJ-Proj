@@ -37,7 +37,7 @@ int main(int argc, char **argv)
 	{
 		case ENOP:
 			// vse v poradku
-			printf("SUCCESS: vse v poradku!\n");
+			fprintf(stderr, "SUCCESS: vse v poradku!\n");
 			break;
 		default:
 			// nastala chyba v prekladu
@@ -48,7 +48,7 @@ int main(int argc, char **argv)
 			print_error(result, token.line);
 			fclose(input);
 			//strFree(&attr);
-			return -result;
+			return result;
 		break;
 	}
 	/**
