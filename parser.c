@@ -8,7 +8,7 @@
  * 			xvalec00 – Dusan Valecky
  */
 
-//#define DEBUG 1
+#define DEBUG 1
 //#define SEM_CHECK 1
 
 #include <stdio.h>
@@ -20,7 +20,7 @@
 #include "ial.h"
 #include "expression.h"
 
-string attr; //vytvorime si string
+string attr; // vytvorime si string
 
 int counterVar = 1;		// globalna premenna, ktora sluzi pri tvorbe pomocnych premennych na medzivypocty
 tHTable* localTable;
@@ -48,25 +48,6 @@ void getNextToken(FILE *input, string *attr)
 		print_error(ELEX, token.line);
 		exit(1);
 	}
-}
-
-/**
- * Zkontroluje, zda je vlozeny retezec klicove slovo.
- * @param  attr String lexemu.
- * @return      0 pokud neni, 1 pokud je.
- */
-int checkKeyword(char *test)
-{
-	int idx = 0;
-	while(idx < KW)
-	{
-		if(strcmp(kw[idx], test) == 0)
-		{
-			return 1;
-		}
-		++idx;
-	}
-	return 0;
 }
 
 /**
@@ -187,24 +168,14 @@ TError func(FILE *input)
 
 			// SEMANTICKA ANALYZA
 			
-			/**
-			 * @todo kontrola, zda nazev funkce neni keyword
-			 */
-			if(checkKeyword(attr.str) == 1)
-			{
-				error = ESEM;
-				return error;
-			}
-			
 			tData data;
 			data.type = FUNC;
 			data.timesUsed = 0;
-			if(attr.str != NULL)
+			if(strGetStr(&attr) != NULL)
 			{
 				htInsert(localTable, strGetStr(&attr), data);
-				outputSymbolTable(localTable);
 			}
-			
+
 			/**
 			 * @todo inicializace lokalni tabulky symbolu
 			 * @todo vlozeni funkce samotne do tabulky symbolu
@@ -660,6 +631,14 @@ TError stmt(FILE *input)
 		 */
 		// KONEC SEMANTICKE ANALYZY
 		#endif
+		// 30) <STMT> -> <FCALL>
+		if((error = fcall(input)) == ENOP || error == ESYN)
+		{
+			#ifdef DEBUG
+			printf("stmt: fcall vratilo: %d\n", error);
+			#endif
+			return error;
+		}
 		getNextToken(input, &attr);
 		if(token.type == T_Assig)
 		{
@@ -1269,6 +1248,61 @@ TError fcall_or_assign(FILE *input)
 		else if(error == ESYN)
 		{
 			return error;
+		}
+	}
+	return error;
+}
+
+
+/**
+ * [fcall description]
+ * @param  input [description]
+ * @return       [description]
+ */
+TError fcall(FILE *input)
+{
+	#ifdef DEBUG
+	printf("fcall\n");
+	#endif
+	TError error = ENOTFOUND;
+	// 31b: <FCALL> -> id ( <TERMS> );
+	if(token.type == T_Id)
+	{
+		getNextToken(input, &attr);
+		if(token.type == T_LeftParenthesis)
+		{
+			getNextToken(input, &attr);
+			error = terms(input);
+			if(error == ENOP || error == EEMPTY)
+			{
+				//getNextToken(input, &attr);
+				// semicolon nebo right parenth
+				if(token.type == T_RightParenthesis)
+				{
+					getNextToken(input, &attr);
+					if(token.type == T_Semicolon)
+					{
+						error = ENOP;
+						return error;
+					}
+					else
+					{
+						return ESYN;
+					}
+				}
+				else
+				{
+					return ESYN;
+				}
+			}
+			else if(error == ESYN)
+			{
+				return error;
+			}
+		}
+		else
+		{
+			return ESYN;
 		}
 	}
 	return error;
