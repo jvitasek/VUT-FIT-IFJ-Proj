@@ -20,7 +20,7 @@
 int *counteerVar;	// sluzi pri tvorbe pomocnych premennych
 
 //tHTable* globalTS;
-PSymbols *exprStr;
+//PSymbols *exprStr;
 Tstack stack;
 
 /**
@@ -63,7 +63,7 @@ TError StackInit(Tstack *stack)
 		#ifdef DEBUG
 			printf("StackInit stack == NULL.\n");
 		#endif
-		error = ERUN_UNINIT;
+		error = EINT;
 		return error;
 	}
 
@@ -73,7 +73,7 @@ TError StackInit(Tstack *stack)
 		((stack->first = malloc(sizeof(struct TstackElem))) == NULL))
 	{
 		fprintf(stderr, "Chyba pri malloc.\n");
-		error = ERUN_UNINIT;
+		error = EINT;
 		return error;
 	}
 
@@ -81,7 +81,7 @@ TError StackInit(Tstack *stack)
 	if ((tempPtr = malloc(sizeof(struct TstackElem))) == NULL)
 	{
 		fprintf(stderr, "Chyba pri malloc.\n");
-		error = ERUN_UNINIT;
+		error = EINT;
 		return error;
 	}
 
@@ -219,7 +219,7 @@ TError StackPush(Tstack *stack, int tokterm)
 	
 	if ((tempPtr = malloc(sizeof(struct TstackElem))) == NULL)
 	{
-		error = ERUN_UNINIT;
+		error = EINT;
 		return error;
 	}
 
@@ -264,7 +264,8 @@ TstackElemPtr StackTop(Tstack *stack)
 	if ((tempPtr = malloc(sizeof(struct TstackElem))) == NULL)
 	{
 		fprintf(stderr, "Chyba pri malloc.\n");
-		exit(99);
+		error = EINT;
+		return error;
 	}
 
 	// terminal je hned na vrcholu zasobniku
@@ -347,7 +348,7 @@ TError StackShift(Tstack *stack, int tokterm)
 	if ((temp = malloc(sizeof(struct TstackElem))) == NULL)
 	{
 		fprintf(stderr, "Chyba pri malloc.\n");
-		error = ERUN_UNINIT;
+		error = EINT;
 		return error;
 	}
 
@@ -719,7 +720,7 @@ TError findRule(Tstack *stack, ruleType rule)
 			if ((tempPtr = malloc(sizeof(struct TstackElem))) == NULL)
 			{
 				fprintf(stderr, "Chyba pri malloc.\n");
-				error = ERUN_UNINIT;
+				error = EINT;
 				return error;
 			}
 			
@@ -817,7 +818,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 	if ((tempStack = malloc(sizeof(struct TstackElem))) == NULL)
 	{
 		fprintf(stderr, "Chyba pri malloc.\n");
-		error = ERUN_UNINIT;
+		error = EINT;
 		StackDispose(&stack);
 		return error;
 	}
