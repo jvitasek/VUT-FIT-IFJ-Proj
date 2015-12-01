@@ -8,7 +8,7 @@
  * 			xvalec00 – Dusan Valecky
  */
 
-#define DEBUG 1
+//#define DEBUG 1
 //#define SEM_CHECK 1
 
 #include <stdio.h>
@@ -25,6 +25,7 @@ string attr; // vytvorime si string
 int counterVar = 1;		// globalna premenna, ktora sluzi pri tvorbe pomocnych premennych na medzivypocty
 tHTable* localTable;
 tHTItem* item;
+tHTItem* temp;
 /**
  * @todo deklarace instruction listu
  */
@@ -81,7 +82,7 @@ TError parse(FILE *input)
 	printf("parse: func_n vratilo: %d\n", error);
 	#endif
 
-	//outputSymbolTable(localTable);
+	outputSymbolTable(localTable);
 	htClearAll(localTable);
 
 	if(error == ENOP || error == EEMPTY)
@@ -172,12 +173,33 @@ TError func(FILE *input)
 			// precti timesUsed podle
 			// pokud neni
 
-			tData data;
-			data.type = FUNC;
-			data.timesUsed = 0;
-			if(strGetStr(&attr) != NULL)
+			// funkce jiz v tabulce je
+			tData *tempData;
+			if((tempData = htRead(localTable, strGetStr(&attr))) != NULL)
 			{
-				htInsert(localTable, strGetStr(&attr), data);
+				if(tempData->timesUsed == 0)
+				{
+					tData data;
+					data.type = tempData->type;
+					data.timesUsed = tempData->timesUsed + 1;
+					htInsert(localTable, strGetStr(&attr), data);
+				}
+				// redefinice/znovudeklarace
+				else
+				{
+					return ESEM_DEF;
+				}
+			}
+			// funkce jeste v tabulce neni
+			else
+			{
+				if(strGetStr(&attr) != NULL)
+				{
+					tData data;
+					data.type = FUNC;
+					data.timesUsed = 0;
+					htInsert(localTable, strGetStr(&attr), data);
+				}
 			}
 
 			/**

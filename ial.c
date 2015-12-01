@@ -128,7 +128,7 @@ void heapSort (char* a) {
  * @param  key [description]
  * @return     [description]
  */
-int hashCode (char* key) {
+int hashCode ( char *key ) {
 	int retval = 1;
 	int keylen = strlen(key);
 	for ( int i=0; i<keylen; i++ )
@@ -137,116 +137,130 @@ int hashCode (char* key) {
 }
 
 /**
- * Inicializace tabulky.
+ * [htInit  description]
  * @param ptrht [description]
  */
-void htInit (tHTable* ptrht) {
+void htInit ( tHTable* ptrht ) {
 
-	if ((*ptrht) == NULL) {
-		return;
+	if(ptrht) // we have something to work with
+	{
+		for(int i = 0; i < HTSIZE; i++) // get all the items
+			(*ptrht)[i] = NULL; // and set them to null
 	}
-
-	for (int i = 0; i < HTSIZE; i++) {
-		(*ptrht)[i] = NULL;
-	}
+	else // nothing to do
+		return; // end here
 }
 
 /**
- * Vyhledani prvku v TRP ptrht podle zadaneho klice key. Pokud je
- * dany prvek nalezen, vraci se ukazatel na dany prvek. Pokud prvek nalezen neni, 
- * vraci se hodnota NULL.
+ * [htSearch  description]
  * @param  ptrht [description]
  * @param  key   [description]
  * @return       [description]
  */
-tHTItem* htSearch (tHTable* ptrht, char* key) {
+tHTItem* htSearch ( tHTable* ptrht, char *key ) {
 
-	// pokud bude tabulka neinicializovaná
-	if ((*ptrht) == NULL) {
-		return NULL;
+	if(ptrht)
+	{
+		int rkey = hashCode(key); // we decode our key and store it
+		tHTItem *temp = (*ptrht)[rkey]; // helper placeholder
+
+		while(temp && temp->key != key) // until there is something to search + we haven't yet found it
+			temp = temp->ptrnext; // move onto the next value
+
+		return temp; // found it, return it
 	}
-
-	tHTItem* item; // pomocna promena
-	item = (*ptrht)[hashCode(key)]; 
-
-	// prochazi jednotlive synonyma v tabulce, pokud najde synonymum se spravnym klicem vrati ukazatel na nej
-	while (item != NULL) {
-		if (item->key == key) {
-			return item; // nasli jsme
-		}
-		else {
-			item = item->ptrnext;
-		}
-	}
-
-	// klic nenalezen vratime NULL
-	return NULL;
+	else // nothing to do or we ran out of values
+		return NULL; // end here, haven't found anything
 }
 
 /**
- * Tato funkce vklada do tabulky ptrht polozku s klicem key a s daty
- * data.
+ * [htInsert  description]
  * @param ptrht [description]
  * @param key   [description]
  * @param data  [description]
  */
-void htInsert (tHTable* ptrht, char* key, tData data) {
+void htInsert ( tHTable* ptrht, char *key, tData data ) {
 
-	if ((*ptrht) == NULL)
+	if(ptrht) // it there is something to work with
 	{
-		return;
-	}
+		tHTItem *temp = NULL; // our helper placeholder
+		int rkey = hashCode(key); // decode the key specified
 
-	tHTItem *item = htSearch(ptrht, key); // najdeme polozku
+		if((temp = htSearch(ptrht, key))) // we have found our key position
+		{
+			tHTItem *ntemp = (*ptrht)[rkey]; // new helper placeholder
 
-	if (item != NULL)
-	{		
-		// pokud jsem polozku nasel, tak prepisu data
-		item->data = data;
-		return;
+			while(ntemp) // until there is no more items
+			{
+				if(ntemp->key == key) // if we have found our key position
+				{
+					ntemp->data = data; // insert the data
+					return; // end here
+				}
+				ntemp = ntemp->ptrnext; // otherwise, move onto the next item
+			}
+		}
+		else // we found an empty place or a synonym
+		{
+			if((*ptrht[rkey])) // empty place
+			{
+				temp = malloc(sizeof(tHTable));
+				if(!temp) // malloc went wrong
+					return; // end here
+				temp->data = data; // store our data
+				//temp->key = key; // store our key
+				temp->key = (char *) malloc(sizeof(char)*strlen(key)+1);
+				strcpy(temp->key, key);
+				temp->ptrnext = (*ptrht)[rkey]; // append our new item
+				(*ptrht)[rkey] = temp; // move it to the right position
+			}
+			else // synonym
+			{
+				(*ptrht)[rkey] = malloc(sizeof(tHTable)); // allocating a new place
+				if(!((*ptrht)[rkey])) // malloc went wrong
+					return; // end here
+
+				(*ptrht)[rkey]->data = data; // passing the data specified
+				(*ptrht)[rkey]->key = key; // passing the key specified
+				//(*ptrht)[rkey]->key = malloc(sizeof(char)*strlen(key));
+				//strcpy((*ptrht)[rkey]->key, key);
+				(*ptrht)[rkey]->ptrnext = NULL; // nowhere else to go
+
+			}
+		}
 	}
-	else
-	{
-		// pokud jsem polozku nenasel, tak vytvorim a zaradim na zacatek
-		tHTItem *itemNew = malloc(sizeof(struct tHTItem));
-		itemNew->key = (char *) malloc(sizeof(char)*strlen(key));
-		strcpy(itemNew->key,key);
-		itemNew->data = data;
-		itemNew->ptrnext = (*ptrht)[hashCode(key)];
-		printf("HASH: %d\n", hashCode(key));
-		(*ptrht)[hashCode(key)] = itemNew;
-	}
+	else // nothing to work with
+		return; // end here
 }
 
 /**
- * Tato funkce zjistuje hodnotu datove casti polozky zadane klicem.
- * Pokud je polozka nalezena, vraci funkce ukazatel na polozku
- * Pokud polozka nalezena nebyla, vraci se funkcni hodnota NULL
+ * [htRead  description]
  * @param  ptrht [description]
  * @param  key   [description]
  * @return       [description]
  */
-tData* htRead (tHTable* ptrht, char* key) {
+tData* htRead ( tHTable* ptrht, char *key ) {
 
-	tHTItem* item = htSearch(ptrht, key); // najdu prvek podle klice
+	if(!ptrht || !((*ptrht)[hashCode(key)]) ) // nowhere to look or not initialized
+		return NULL; // end here, let us know we found nothing
+	else // we have somewhere to look
+	{
+		tHTItem *temp = htSearch(ptrht, key); // search for the item with our key
 
-	if (item != NULL) {
-		// nalezen v tabulce zaznam s timto klicem
-		return &(item->data);
+		if(temp) // if we found the item
+			return &(temp->data); // return its data
+		else // haven't found it
+			return NULL; // end here, let us know we found nothing
 	}
-	else {
-		// polozka nenalezena vratim NULL
-		return NULL;
-	}
+	return NULL; // end here, let us know we found nothing
 }
 
 /**
- * Funkce vyjme polozku s klicem key z tabulky ptrht. 
+ * [htDelete  description]
  * @param ptrht [description]
  * @param key   [description]
  */
-void htDelete (tHTable* ptrht, char* key) {
-
+void htDelete ( tHTable* ptrht, char *key ) {
 	if ((*ptrht) == NULL) {
 		return;
 	}
@@ -273,25 +287,26 @@ void htDelete (tHTable* ptrht, char* key) {
 }
 
 /**
- * Funkce zrusi vsechny polozky tabulky
+ * [htClearAll  description]
  * @param ptrht [description]
  */
-void htClearAll (tHTable* ptrht) {
+void htClearAll ( tHTable* ptrht ) {
 
-	if ((*ptrht) == NULL) {
-		return;
-	}
+	if(!ptrht) // nothing to clean up
+		return; // end here
+	else // something to clean up
+	{
+		for(int i = 0; i < HTSIZE; i++) // cycle to go through everything
+		{
+			tHTItem *temp = (*ptrht)[i]; // placeholder variable for the cleanup
 
-	tHTItem* item; // pomocna promena
-
-	// prochazime pres celou tabulku
-	for (int i = 0; i < HTSIZE; i++) {
-		while ((*ptrht)[i] != NULL) {
-			item = ((*ptrht)[i])->ptrnext;
-			free((*ptrht)[i]);
-			(*ptrht)[i] = item;
+			while((*ptrht)[i]) // while there is an item
+			{
+				temp = (*ptrht)[i]; // assign it to the placeholder
+				(*ptrht)[i] = (*ptrht)[i]->ptrnext; // move onto the next item
+				free(temp); // clean up
+			}
 		}
-		(*ptrht)[i] = NULL;
 	}
 }
 

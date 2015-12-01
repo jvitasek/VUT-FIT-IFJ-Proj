@@ -54,7 +54,7 @@ typedef struct tData {
  * Datova polozka TRP s explicitne retezenymi synonymy
  */
 typedef struct tHTItem {
-   char* key;            // klic 
+   char *key;            // klic 
    tData data;          // obsah 
    struct tHTItem* ptrnext;   // ukazatel na dalsi synonymum
 } tHTItem;
