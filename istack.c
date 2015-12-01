@@ -180,17 +180,8 @@ TError gStackPush(stack *stack, tHTable **table)
 
 	tempPtr->table = table;
 
-	// vkladame teprve 1. prvek
-	if (stack->top->Lptr == NULL)
-	{
-		tempPtr->Lptr = stack->first;
-		stack->top = tempPtr;
-	}
-	else
-	{
-		tempPtr->Lptr = stack->top;
-		stack->top = tempPtr;
-	}
+	tempPtr->Lptr = stack->top;
+	stack->top = tempPtr;
 
 	error = ENOP;
 	return error;
