@@ -95,7 +95,8 @@ TError parse(FILE *input)
 	#ifdef DEBUG
 	printf("parse: func_n vratilo: %d\n", error);
 	#endif
-	outputSymbolTable(localTable);
+	//outputSymbolTable(localTable);
+	whatsInStacks(&tableStack);
 
 	/**
 	 * smazani tabulky symbolu
@@ -216,6 +217,7 @@ TError func(FILE *input)
 					data.type = FUNC;
 					data.timesUsed = 0;
 					htInsert(localTable, strGetStr(&attr), data);
+					gStackPush(&tableStack, &localTable);
 				}
 			}
 
@@ -1115,12 +1117,32 @@ TError var_def(FILE *input)
 		{
 			#ifdef SEM_CHECK
 			// SEMANTICKA ANALYZA
-			if(attr->str != NULL)
+			tData *tempData;
+			if((tempData = htRead(localTable, strGetStr(&attr))) != NULL)
 			{
-				tData data;
-				data.type = VAR;
-				data.timesUsed = 0;
-				htInsert(localTable, attr->str, data);
+				if(tempData->timesUsed == 0)
+				{
+					tData data;
+					data.type = tempData->type;
+					data.timesUsed = tempData->timesUsed + 1;
+					htInsert(localTable, strGetStr(&attr), data);
+				}
+				// redefinice/znovudeklarace
+				else
+				{
+					return ESEM_DEF;
+				}
+			}
+			// funkce jeste v tabulce neni
+			else
+			{
+				if(strGetStr(&attr) != NULL)
+				{
+					tData data;
+					data.type = FUNC;
+					data.timesUsed = 0;
+					htInsert(localTable, strGetStr(&attr), data);
+				}
 			}
 			// KONEC SEMANTICKE ANALYZY
 			#endif
@@ -1469,23 +1491,4 @@ TError initSTable(tHTable **table)
 		return error;
 	}
 	return error;
-}
-
-/**
- * [outputSymbolTable description]
- * @param ptrht [description]
- */
-void outputSymbolTable(tHTable* ptrht)
-{
-	printf ("------------HASH TABLE--------------\n");
-	for ( int i=0; i<HTSIZE; i++ ) {
-		printf ("%i:",i);
-		tHTItem* ptr = (*ptrht)[i];
-		while ( ptr != NULL ) {
-			printf (" (%s,%d,%d)", ptr->key, ptr->data.type, ptr->data.timesUsed);
-			ptr = ptr->ptrnext;
-		}
-		printf ("\n");
-	}
-	printf ("------------------------------------\n");
 }

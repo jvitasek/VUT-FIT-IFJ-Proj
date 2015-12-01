@@ -221,9 +221,9 @@ void htInsert ( tHTable* ptrht, char *key, tData data ) {
 					return; // end here
 
 				(*ptrht)[rkey]->data = data; // passing the data specified
-				(*ptrht)[rkey]->key = key; // passing the key specified
-				//(*ptrht)[rkey]->key = malloc(sizeof(char)*strlen(key));
-				//strcpy((*ptrht)[rkey]->key, key);
+				//(*ptrht)[rkey]->key = key; // passing the key specified
+				(*ptrht)[rkey]->key = malloc(sizeof(char)*strlen(key));
+				strcpy((*ptrht)[rkey]->key, key);
 				(*ptrht)[rkey]->ptrnext = NULL; // nowhere else to go
 
 			}
@@ -308,6 +308,25 @@ void htClearAll ( tHTable* ptrht ) {
 			}
 		}
 	}
+}
+
+/**
+ * [outputSymbolTable description]
+ * @param ptrht [description]
+ */
+void outputSymbolTable(tHTable* ptrht)
+{
+	printf ("------------HASH TABLE--------------\n");
+	for ( int i=0; i<HTSIZE; i++ ) {
+		printf ("%i:",i);
+		tHTItem* ptr = (*ptrht)[i];
+		while ( ptr != NULL ) {
+			printf (" (%s,%d,%d)", ptr->key, ptr->data.type, ptr->data.timesUsed);
+			ptr = ptr->ptrnext;
+		}
+		printf ("\n");
+	}
+	printf ("------------------------------------\n");
 }
 
 /**
