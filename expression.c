@@ -264,8 +264,8 @@ TstackElemPtr StackTop(Tstack *stack)
 	if ((tempPtr = malloc(sizeof(struct TstackElem))) == NULL)
 	{
 		fprintf(stderr, "Chyba pri malloc.\n");
-		error = EINT;
-		return error;
+		//error = EINT;
+		//return error;
 	}
 
 	// terminal je hned na vrcholu zasobniku

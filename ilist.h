@@ -61,14 +61,6 @@ typedef enum {
 	I_SORT 
 } tInstCode;
 
-/**
- * Struktura operandu
- */
-typedef struct operand
-{
-	TypeI type; // typ operandu
-	void *obsah // obsah promenne/operandu
-};
 
 /**
  * Datovy typ
@@ -81,14 +73,24 @@ typedef enum
 } TypeI;
 
 /**
+ * Struktura operandu
+ */
+typedef struct operand
+{
+	TypeI type; // typ operandu
+	void *obsah; // obsah promenne/operandu
+} iOperand;
+
+
+/**
  * Struktura reprezentujici 3AC instrukci
  */
 typedef struct Inst 
 {
 	tInstCode instType; // typ instrukce
-	operand *op1; // operand 1
-	operand *op2; // operand 2
-	operand *res; // result
+	iOperand *op1; // operand 1
+	iOperand *op2; // operand 2
+	iOperand *res; // result
 } tInst;
 
 /**
