@@ -6,6 +6,7 @@
  * Autori:
  * 			xvyrou05 – Marek Vyroubal
  * 			xvitas02 – Jakub Vitasek
+ * 			xvidaj00 – Juraj Vida
  */
 
 

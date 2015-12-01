@@ -24,6 +24,7 @@ string attr; // vytvorime si string
 
 int counterVar = 1;		// globalna premenna, ktora sluzi pri tvorbe pomocnych premennych na medzivypocty
 tHTable* localTable;
+tHTable* tempTable; 
 stack tableStack;
 tHTItem* item;
 tHTItem* temp;
@@ -74,7 +75,7 @@ TError parse(FILE *input)
 	/**
 	 * inicializace hlavni tabulky symbolu
 	 */
-	if(initSTable(&localTable) != ENOP)
+	if(initSTable(&localTable) != ENOP || initSTable(&tempTable) != ENOP)
 	{
 		return error;
 	}
@@ -95,13 +96,14 @@ TError parse(FILE *input)
 	#ifdef DEBUG
 	printf("parse: func_n vratilo: %d\n", error);
 	#endif
-	//outputSymbolTable(localTable);
-	whatsInStacks(&tableStack);
+	outputSymbolTable(localTable);
+	//whatsInStacks(&tableStack);
 
 	/**
 	 * smazani tabulky symbolu
 	 */
 	htClearAll(localTable);
+	htClearAll(tempTable);
 
 	/**
 	 * smazani zasobniku tabulek symbolu
@@ -217,7 +219,7 @@ TError func(FILE *input)
 					data.type = FUNC;
 					data.timesUsed = 0;
 					htInsert(localTable, strGetStr(&attr), data);
-					gStackPush(&tableStack, &localTable);
+					//gStackPush(&tableStack, &localTable);
 				}
 			}
 
@@ -669,13 +671,16 @@ TError stmt(FILE *input)
 	// 29) <STMT> -> id = <FCALL_OR_ASSIGN>
 	else if(token.type == T_Id)
 	{
-		#ifdef SEM_CHECK
+		//#ifdef SEM_CHECK
 		// SEMANTICKA ANALYZA
-		/**
-		 * todo kontrola, zda id existuje v tabulce symbolu
-		 */
+		tData *tempData;
+		if((tempData = htRead(localTable, strGetStr(&attr))) == NULL)
+		{
+			print_error(ESEM_DEF, token.line);
+			exit(ESEM_DEF);
+		}
 		// KONEC SEMANTICKE ANALYZY
-		#endif
+		//#endif
 		getNextToken(input, &attr);
 		if(token.type == T_Assig)
 		{
@@ -1115,37 +1120,30 @@ TError var_def(FILE *input)
 		getNextToken(input, &attr);
 		if(token.type == T_Id)
 		{
-			#ifdef SEM_CHECK
+			//#ifdef SEM_CHECK
 			// SEMANTICKA ANALYZA
+			
 			tData *tempData;
 			if((tempData = htRead(localTable, strGetStr(&attr))) != NULL)
 			{
-				if(tempData->timesUsed == 0)
-				{
-					tData data;
-					data.type = tempData->type;
-					data.timesUsed = tempData->timesUsed + 1;
-					htInsert(localTable, strGetStr(&attr), data);
-				}
-				// redefinice/znovudeklarace
-				else
-				{
-					return ESEM_DEF;
-				}
+				print_error(ESEM_DEF, token.line);
+				exit(ESEM_DEF);
 			}
-			// funkce jeste v tabulce neni
+			// promenna jeste neni v tabulce
 			else
 			{
 				if(strGetStr(&attr) != NULL)
 				{
 					tData data;
-					data.type = FUNC;
+					data.type = VAR;
 					data.timesUsed = 0;
 					htInsert(localTable, strGetStr(&attr), data);
+					//gStackPush(&tableStack, &localTable);
 				}
 			}
+
 			// KONEC SEMANTICKE ANALYZY
-			#endif
+			//#endif
 			getNextToken(input, &attr);
 			error = init(input);
 			#ifdef DEBUG
