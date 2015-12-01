@@ -164,9 +164,8 @@ tHTItem* htSearch ( tHTable* ptrht, char *key ) {
 		int rkey = hashCode(key); // we decode our key and store it
 		tHTItem *temp = (*ptrht)[rkey]; // helper placeholder
 
-		while(temp && temp->key != key) // until there is something to search + we haven't yet found it
+		while(temp && (strcmp(temp->key,key) != 0)) // until there is something to search + we haven't yet found it
 			temp = temp->ptrnext; // move onto the next value
-
 		return temp; // found it, return it
 	}
 	else // nothing to do or we ran out of values
@@ -180,7 +179,6 @@ tHTItem* htSearch ( tHTable* ptrht, char *key ) {
  * @param data  [description]
  */
 void htInsert ( tHTable* ptrht, char *key, tData data ) {
-
 	if(ptrht) // it there is something to work with
 	{
 		tHTItem *temp = NULL; // our helper placeholder
@@ -189,12 +187,13 @@ void htInsert ( tHTable* ptrht, char *key, tData data ) {
 		if((temp = htSearch(ptrht, key))) // we have found our key position
 		{
 			tHTItem *ntemp = (*ptrht)[rkey]; // new helper placeholder
-
+	
 			while(ntemp) // until there is no more items
 			{
-				if(ntemp->key == key) // if we have found our key position
+				if(strcmp(ntemp->key,key) == 0) // if we have found our key position
 				{
-					ntemp->data = data; // insert the data
+					ntemp->data.timesUsed = data.timesUsed; // insert the data
+					ntemp->data.type = data.type;
 					return; // end here
 				}
 				ntemp = ntemp->ptrnext; // otherwise, move onto the next item
@@ -207,10 +206,11 @@ void htInsert ( tHTable* ptrht, char *key, tData data ) {
 				temp = malloc(sizeof(tHTable));
 				if(!temp) // malloc went wrong
 					return; // end here
-				temp->data = data; // store our data
-				//temp->key = key; // store our key
-				temp->key = (char *) malloc(sizeof(char)*strlen(key)+1);
+				temp->data.timesUsed = data.timesUsed;
+				temp->data.type = data.type;
+				temp->key = malloc(sizeof(char)*strlen(key)+1);
 				strcpy(temp->key, key);
+
 				temp->ptrnext = (*ptrht)[rkey]; // append our new item
 				(*ptrht)[rkey] = temp; // move it to the right position
 			}
@@ -219,10 +219,10 @@ void htInsert ( tHTable* ptrht, char *key, tData data ) {
 				(*ptrht)[rkey] = malloc(sizeof(tHTable)); // allocating a new place
 				if(!((*ptrht)[rkey])) // malloc went wrong
 					return; // end here
-
-				(*ptrht)[rkey]->data = data; // passing the data specified
-				//(*ptrht)[rkey]->key = key; // passing the key specified
-				(*ptrht)[rkey]->key = malloc(sizeof(char)*strlen(key));
+				
+				(*ptrht)[rkey]->data.timesUsed = data.timesUsed; // passing the data specified
+				(*ptrht)[rkey]->data.type = data.type;
+				(*ptrht)[rkey]->key = malloc(sizeof(char)*strlen(key)+1);
 				strcpy((*ptrht)[rkey]->key, key);
 				(*ptrht)[rkey]->ptrnext = NULL; // nowhere else to go
 

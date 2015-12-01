@@ -53,10 +53,10 @@ typedef struct tData {
 /**
  * Datova polozka TRP s explicitne retezenymi synonymy
  */
-typedef struct tHTItem {
+typedef struct HTItem {
    char *key;            // klic 
    tData data;          // obsah 
-   struct tHTItem* ptrnext;   // ukazatel na dalsi synonymum
+   struct HTItem* ptrnext;   // ukazatel na dalsi synonymum
 } tHTItem;
 
 /* TRP s explicitne zretezenymi synonymy. */
