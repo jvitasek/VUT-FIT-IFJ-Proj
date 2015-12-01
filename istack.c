@@ -32,8 +32,8 @@ TError gStackInit(stack *stack)
 		#ifdef DEBUG
 			printf("StackInit stack == NULL.\n");
 		#endif
-		error = ERUN_UNINIT;
-		return error;
+		print_error(EINT, 0);
+		exit(EINT);
 	}
 
 	stack->top = NULL;
@@ -41,17 +41,15 @@ TError gStackInit(stack *stack)
 	if (((stack->top = malloc(sizeof(struct stackItem))) == NULL) || 
 		((stack->first = malloc(sizeof(struct stackItem))) == NULL))
 	{
-		fprintf(stderr, "Chyba pri malloc.\n");
-		error = ERUN_UNINIT;
-		return error;
+		print_error(EINT, 0);
+		exit(EINT);
 	}
 
 	stackItemPtr tempPtr = NULL;
 	if ((tempPtr = malloc(sizeof(struct stackItem))) == NULL)
 	{
-		fprintf(stderr, "Chyba pri malloc.\n");
-		error = ERUN_UNINIT;
-		return error;
+		print_error(EINT, 0);
+		exit(EINT);
 	}
 
 	if (tempPtr != NULL)
@@ -63,8 +61,8 @@ TError gStackInit(stack *stack)
 	}
 	else
 	{
-		error = EINT;
-		return error;
+		print_error(EINT, 0);
+		exit(EINT);
 	}
 	return error;
 }
@@ -85,7 +83,7 @@ TError gStackDispose(stack *stack)
 
 	if ((tempPtr = malloc(sizeof(struct stackItem))) == NULL)
 	{
-		fprintf(stderr, "Chyba pri malloc.\n");
+		print_error(EINT, 0);
 		exit(EINT);
 	}
 
@@ -176,8 +174,8 @@ TError gStackPush(stack *stack, tHTable **table)
 	
 	if ((tempPtr = malloc(sizeof(struct stackItem))) == NULL)
 	{
-		error = ERUN_UNINIT;
-		return error;
+		print_error(EINT, 0);
+		exit(EINT);
 	}
 
 	tempPtr->table = table;
@@ -196,4 +194,33 @@ TError gStackPush(stack *stack, tHTable **table)
 
 	error = ENOP;
 	return error;
+}
+
+void whatsInStacks(stack *stack)
+{
+	int i = 1;
+	stackItemPtr temp;
+	if((temp = malloc(sizeof(struct stackItem))) == NULL)
+	{
+		print_error(EINT, 0);
+		exit(EINT);
+	}
+
+	temp = stack->top;
+	temp->Lptr = stack->top->Lptr;
+	temp->table = stack->top->table;
+	
+	printf("|--VRCHOL- -top->table\n");
+	outputSymbolTable(*stack->top->table);
+	
+	while(temp->Lptr != NULL)
+	{
+		temp = temp->Lptr;
+		printf("|--%d.-\t\t-table|\n", i);
+		i++;
+		if(temp->table != NULL)
+		{
+			outputSymbolTable(*temp->table);
+		}
+	}
 }

@@ -71,6 +71,7 @@ void htInsert (tHTable* ptrht, char *key, tData data);
 tData* htRead (tHTable* ptrht, char *key);
 void htDelete (tHTable* ptrht, char *key);
 void htClearAll (tHTable* ptrht);
+void outputSymbolTable(tHTable* ptrht);
 
 
 // vestavene funkce

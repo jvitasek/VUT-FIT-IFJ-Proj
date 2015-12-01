@@ -32,5 +32,6 @@ TError gStackInit(stack *stack);
 TError gStackDispose(stack *stack);
 TError gStackPop(stack *stack);
 TError gStackPush(stack *stack, tHTable **table);
+void whatsInStacks(stack *stack);
 
 #endif
