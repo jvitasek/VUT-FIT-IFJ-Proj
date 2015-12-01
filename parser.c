@@ -17,13 +17,14 @@
 #include <string.h>
 #include "error.h"
 #include "parser.h"
-#include "ial.h"
 #include "expression.h"
+#include "istack.h"
 
 string attr; // vytvorime si string
 
 int counterVar = 1;		// globalna premenna, ktora sluzi pri tvorbe pomocnych premennych na medzivypocty
 tHTable* localTable;
+stack tableStack;
 tHTItem* item;
 tHTItem* temp;
 /**
@@ -63,12 +64,25 @@ TError parse(FILE *input)
 	printf("parse\n");
 	#endif
 	TError error = ESYN;
-	strInit(&attr);		// inicializujeme string
-	// inicializace TS
-	if(initSTable() != ENOP)
+	
+
+	/**
+	 * inicializace stringu s nazvem tokenu
+	 */
+	strInit(&attr);
+
+	/**
+	 * inicializace hlavni tabulky symbolu
+	 */
+	if(initSTable(&localTable) != ENOP)
 	{
 		return error;
 	}
+
+	/**
+	 * inicializace zasobniku tabulek symbolu
+	 */
+	gStackInit(&tableStack);
 
 	getNextToken(input, &attr);
 	// prazdny soubor
@@ -81,9 +95,17 @@ TError parse(FILE *input)
 	#ifdef DEBUG
 	printf("parse: func_n vratilo: %d\n", error);
 	#endif
-
 	outputSymbolTable(localTable);
+
+	/**
+	 * smazani tabulky symbolu
+	 */
 	htClearAll(localTable);
+
+	/**
+	 * smazani zasobniku tabulek symbolu
+	 */
+	gStackDispose(&tableStack);
 
 	if(error == ENOP || error == EEMPTY)
 	{
@@ -168,11 +190,6 @@ TError func(FILE *input)
 		{
 
 			// SEMANTICKA ANALYZA
-			
-
-			// precti timesUsed podle
-			// pokud neni
-
 			// funkce jiz v tabulce je
 			tData *tempData;
 			if((tempData = htRead(localTable, strGetStr(&attr))) != NULL)
@@ -1421,7 +1438,7 @@ TError realtype()
  * Incializuje tabulku symbolu
  * @return Index do enumerace chyb.
  */
-TError initSTable()
+TError initSTable(tHTable **table)
 {
 	TError error = ENOP;
 	item = NULL;
@@ -1439,12 +1456,12 @@ TError initSTable()
 		return error;
 	}
 
-	localTable = NULL;
-	localTable = (tHTable*) malloc(sizeof(tHTable));
-	if(localTable != NULL)
+	*table = NULL;
+	*table = (tHTable*) malloc(sizeof(tHTable));
+	if(*table != NULL)
 	{
-		for (int i=0; i<MAX_HTSIZE; (*localTable)[i++] = item);
-		htInit(localTable);
+		for (int i=0; i<MAX_HTSIZE; (**table)[i++] = item);
+		htInit(*table);
 	}
 	else
 	{
