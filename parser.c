@@ -23,11 +23,11 @@
 string attr; // vytvorime si string
 
 int counterVar = 1;		// globalna premenna, ktora sluzi pri tvorbe pomocnych premennych na medzivypocty
-tHTable* localTable;
-tHTable* tempTable; 
+tHTable *localTable;
+tHTable *tempTable;
 stack tableStack;
-tHTItem* item;
-tHTItem* temp;
+tHTItem *item;
+tHTItem *temp;
 /**
  * @todo deklarace instruction listu
  */
@@ -1172,7 +1172,7 @@ TError var_def(FILE *input)
 					data.timesUsed = 0;
 					htInsert(tempTable, strGetStr(&attr), data);
 					fprintf(stderr, "VKLADAM %s, LINE: %d\n", strGetStr(&attr), token.type);
-					//gStackPush(&tableStack, &localTable);
+					currentVar = strGetStr(&attr);
 				}
 			}
 			
@@ -1204,17 +1204,33 @@ TError var_def(FILE *input)
 		getNextToken(input, &attr);
 		if(token.type == T_Id)
 		{
-			#ifdef SEM_CHECK
 			// SEMANTICKA ANALYZA
-			if(attr->str != NULL)
+			
+			tData *tempData;
+			if((tempData = htRead(tempTable, strGetStr(&attr))) != NULL)
 			{
-				tData data;
-				data.type = VAR;
-				data.timesUsed = 0;
-				htInsert(localTable, attr->str, data);
+				#ifdef DEBUG
+				fprintf(stderr, "KONCIM VE VAR_DEF: 4)\n");
+				#endif
+
+				print_error(ESEM_DEF, token.line);
+				exit(ESEM_DEF);
 			}
+			// promenna jeste neni v tabulce
+			else
+			{
+				if(strGetStr(&attr) != NULL)
+				{
+					tData data;
+					data.type = VAR;
+					data.timesUsed = 0;
+					htInsert(tempTable, strGetStr(&attr), data);
+					fprintf(stderr, "VKLADAM %s, LINE: %d\n", strGetStr(&attr), token.type);
+					currentVar = strGetStr(&attr);
+				}
+			}
+
 			// KONEC SEMANTICKE ANALYZY
-			#endif	
 			getNextToken(input, &attr);
 			error = init(input);
 			#ifdef DEBUG
