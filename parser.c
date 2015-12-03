@@ -8,7 +8,7 @@
  * 			xvalec00 – Dusan Valecky
  */
 
-//#define DEBUG 1
+#define DEBUG 1
 #define SEM 1
 
 #include <stdio.h>
@@ -24,8 +24,8 @@ string attr; // vytvorime si string
 
 int counterVar = 1;		// globalna premenna, ktora sluzi pri tvorbe pomocnych premennych na medzivypocty
 tHTable *commTable;
+tHTable *funcTable;
 stack tableStack;
-char *currentFunction;
 
 /**
  * @todo deklarace instruction listu
@@ -43,7 +43,7 @@ void getNextToken(FILE *input, string *attr)
 	if(token.type == T_Error)
 	{
 		print_error(ELEX, token.line);
-		exit(1);
+		exit(ELEX);
 	}
 }
 
@@ -59,21 +59,6 @@ TError parse(FILE *input)
 	printf("parse\n");
 	#endif
 	TError error = ESYN;
-	currentFunction = "";
-
-	string test;
-	strInit(&test);
-	test = toString("Testicek");
-
-	string finder;
-	strInit(&finder);
-	finder = toString("pica");
-	
-	int idx = find(test, finder);
-	printf("$$$$#####: FIND: %d\n", idx);
-
-	strFree(&test);
-	strFree(&finder);
 
 	/**
 	 * inicializace stringu s nazvem tokenu
@@ -84,6 +69,7 @@ TError parse(FILE *input)
 	 * inicializace hlavni tabulky symbolu
 	 */
 	initSTable(&commTable);
+	initSTable(&funcTable);
 
 	/**
 	 * inicializace zasobniku tabulek symbolu
@@ -109,6 +95,7 @@ TError parse(FILE *input)
 	 * smazani tabulky symbolu
 	 */
 	htClearAll(commTable);
+	htClearAll(funcTable);
 
 	/**
 	 * smazani zasobniku tabulek symbolu
@@ -196,25 +183,20 @@ TError func(FILE *input)
 		getNextToken(input, &attr);
 		if(token.type == T_Id)
 		{
-			#ifdef SEM
 			// SEMANTICKA ANALYZA
-
-			if(tableStack.top->table != NULL)
-			{
-				commTable = tableStack.top->table;
-			}
-
 			tData *tempData;
 			// funkce jiz v tabulce je
-			if((tempData = htRead(commTable, strGetStr(&attr))) != NULL)
+			if((tempData = htRead(funcTable, strGetStr(&attr))) != NULL)
 			{
 				if(tempData->timesUsed == 0)
 				{
 					tData data;
 					data.type = tempData->type;
 					data.timesUsed = tempData->timesUsed + 1;
-					htInsert(commTable, strGetStr(&attr), data);
-					printf("VKLADAM %s\n", strGetStr(&attr));
+					htInsert(funcTable, strGetStr(&attr), data);
+					#ifdef DEBUG
+					fprintf(stderr, "VKLADAM %s\n", strGetStr(&attr));
+					#endif
 				}
 				// redefinice/znovudeklarace
 				else
@@ -233,36 +215,26 @@ TError func(FILE *input)
 					tData data;
 					data.type = FUNC;
 					data.timesUsed = 0;
-					htInsert(commTable, strGetStr(&attr), data);
-					printf("VKLADAM %s\n", strGetStr(&attr));
+					htInsert(funcTable, strGetStr(&attr), data);
+					#ifdef DEBUG
+					fprintf(stderr, "VKLADAM %s\n", strGetStr(&attr));
+					#endif
 				}
 			}
-			// ukladani nazvu funkce do globalni promenne
-			currentFunction = malloc(sizeof(char)*strlen(strGetStr(&attr)));
-			strcpy(currentFunction, strGetStr(&attr));
-
-			#endif
-			
-			/**
-			 * @todo inicializace lokalni tabulky symbolu
-			 * @todo vlozeni funkce samotne do tabulky symbolu
-			 * @todo vlozeni funkce do globalni tabulky
-			 * @todo vlozeni tabulky symbolu na stack (top)
-			 */
 			// KONEC SEMANTICKE ANALYZY
 
 
 			getNextToken(input, &attr);
 			error = par_def_list(input);
 			#ifdef DEBUG
-			printf("func: par_def_list vratilo: %d\n", error);
+			fprintf(stderr, "func: par_def_list vratilo: %d\n", error);
 			#endif
 			if(error == ENOP)
 			{
 				getNextToken(input, &attr);
-				error = dec_or_def(input, 1);
+				error = dec_or_def(input);
 				#ifdef DEBUG
-				printf("func: dec_or_def vratilo: %d\n", error);
+				fprintf(stderr, "func: dec_or_def vratilo: %d\n", error);
 				#endif
 				return error;
 			}
@@ -332,22 +304,14 @@ TError par_def_list(FILE *input)
  * @param  attr  String lexemu.
  * @return       Index do enumerace chyb.
  */
-TError dec_or_def(FILE *input, int fromFunc)
+TError dec_or_def(FILE *input)
 {
 	#ifdef DEBUG
 	printf("dec_or_def\n");
 	#endif
 	TError error = ENOTFOUND;
 	// 12: <DEC_OR_DEF> -> <COMM_SEQ>
-	if(fromFunc == 1)
-	{
-		error = comm_seq(input, 1);
-	}
-	else
-	{
-		error = comm_seq(input, 0);
-	}
-	
+	error = comm_seq(input);
 	#ifdef DEBUG
 	printf("dec_or_def: comm_seq vratilo: %d\n", error);
 	#endif
@@ -373,7 +337,7 @@ TError dec_or_def(FILE *input, int fromFunc)
  * @param  attr  String lexemu.
  * @return       Index do enumerace chyb.
  */
-TError comm_seq(FILE *input, int fromFunc)
+TError comm_seq(FILE *input)
 {
 	#ifdef DEBUG
 	printf("comm_seq\n");
@@ -383,6 +347,14 @@ TError comm_seq(FILE *input, int fromFunc)
 	if(token.type == T_LeftBrace)
 	{
 		// SEMANTICKA ANALYZA
+		if(tableStack.top->table != NULL)
+		{
+			commTable = tableStack.top->table;
+		}
+		else
+		{
+			commTable = funcTable;
+		}
 		gStackPush(&tableStack, commTable);
 		printf("PUSHUJU na %d\n", token.line);
 		commTable = tableStack.top->table;
@@ -399,11 +371,10 @@ TError comm_seq(FILE *input, int fromFunc)
 		
 
 		// SEMANTICKA ANALYZA
-		if(fromFunc == 0) // v pripade, ze jsme v bloku funkce, nechceme poppovat
-		{
-			gStackPop(&tableStack);
-			printf("POPPUJU na %d\n", token.line);
-		}
+		gStackPop(&tableStack);
+		#ifdef DEBUG
+		printf("POPPUJU na %d\n", token.line);
+		#endif
 		commTable = tableStack.top->table;
 		// /SEMANTICKA ANALYZA
 		if(error == ENOP || error == EEMPTY)
@@ -503,7 +474,7 @@ TError stmt(FILE *input)
 			if(error == ENOP)
 			{
 				getNextToken(input, &attr);
-				error = comm_seq(input, 0);
+				error = comm_seq(input);
 				#ifdef DEBUG
 				printf("stmt: comm_seq vratilo: %d\n", error);
 				#endif
@@ -554,7 +525,7 @@ TError stmt(FILE *input)
 					if(error == ENOP)
 					{
 						getNextToken(input, &attr);
-						error = comm_seq(input, 0);
+						error = comm_seq(input);
 						#ifdef DEBUG
 						printf("stmt: comm_seq vratilo: %d\n", error);
 						#endif
@@ -588,7 +559,7 @@ TError stmt(FILE *input)
 		}
 	}
 	// 24: <STMT> -> <COMM_SEQ>
-	else if((error = comm_seq(input, 0)) == ENOP || error == ESYN)
+	else if((error = comm_seq(input)) == ENOP || error == ESYN)
 	{
 		#ifdef DEBUG
 		printf("stmt: comm_seq vratilo: %d\n", error);
@@ -1333,7 +1304,7 @@ TError if_n(FILE *input)
 	if(token.type == T_Else)
 	{
 		getNextToken(input, &attr);
-		error = comm_seq(input, 0);
+		error = comm_seq(input);
 		#ifdef DEBUG
 		printf("if_n: comm_seq vratilo: %d\n", error);
 		#endif

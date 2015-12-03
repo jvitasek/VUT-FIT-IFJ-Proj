@@ -1,6 +1,4 @@
-inť main();
-
 int main()
 {
-	
+	ūint = lol;	
 }
