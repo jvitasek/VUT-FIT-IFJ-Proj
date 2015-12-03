@@ -1,0 +1,6 @@
+inť main();
+
+int main()
+{
+	
+}

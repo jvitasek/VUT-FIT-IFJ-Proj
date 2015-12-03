@@ -13,3 +13,6 @@ main
 
 # testovaci soubor SA
 Files/*.cc
+
+# testovaci output
+test.out

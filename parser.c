@@ -25,6 +25,7 @@ string attr; // vytvorime si string
 int counterVar = 1;		// globalna premenna, ktora sluzi pri tvorbe pomocnych premennych na medzivypocty
 tHTable *commTable;
 stack tableStack;
+char *currentFunction;
 
 /**
  * @todo deklarace instruction listu
@@ -58,7 +59,7 @@ TError parse(FILE *input)
 	printf("parse\n");
 	#endif
 	TError error = ESYN;
-	
+	currentFunction = "";
 
 	/**
 	 * inicializace stringu s nazvem tokenu
@@ -222,6 +223,10 @@ TError func(FILE *input)
 					printf("VKLADAM %s\n", strGetStr(&attr));
 				}
 			}
+			// ukladani nazvu funkce do globalni promenne
+			currentFunction = malloc(sizeof(char)*strlen(strGetStr(&attr)));
+			strcpy(currentFunction, strGetStr(&attr));
+
 			#endif
 			
 			/**
