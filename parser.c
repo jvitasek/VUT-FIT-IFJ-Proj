@@ -61,6 +61,20 @@ TError parse(FILE *input)
 	TError error = ESYN;
 	currentFunction = "";
 
+	string test;
+	strInit(&test);
+	test = toString("Testicek");
+
+	string finder;
+	strInit(&finder);
+	finder = toString("pica");
+	
+	int idx = find(test, finder);
+	printf("$$$$#####: FIND: %d\n", idx);
+
+	strFree(&test);
+	strFree(&finder);
+
 	/**
 	 * inicializace stringu s nazvem tokenu
 	 */
