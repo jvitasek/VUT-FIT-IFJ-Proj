@@ -9,7 +9,6 @@
  */
 
 #define DEBUG 1
-#define SEM 1
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -756,13 +755,11 @@ TError params(FILE *input)
 		getNextToken(input, &attr);
 		if(token.type == T_Id)
 		{
-			#ifdef SEM_CHECK
 			// SEMANTICKA ANALYZA
 			/**
 			 * todo vlozeni do tabulky symbolu funkce
 			 */
 			// KONEC SEMANTICKE ANALYZY
-			#endif
 			getNextToken(input, &attr);
 			error = params_n(input);
 			#ifdef DEBUG
@@ -822,13 +819,11 @@ TError params_n(FILE *input)
 			getNextToken(input, &attr);
 			if(token.type == T_Id)
 			{
-				#ifdef SEM_CHECK
 				// SEMANTICKA ANALYZA
 				/**
 				 * todo vkladani do tabulky symbolu funkce
 				 */
 				// KONEC SEMANTICKE ANALYZY
-				#endif
 				getNextToken(input, &attr);
 				error = params_n(input);
 				#ifdef DEBUG
@@ -911,13 +906,11 @@ TError cout_term(FILE *input)
 	// 39: <COUT_TERM> -> id <COUT_TERM_N>
 	if(token.type == T_Id)
 	{
-		#ifdef SEM_CHECK
 		// SEMANTICKA ANALYZA
 		/**
 		 * todo kontrola, zda id existuje v tabulce symbolu
 		 */
 		// KONEC SEMANTICKE ANALYZY
-		#endif
 		getNextToken(input, &attr);
 		error = cout_term_n(input);
 		#ifdef DEBUG
@@ -1017,13 +1010,11 @@ TError cin_id_n(FILE *input)
 		getNextToken(input, &attr);
 		if(token.type == T_Id)
 		{
-			#ifdef SEM_CHECK
 			// SEMANTICKA ANALYZA
 			/**
 			 * todo kontrola, zda id existuje v tabulce symbolu
 			 */
 			// KONEC SEMANTICKE ANALYZY
-			#endif
 			getNextToken(input, &attr);
 			error = cin_id_n(input);
 			#ifdef DEBUG
@@ -1089,13 +1080,11 @@ TError assign(FILE *input)
 	// 36: <ASSIGN> -> id = <EXPR> 
 	if(token.type == T_Id)
 	{
-		#ifdef SEM_CHECK
 		// SEMANTICKA ANALYZA
 		/**
 		 * todo kontrola, zda id existuje v tabulce symbolu
 		 */
 		// KONEC SEMANTICKE ANALYZY
-		#endif
 		getNextToken(input, &attr);
 		if(token.type == T_Assig)
 		{
@@ -1148,7 +1137,6 @@ TError var_def(FILE *input)
 		getNextToken(input, &attr);
 		if(token.type == T_Id)
 		{
-			#ifdef SEM
 			// SEMANTICKA ANALYZA
 			tData *tempData;
 			if((tempData = htRead(commTable, strGetStr(&attr))) != NULL)
@@ -1174,7 +1162,6 @@ TError var_def(FILE *input)
 				}
 			}
 			// KONEC SEMANTICKE ANALYZY
-			#endif
 			getNextToken(input, &attr);
 			error = init(input);
 			#ifdef DEBUG
@@ -1371,17 +1358,11 @@ TError terms(FILE *input)
 	// 32) <TERMS> -> id <TERMS_N>
 	if(token.type == T_Id)
 	{
-		#ifdef SEM_CHECK
 		// SEMANTICKA ANALYZA
-		if(attr->str != NULL)
-		{
-			tData data;
-			data.type = VAR;
-			data.timesUsed = 0;
-			htInsert(commTable, attr->str, data);
-		}
+		/**
+		 * @todo semanticka analyza
+		 */
 		// KONEC SEMANTICKE ANALYZY
-		#endif
 		getNextToken(input, &attr);
 		error = terms_n(input);
 		#ifdef DEBUG
@@ -1423,17 +1404,11 @@ TError terms_n(FILE *input)
 		getNextToken(input, &attr);
 		if(token.type == T_Id)
 		{
-			#ifdef SEM_CHECK
 			// SEMANTICKA ANALYZA
-			if(attr->str != NULL)
-			{
-				tData data;
-				data.type = VAR;
-				data.timesUsed = 0;
-				htInsert(commTable, attr->str, data);
-			}
+			/**
+			 * @todo semanticka analyza
+			 */
 			// KONEC SEMANTICKE ANALYZY
-			#endif
 			getNextToken(input, &attr);
 			error = terms_n(input);
 			#ifdef DEBUG
