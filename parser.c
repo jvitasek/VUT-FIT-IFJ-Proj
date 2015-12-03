@@ -8,8 +8,8 @@
  * 			xvalec00 – Dusan Valecky
  */
 
-#define DEBUG 1
-//#define SEM_CHECK 1
+//#define DEBUG 1
+#define SEM 1
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -23,20 +23,13 @@
 string attr; // vytvorime si string
 
 int counterVar = 1;		// globalna premenna, ktora sluzi pri tvorbe pomocnych premennych na medzivypocty
-tHTable *localTable;
-tHTable *tempTable;
+tHTable *commTable;
 stack tableStack;
-tHTItem *item;
-tHTItem *temp;
+
 /**
  * @todo deklarace instruction listu
  */
 int line = 1;
-
-const char* kw[KW] = {
-	"auto", "cin", "cout", "double", "else",
-	"for", "if", "int", "return", "string"
-};
 
 /**
  * Vrati dalsi token ze vstupu.
@@ -75,10 +68,7 @@ TError parse(FILE *input)
 	/**
 	 * inicializace hlavni tabulky symbolu
 	 */
-	if(initSTable(&localTable) != ENOP || initSTable(&tempTable) != ENOP)
-	{
-		return error;
-	}
+	initSTable(&commTable);
 
 	/**
 	 * inicializace zasobniku tabulek symbolu
@@ -96,13 +86,14 @@ TError parse(FILE *input)
 	#ifdef DEBUG
 	printf("parse: func_n vratilo: %d\n", error);
 	#endif
-	//outputSymbolTable(localTable);
+
+	//outputSymbolTable(commTable);
+	//whatsInStacks(&tableStack);
 
 	/**
 	 * smazani tabulky symbolu
 	 */
-	htClearAll(localTable);
-	htClearAll(tempTable);
+	htClearAll(commTable);
 
 	/**
 	 * smazani zasobniku tabulek symbolu
@@ -190,24 +181,32 @@ TError func(FILE *input)
 		getNextToken(input, &attr);
 		if(token.type == T_Id)
 		{
-
+			#ifdef SEM
 			// SEMANTICKA ANALYZA
-			// funkce jiz v tabulce je
+
+			if(tableStack.top->table != NULL)
+			{
+				commTable = tableStack.top->table;
+			}
+
 			tData *tempData;
-			if((tempData = htRead(localTable, strGetStr(&attr))) != NULL)
+			// funkce jiz v tabulce je
+			if((tempData = htRead(commTable, strGetStr(&attr))) != NULL)
 			{
 				if(tempData->timesUsed == 0)
 				{
 					tData data;
 					data.type = tempData->type;
 					data.timesUsed = tempData->timesUsed + 1;
-					htInsert(localTable, strGetStr(&attr), data);
-					htInsert(tempTable, strGetStr(&attr), data);
-					fprintf(stderr, "VKLADAM %s, LINE: %d\n", strGetStr(&attr), token.type);
+					htInsert(commTable, strGetStr(&attr), data);
+					printf("VKLADAM %s\n", strGetStr(&attr));
 				}
 				// redefinice/znovudeklarace
 				else
 				{
+					#ifdef DEBUG
+					fprintf(stderr, "KONCIM VE FUNC: 11)\n");
+					#endif
 					return ESEM_DEF;
 				}
 			}
@@ -219,14 +218,14 @@ TError func(FILE *input)
 					tData data;
 					data.type = FUNC;
 					data.timesUsed = 0;
-					htInsert(localTable, strGetStr(&attr), data);
-					htInsert(tempTable, strGetStr(&attr), data);
-					fprintf(stderr, "VKLADAM %s, LINE: %d + PUSH\n", strGetStr(&attr), token.type);
-					gStackPush(&tableStack, &tempTable);
+					htInsert(commTable, strGetStr(&attr), data);
+					printf("VKLADAM %s\n", strGetStr(&attr));
 				}
 			}
-			
 
+			
+			#endif
+			
 			/**
 			 * @todo inicializace lokalni tabulky symbolu
 			 * @todo vlozeni funkce samotne do tabulky symbolu
@@ -358,22 +357,27 @@ TError comm_seq(FILE *input)
 	// 19: <COMM_SEQ> -> { <STMT_LIST> }
 	if(token.type == T_LeftBrace)
 	{
-		tempTable = *(tableStack.top->table);
-		gStackPush(&tableStack, &tempTable);
-		fprintf(stderr, "PUSHUJU!, line: %d\n", token.line);
+		// SEMANTICKA ANALYZA
+		gStackPush(&tableStack, commTable);
+		printf("PUSHUJU na %d\n", token.line);
+		commTable = tableStack.top->table;
+		// /SEMANTICKA ANALYZA
+
+
+		// SYNTAKTICKA ANALYZA
 		getNextToken(input, &attr);
 		error = stmt_list(input);
 		#ifdef DEBUG
 		printf("comm_seq: stmt_list vratilo: %d\n", error);
 		#endif
-
-		gStackPop(&tableStack);
-		tempTable = *(tableStack.top->table);
-		fprintf(stderr, "###########################\n");
-		whatsInStacks(&tableStack);
-		fprintf(stderr, "###########################\n");
+		// /SYNTAKTICKA ANALYZA
 		
-		fprintf(stderr, "POPPUJU!, line: %d\n", token.line);
+
+		// SEMANTICKA ANALYZA
+		gStackPop(&tableStack);
+		printf("POPPUJU na %d\n", token.line);
+		commTable = tableStack.top->table;
+		// /SEMANTICKA ANALYZA
 		if(error == ENOP || error == EEMPTY)
 		{
 			if(token.type == T_RightBrace)
@@ -463,7 +467,7 @@ TError stmt(FILE *input)
 		if(token.type == T_LeftParenthesis)
 		{
 			getNextToken(input, &attr);
-			error = expr(input, &attr, 1, &counterVar, &tempTable);
+			error = expr(input, &attr, 1, &counterVar, &commTable);
 			#ifdef DEBUG
 			printf("stmt: expr vratilo: %d\n", error);
 			printf("### token po expr: %d\n", token.type);
@@ -508,7 +512,7 @@ TError stmt(FILE *input)
 			if(error == ENOP)
 			{
 				getNextToken(input, &attr);
-				error = expr(input, &attr, 0, &counterVar, &tempTable);
+				error = expr(input, &attr, 0, &counterVar, &commTable);
 				#ifdef DEBUG
 				printf("stmt: expr vratilo: %d\n", error);
 				#endif
@@ -580,10 +584,9 @@ TError stmt(FILE *input)
 			getNextToken(input, &attr);
 			if(token.type == T_Id)
 			{
-				//#ifdef SEM_CHECK
 				// SEMANTICKA ANALYZA
 				tData *tempData;
-				if((tempData = htRead(tempTable, strGetStr(&attr))) == NULL)
+				if((tempData = htRead(commTable, strGetStr(&attr))) == NULL)
 				{
 					#ifdef DEBUG
 					fprintf(stderr, "KONCIM V STMT: 26)\n");
@@ -591,9 +594,8 @@ TError stmt(FILE *input)
 					print_error(ESEM_DEF, token.line);
 					exit(ESEM_DEF);
 				}
-				
-				// KONEC SEMANTICKE ANALYZY
-				//#endif
+				// /SEMANTICKA ANALYZA
+
 				getNextToken(input, &attr);
 				error = cin_id_n(input);
 				#ifdef DEBUG
@@ -696,10 +698,9 @@ TError stmt(FILE *input)
 	// 29) <STMT> -> id = <FCALL_OR_ASSIGN>
 	else if(token.type == T_Id)
 	{
-		//#ifdef SEM_CHECK
 		// SEMANTICKA ANALYZA
 		tData *tempData;
-		if((tempData = htRead(tempTable, strGetStr(&attr))) == NULL)
+		if((tempData = htRead(commTable, strGetStr(&attr))) == NULL)
 		{
 			#ifdef DEBUG
 			fprintf(stderr, "KONCIM V STMT: 29)\n");
@@ -707,9 +708,8 @@ TError stmt(FILE *input)
 			print_error(ESEM_DEF, token.line);
 			exit(ESEM_DEF);
 		}
-		
-		// KONEC SEMANTICKE ANALYZY
-		//#endif
+		// /SEMANTICKA ANALYZA
+
 		getNextToken(input, &attr);
 		if(token.type == T_Assig)
 		{
@@ -881,7 +881,7 @@ TError ret(FILE *input)
 	if(token.type == T_Return)
 	{
 		getNextToken(input, &attr);
-		error = expr(input, &attr, 0, &counterVar, &tempTable);
+		error = expr(input, &attr, 0, &counterVar, &commTable);
 		#ifdef DEBUG
 		printf("ret: expr vratilo: %d\n", error);
 		#endif
@@ -1101,7 +1101,7 @@ TError assign(FILE *input)
 		if(token.type == T_Assig)
 		{
 			getNextToken(input, &attr);
-			error = expr(input, &attr, 1, &counterVar, &tempTable);
+			error = expr(input, &attr, 1, &counterVar, &commTable);
 			#ifdef DEBUG
 			printf("assign: expr vratilo: %d\n", error);
 			#endif
@@ -1149,11 +1149,10 @@ TError var_def(FILE *input)
 		getNextToken(input, &attr);
 		if(token.type == T_Id)
 		{
-			//#ifdef SEM_CHECK
+			#ifdef SEM
 			// SEMANTICKA ANALYZA
-			
 			tData *tempData;
-			if((tempData = htRead(tempTable, strGetStr(&attr))) != NULL)
+			if((tempData = htRead(commTable, strGetStr(&attr))) != NULL)
 			{
 				#ifdef DEBUG
 				fprintf(stderr, "KONCIM VE VAR_DEF: 4)\n");
@@ -1170,15 +1169,13 @@ TError var_def(FILE *input)
 					tData data;
 					data.type = VAR;
 					data.timesUsed = 0;
-					htInsert(tempTable, strGetStr(&attr), data);
+					htInsert(commTable, strGetStr(&attr), data);
 					fprintf(stderr, "VKLADAM %s, LINE: %d\n", strGetStr(&attr), token.type);
 					currentVar = strGetStr(&attr);
 				}
 			}
-			
-
 			// KONEC SEMANTICKE ANALYZY
-			//#endif
+			#endif
 			getNextToken(input, &attr);
 			error = init(input);
 			#ifdef DEBUG
@@ -1207,7 +1204,7 @@ TError var_def(FILE *input)
 			// SEMANTICKA ANALYZA
 			
 			tData *tempData;
-			if((tempData = htRead(tempTable, strGetStr(&attr))) != NULL)
+			if((tempData = htRead(commTable, strGetStr(&attr))) != NULL)
 			{
 				#ifdef DEBUG
 				fprintf(stderr, "KONCIM VE VAR_DEF: 4)\n");
@@ -1224,7 +1221,7 @@ TError var_def(FILE *input)
 					tData data;
 					data.type = VAR;
 					data.timesUsed = 0;
-					htInsert(tempTable, strGetStr(&attr), data);
+					htInsert(commTable, strGetStr(&attr), data);
 					fprintf(stderr, "VKLADAM %s, LINE: %d\n", strGetStr(&attr), token.type);
 					currentVar = strGetStr(&attr);
 				}
@@ -1271,7 +1268,7 @@ TError init(FILE *input)
 	if(token.type == T_Assig)
 	{
 		getNextToken(input, &attr);
-		error = expr(input, &attr, 0, &counterVar, &tempTable);
+		error = expr(input, &attr, 0, &counterVar, &commTable);
 		#ifdef DEBUG
 		printf("init: expr vratilo: %d\n", error);
 		#endif
@@ -1342,7 +1339,7 @@ TError fcall_or_assign(FILE *input)
 	#endif
 	TError error = ENOTFOUND;
 	// 30: <FCALL_OR_ASSIGN> -> <EXPR> ;
-	if((error = expr(input, &attr, 0, &counterVar, &tempTable)) == ENOP || error == ESYN)
+	if((error = expr(input, &attr, 0, &counterVar, &commTable)) == ENOP || error == ESYN)
 	{
 		#ifdef DEBUG
 		printf("fcall_or_assign: expr vratilo: %d\n", error);
@@ -1382,7 +1379,7 @@ TError terms(FILE *input)
 			tData data;
 			data.type = VAR;
 			data.timesUsed = 0;
-			htInsert(localTable, attr->str, data);
+			htInsert(commTable, attr->str, data);
 		}
 		// KONEC SEMANTICKE ANALYZY
 		#endif
@@ -1434,7 +1431,7 @@ TError terms_n(FILE *input)
 				tData data;
 				data.type = VAR;
 				data.timesUsed = 0;
-				htInsert(localTable, attr->str, data);
+				htInsert(commTable, attr->str, data);
 			}
 			// KONEC SEMANTICKE ANALYZY
 			#endif
@@ -1512,8 +1509,9 @@ TError realtype()
 TError initSTable(tHTable **table)
 {
 	TError error = ENOP;
-	item = NULL;
-	item = (tHTItem*) malloc(sizeof(tHTable));
+	tHTItem *item;
+	item = (tHTItem *) malloc(sizeof(tHTItem));
+
 	if(item != NULL)
 	{
 		item->key = "*UNDEF*";
@@ -1523,8 +1521,8 @@ TError initSTable(tHTable **table)
 	}
 	else
 	{
-		error = EINT;
-		return error;
+		print_error(EINT, token.line);
+		exit(error);
 	}
 
 	*table = NULL;
@@ -1536,8 +1534,8 @@ TError initSTable(tHTable **table)
 	}
 	else
 	{
-		error = EINT;
-		return error;
+		print_error(EINT, token.line);
+		exit(error);
 	}
 	return error;
 }

@@ -19,7 +19,7 @@
 
 typedef struct stackItem {
 	struct stackItem *Lptr;
-	tHTable **table;
+	tHTable *table;
 } *stackItemPtr;
 
 
@@ -31,7 +31,7 @@ typedef struct stack {
 TError gStackInit(stack *stack);
 TError gStackDispose(stack *stack);
 TError gStackPop(stack *stack);
-TError gStackPush(stack *stack, tHTable **table);
+TError gStackPush(stack *stack, tHTable *table);
 void whatsInStacks(stack *stack);
 
 #endif

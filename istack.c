@@ -16,6 +16,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "error.h"
 #include "istack.h"
 
@@ -163,23 +164,22 @@ TError gStackPop(stack *stack)
  * @param  tokterm Terminal prevedeny z tokenu.
  * @return error	Navratova hodnota chyby.
  */
-TError gStackPush(stack *stack, tHTable **table)
+TError gStackPush(stack *stack, tHTable *table)
 {
 	TError error = ENOP;
 	#ifdef DEBUG
 		printf("StackPush in progress.\n");
 	#endif
 
-	stackItemPtr tempPtr = NULL;
-	
-	if ((tempPtr = malloc(sizeof(struct stackItem))) == NULL)
+	struct stackItem *tempPtr;
+	if((tempPtr = malloc(sizeof(struct stackItem))) == NULL)
 	{
 		print_error(EINT, 0);
 		exit(EINT);
 	}
 
-	tempPtr->table = table;
-
+	tempPtr->table = malloc(sizeof(tHTable));
+	memcpy(tempPtr->table, table, sizeof(tHTable));
 	tempPtr->Lptr = stack->top;
 	stack->top = tempPtr;
 
@@ -190,7 +190,7 @@ TError gStackPush(stack *stack, tHTable **table)
 void whatsInStacks(stack *stack)
 {
 	int i = 1;
-	stackItemPtr temp;
+	struct stackItem *temp;
 	if((temp = malloc(sizeof(struct stackItem))) == NULL)
 	{
 		print_error(EINT, 0);
@@ -202,7 +202,7 @@ void whatsInStacks(stack *stack)
 	temp->table = stack->top->table;
 	
 	printf("|--VRCHOL- -top->table\n");
-	outputSymbolTable(*stack->top->table);
+	//outputSymbolTable(stack->top->table);
 	
 	while(temp->Lptr != NULL)
 	{
@@ -211,7 +211,8 @@ void whatsInStacks(stack *stack)
 		i++;
 		if(temp->table != NULL)
 		{
-			outputSymbolTable(*temp->table);
+			printf("%d\n",i);
+			//outputSymbolTable(temp->table);
 		}
 	}
 }

@@ -202,7 +202,7 @@ void htInsert ( tHTable* ptrht, char *key, tData data ) {
 		}
 		else // we found an empty place or a synonym
 		{
-			if((*ptrht[rkey])) // empty place
+			if(ptrht[rkey]) // empty place
 			{
 				temp = malloc(sizeof(tHTable));
 				if(!temp) // malloc went wrong
@@ -320,7 +320,8 @@ void outputSymbolTable(tHTable* ptrht)
 	printf ("------------HASH TABLE--------------\n");
 	for ( int i=0; i<HTSIZE; i++ ) {
 		printf ("%i:",i);
-		tHTItem* ptr = (*ptrht)[i];
+		tHTItem *ptr = malloc(sizeof(tHTItem));
+		ptr = (*ptrht)[i];
 		while ( ptr != NULL ) {
 			printf (" (%s,%d,%d)", ptr->key, ptr->data.type, ptr->data.timesUsed);
 			ptr = ptr->ptrnext;
