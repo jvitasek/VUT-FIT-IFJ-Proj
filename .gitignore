@@ -16,3 +16,4 @@ Files/*.cc
 
 # testovaci output
 test.out
+adv-test.out
