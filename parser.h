@@ -27,8 +27,8 @@ TError params_n(FILE *input); // P: 17, 18
 TError func(FILE *input); // P: 11
 TError func_n(FILE *input); // P: 2, 3
 TError par_def_list(FILE *input); // P: 14
-TError dec_or_def(FILE *input); // P: 12, 13
-TError comm_seq(FILE *input); // P: 19
+TError dec_or_def(FILE *input, int fromFunc); // P: 12, 13
+TError comm_seq(FILE *input, int fromFunc); // P: 19
 TError stmt_list(FILE *input); // P: 20, 21
 TError stmt(FILE *input); // P: 22, 23, 24, 25, 26, 27, 28, 29
 TError fcall_or_assign(FILE *input); // P: 30, 31

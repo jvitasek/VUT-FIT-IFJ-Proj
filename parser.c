@@ -222,8 +222,6 @@ TError func(FILE *input)
 					printf("VKLADAM %s\n", strGetStr(&attr));
 				}
 			}
-
-			
 			#endif
 			
 			/**
@@ -243,7 +241,7 @@ TError func(FILE *input)
 			if(error == ENOP)
 			{
 				getNextToken(input, &attr);
-				error = dec_or_def(input);
+				error = dec_or_def(input, 1);
 				#ifdef DEBUG
 				printf("func: dec_or_def vratilo: %d\n", error);
 				#endif
@@ -315,14 +313,22 @@ TError par_def_list(FILE *input)
  * @param  attr  String lexemu.
  * @return       Index do enumerace chyb.
  */
-TError dec_or_def(FILE *input)
+TError dec_or_def(FILE *input, int fromFunc)
 {
 	#ifdef DEBUG
 	printf("dec_or_def\n");
 	#endif
 	TError error = ENOTFOUND;
 	// 12: <DEC_OR_DEF> -> <COMM_SEQ>
-	error = comm_seq(input);
+	if(fromFunc == 1)
+	{
+		error = comm_seq(input, 1);
+	}
+	else
+	{
+		error = comm_seq(input, 0);
+	}
+	
 	#ifdef DEBUG
 	printf("dec_or_def: comm_seq vratilo: %d\n", error);
 	#endif
@@ -348,7 +354,7 @@ TError dec_or_def(FILE *input)
  * @param  attr  String lexemu.
  * @return       Index do enumerace chyb.
  */
-TError comm_seq(FILE *input)
+TError comm_seq(FILE *input, int fromFunc)
 {
 	#ifdef DEBUG
 	printf("comm_seq\n");
@@ -374,8 +380,11 @@ TError comm_seq(FILE *input)
 		
 
 		// SEMANTICKA ANALYZA
-		gStackPop(&tableStack);
-		printf("POPPUJU na %d\n", token.line);
+		if(fromFunc == 0) // v pripade, ze jsme v bloku funkce, nechceme poppovat
+		{
+			gStackPop(&tableStack);
+			printf("POPPUJU na %d\n", token.line);
+		}
 		commTable = tableStack.top->table;
 		// /SEMANTICKA ANALYZA
 		if(error == ENOP || error == EEMPTY)
@@ -475,7 +484,7 @@ TError stmt(FILE *input)
 			if(error == ENOP)
 			{
 				getNextToken(input, &attr);
-				error = comm_seq(input);
+				error = comm_seq(input, 0);
 				#ifdef DEBUG
 				printf("stmt: comm_seq vratilo: %d\n", error);
 				#endif
@@ -526,7 +535,7 @@ TError stmt(FILE *input)
 					if(error == ENOP)
 					{
 						getNextToken(input, &attr);
-						error = comm_seq(input);
+						error = comm_seq(input, 0);
 						#ifdef DEBUG
 						printf("stmt: comm_seq vratilo: %d\n", error);
 						#endif
@@ -560,7 +569,7 @@ TError stmt(FILE *input)
 		}
 	}
 	// 24: <STMT> -> <COMM_SEQ>
-	else if((error = comm_seq(input)) == ENOP || error == ESYN)
+	else if((error = comm_seq(input, 0)) == ENOP || error == ESYN)
 	{
 		#ifdef DEBUG
 		printf("stmt: comm_seq vratilo: %d\n", error);
@@ -1305,7 +1314,7 @@ TError if_n(FILE *input)
 	if(token.type == T_Else)
 	{
 		getNextToken(input, &attr);
-		error = comm_seq(input);
+		error = comm_seq(input, 0);
 		#ifdef DEBUG
 		printf("if_n: comm_seq vratilo: %d\n", error);
 		#endif

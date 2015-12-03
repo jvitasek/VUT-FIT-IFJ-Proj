@@ -202,7 +202,7 @@ void whatsInStacks(stack *stack)
 	temp->table = stack->top->table;
 	
 	printf("|--VRCHOL- -top->table\n");
-	//outputSymbolTable(stack->top->table);
+	outputSymbolTable(stack->top->table);
 	
 	while(temp->Lptr != NULL)
 	{
@@ -212,7 +212,7 @@ void whatsInStacks(stack *stack)
 		if(temp->table != NULL)
 		{
 			printf("%d\n",i);
-			//outputSymbolTable(temp->table);
+			outputSymbolTable(temp->table);
 		}
 	}
 }
