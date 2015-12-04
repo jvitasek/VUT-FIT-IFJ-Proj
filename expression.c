@@ -18,7 +18,6 @@
 #define DEBUG 1
 
 int *counteerVar;	// sluzi pri tvorbe pomocnych premennych
-
 //tHTable* globalTS;
 //PSymbols *exprStr;
 Tstack stack;
@@ -43,7 +42,7 @@ int preceden_tab[16][16] = {
 	{less, less, less, less, less, less, less, less, less, less, less, empty, less, equal, equal, empty},					// (
 	{great, great, great, great, great, great, great, great, great, great, empty, empty, empty, great, empty, great},	// )
 	{empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, less, less, empty, equal, equal, empty},	// ,
-	{less, less, less, less, less, less, less, less, less, less, less, empty, less, less, empty, empty}					// $
+	{less, less, less, less, less, less, less, less, less, less, less, less, less, less, empty, empty}					// $
 };
 
 /**
@@ -100,9 +99,7 @@ TError StackInit(Tstack *stack)
 		error = EINT;
 		return error;
 	}
-	#ifdef DEBUG
-		printf("StackInit tempPtr->termType: %d.\n", tempPtr->termType);
-	#endif
+
 	return error;
 }
 
@@ -165,18 +162,18 @@ TError StackPop(Tstack *stack)
 
 		if (stack->top->Lptr != NULL)
 		{
-			#ifdef DEBUG
-				printf("StackPop mazu vrchol zasobniku.\n");
-			#endif
+			// #ifdef DEBUG
+			// 	printf("StackPop mazu vrchol zasobniku.\n");
+			// #endif
 			stack->top = stack->top->Lptr;
 			stack->top->Rptr = NULL;
 			free(tempPtr);
 		}
 		else if (stack->top == stack->first)
 		{
-			#ifdef DEBUG
-				printf("StackPop stack->top == stack->first.\n");
-			#endif
+			// #ifdef DEBUG
+			// 	printf("StackPop stack->top == stack->first.\n");
+			// #endif
 			stack->top = NULL;
 			stack->first = NULL;
 		}
@@ -218,9 +215,9 @@ TError StackPush(Tstack *stack, int tokterm)
 		return error;
 	}
 
-	#ifdef DEBUG
-		printf("StackPush - vkladam termType: %d\n", tempPtr->termType);
-	#endif
+	// #ifdef DEBUG
+	// 	printf("StackPush - vkladam termType: %d\n", tempPtr->termType);
+	// #endif
 
 	tempPtr->termType = tokterm;
 
@@ -691,7 +688,7 @@ TError findRule(Tstack *stack, ruleType rule)
 			 * @todo 3AC, Ilist
 			 */
 			
-			// nejdrive se zbavim: <, (, E, ) (4x pop)
+			// nejdrive se zbavim: ), E, (, < (4x pop)
 			StackPop(stack);
 			StackPop(stack);
 			StackPop(stack);
@@ -740,11 +737,38 @@ TError findRule(Tstack *stack, ruleType rule)
 		break;
 
 		case FUNC_RULE:
+			//
+			// @ TODO - mozna bude chybet podminka, az budu zpracovavat parametry
+			// 
+			// if (stack->top->Lptr->termType != PNonTerm ||
+			// 	stack->top->Lptr->Lptr->termType != PLeftP)
+			// {
+			// 	fprintf(stderr, "Chyba pravidla PAR_RULE.\n");
+			// 	error = ESYN;
+			// 	return error;
+			// }
+
 			/**
-			 *
-			 * @TODO pravidlo pro funkci !!!!!!!!
-			 * 
+			 * @todo 3AC, Ilist
 			 */
+			
+			// nejdrive se zbavim: ), (, f, < (4x pop)
+			StackPop(stack);
+			StackPop(stack);
+			StackPop(stack);
+			StackPop(stack);
+
+			// pushnu neterminal na zasobnik
+			if ((error = StackPush(stack, PNonTerm)) != ENOP)
+			{
+				fprintf(stderr, "Chyba pri StackPush.\n");
+				StackDispose(stack);
+				return error;
+			}
+			#ifdef DEBUG
+			 	printf("Pravidlo FUNC_RULE po pop a push\n");
+				whatInStacks(stack);
+			#endif
 		break;
 	}
 
@@ -801,13 +825,15 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 	counteerVar = count;
 	TError error = ENOTFOUND;
 	TstackElemPtr tempStack = NULL;
-	int prevTok;
+	tData *tempData; // pro ukladani 
+	int prevTok; // predposledni nacteny token
 	int counter = 0; // pro pocitani zavorek
 	//char *tempData = NULL;
-	int tokterm = 0;
+	int tokterm = 0; // 
 	//outputSymbolTable(*localTable);
+	
 	#ifdef DEBUG
-	printf("expr\n");
+		printf("expr\n");
 	#endif
 
 	if ((tempStack = malloc(sizeof(struct TstackElem))) == NULL)
@@ -850,19 +876,44 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 			// prevedu si token na term (PSymbols)
 			tokterm = tokToTerm(token.type);
 
+			// zjistim, jestli id je funkce
+			if (tokterm == PIden)
+			{
+				#ifdef DEBUG
+					printf("TOKTERM JE ID!!...attr: %s.\n", strGetStr(attr));
+				#endif
+				if((tempData = htRead(*localTable, strGetStr(attr))) != NULL)
+				{
+					if (tempData->type == FUNC)
+					{
+						tokterm = PIdFun;
+						#ifdef DEBUG
+							printf("!!!!!!!!!!!!!ID je FUNKCE!!!!!!!!!!!!!!!!!.\n");
+						#endif
+					}
+					else
+					{
+						tokterm = PIden;
+						#ifdef DEBUG
+							printf("!!!!!!!!!!!!!ID je ID!!!!!!!!!!!!!!!!!.\n");
+						#endif
+					}
+				}
+			}
+
 			// kontrola zavorek
 			if(tokterm == PRightP)
 			{
 				counter--;
 				#ifdef DEBUG
-				printf("##### DEKREMENTUJU COUNTER, NYNI: %d\n", counter);
+				printf("dekteremntuju COUNTER, NYNI: %d\n", counter);
 				#endif
 			}
 			else if(tokterm == PLeftP)
 			{
 				counter++;
 				#ifdef DEBUG
-				printf("##### INKREMENTUJU COUNTER, NYNI: %d\n", counter);
+				printf("inkrementuju COUNTER, NYNI: %d\n", counter);
 				#endif
 			}
 
@@ -952,12 +1003,26 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 								return error;
 							}
 						break;
-						case PRightP:
-							if ((error = findRule(&stack, PAR_RULE)) != ENOP)
+						case PRightP: // muze se jednat o funkci nebo o pravidlo zavorek
+							// funkce ////////////////////////////////////// @TODO PARAMETRY
+							if (tempStack->Lptr->termType == PLeftP &&
+								tempStack->Lptr->Lptr->termType == PIdFun)
 							{
-								StackDispose(&stack);
-								return error;
+								if ((error = findRule(&stack, FUNC_RULE)) != ENOP)
+								{
+									StackDispose(&stack);
+									return error;
+								}
 							}
+							// zavorky
+							else
+							{
+								if ((error = findRule(&stack, PAR_RULE)) != ENOP)
+								{
+									StackDispose(&stack);
+									return error;
+								}
+							}						
 						break;
 						case PIden:
 							if ((error = findRule(&stack, ID_E_RULE)) != ENOP)
@@ -972,33 +1037,22 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 							 * @todo pravidlo f()
 							 * 
 							 */
+							#ifdef DEBUG
+								printf("<<<<<<<<<<<<<<<<<<<< !!!!!!!PIdFun!!!!!! >>>>>>>>\n");
+							#endif
 						break;
 						default: break;
 					}
 				break;
 				case empty:
-					// kontrola, zda se jedna o funkci
+					// kontrola, zda byla funkce deklarovana
 					if (prevTok == PIden && tokterm == PLeftP)
 					{
-						StackPop(&stack); //popnu id
-						if ((error = StackPush(&stack, PIdFun)) != ENOP) // id nahradim za f
-						{
-							fprintf(stderr, "Chyba pri StackPush.\n");
-							StackDispose(&stack);
-							return error;
-						}
 						#ifdef DEBUG
-							printf("---FUNKCEEEEE!!!!! - menim zasobnik na:\n");
-							whatInStacks(&stack);
-							printf("---ZMENENY ZASOBNIK ////////\n");
-						#endif					
-						continue;
-					}
-					else
-					{
-						#ifdef DEBUG
-							printf("Empty - CHYBA.\n");
-						#endif
+							printf("---FUNKCEEEEE!!!!! NEDEKLAROVANAAAAA----:\n");
+						#endif	
+						StackDispose(&stack);
+						print_error(ESEM_DEF, token.line);				
 					}
 
 					fprintf(stderr, "Chyba vyrazu.\n");
@@ -1021,7 +1075,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 			}
 
 			#ifdef DEBUG
-				printf("<<<<<<<<<< Counter == %d <<<<<<.\n", counter);
+				printf("<<Counter == %d <<<.\n", counter);
 			#endif
 			
 			#ifdef DEBUG
