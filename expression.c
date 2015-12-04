@@ -860,7 +860,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 	if(semi_or_par == 0)
 	{
 		#ifdef DEBUG
-			printf("Resim vyraz ukonceny strednikem.\n");
+			printf("################## Resim vyraz ukonceny strednikem. ###################\n");
 		#endif
 		
 		int index = 0;
@@ -1104,7 +1104,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 	else if(semi_or_par == 1)
 	{
 		#ifdef DEBUG
-			printf("Resim vyraz ukonceny pravou zavorkou.\n");
+			printf("############## Resim vyraz ukonceny pravou zavorkou. ####################\n");
 		#endif		
 		
 		counter = 1;
@@ -1125,6 +1125,31 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 			if (tokterm != PDollar)
 			{
 				tokterm = tokToTerm(token.type);
+
+				// zjistim, jestli id je funkce
+				if (tokterm == PIden)
+				{
+					#ifdef DEBUG
+						printf("TOKTERM JE ID!!...attr: %s.\n", strGetStr(attr));
+					#endif
+					if((tempData = htRead(*localTable, strGetStr(attr))) != NULL)
+					{
+						if (tempData->type == FUNC)
+						{
+							tokterm = PIdFun;
+							#ifdef DEBUG
+								printf("!!!!!!!!!!!!!ID je FUNKCE!!!!!!!!!!!!!!!!!.\n");
+							#endif
+						}
+						else
+						{
+							tokterm = PIden;
+							#ifdef DEBUG
+								printf("!!!!!!!!!!!!!ID je ID!!!!!!!!!!!!!!!!!.\n");
+							#endif
+						}
+					}
+				}
 			}
 			
 			// kontrola zavorek
@@ -1132,14 +1157,14 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 			{
 				counter--;
 				#ifdef DEBUG
-				printf("##### DEKREMENTUJU COUNTER, NYNI: %d, tokterm: %d!!!!\n", counter, tokterm);
+				printf("### DEKREMENTUJU COUNTER, NYNI: %d, tokterm: %d!!!!\n", counter, tokterm);
 				#endif
 			}
 			else if(tokterm == PLeftP)
 			{
 				counter++;
 				#ifdef DEBUG
-				printf("##### INKREMENTUJU COUNTER, NYNI: %d, tokterm: %d!!!\n", counter, tokterm);
+				printf("### INKREMENTUJU COUNTER, NYNI: %d, tokterm: %d!!!\n", counter, tokterm);
 				#endif
 			}
 
@@ -1154,6 +1179,9 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 			switch (getPrecSymbol(tempStack->termType, tokterm))
 			{				
 				case equal:
+					#ifdef DEBUG
+						printf("Case equal.\n");
+					#endif
 					if ((error = StackPush(&stack, tokterm)) != ENOP)
 					{
 						fprintf(stderr, "Chyba pri StackPush.\n");
@@ -1227,12 +1255,26 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 								return error;
 							}
 						break;
-						case PRightP:
-							if ((error = findRule(&stack, PAR_RULE)) != ENOP)
+						case PRightP: // muze se jednat o funkci nebo o pravidlo zavorek
+							// funkce ////////////////////////////////////// @TODO PARAMETRY
+							if (tempStack->Lptr->termType == PLeftP &&
+								tempStack->Lptr->Lptr->termType == PIdFun)
 							{
-								StackDispose(&stack);
-								return error;
+								if ((error = findRule(&stack, FUNC_RULE)) != ENOP)
+								{
+									StackDispose(&stack);
+									return error;
+								}
 							}
+							// zavorky
+							else
+							{
+								if ((error = findRule(&stack, PAR_RULE)) != ENOP)
+								{
+									StackDispose(&stack);
+									return error;
+								}
+							}						
 						break;
 						case PIden:
 							if ((error = findRule(&stack, ID_E_RULE)) != ENOP)
@@ -1245,9 +1287,15 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 					}
 				break;
 				case empty:
-					#ifdef DEBUG
-						printf("Empty - CHYBA.\n");
-					#endif
+					// kontrola, zda byla funkce deklarovana
+					if (prevTok == PIden && tokterm == PLeftP)
+					{
+						#ifdef DEBUG
+							printf("---FUNKCEEEEE!!!!! NEDEKLAROVANAAAAA----:\n");
+						#endif	
+						StackDispose(&stack);
+						print_error(ESEM_DEF, token.line);				
+					}
 
 					fprintf(stderr, "Chyba vyrazu.\n");
 					StackDispose(&stack);
@@ -1292,6 +1340,10 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 				printf("-------------------------------------------------------\n");
 				printf("############# COUTNER STATE: %d #############\n", counter);
 			#endif
+
+			prevTok = tokterm;
+
+			printf("---PREV TOK: %d......\n", prevTok);
 
 		} while(!((tempStack->termType == PDollar) && (tokterm == PDollar)));
 	}
