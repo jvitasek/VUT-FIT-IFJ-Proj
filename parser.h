@@ -31,7 +31,7 @@ TError dec_or_def(FILE *input); // P: 12, 13
 TError comm_seq(FILE *input); // P: 19
 TError stmt_list(FILE *input); // P: 20, 21
 TError stmt(FILE *input); // P: 22, 23, 24, 25, 26, 27, 28, 29
-TError fcall_or_assign(FILE *input); // P: 30, 31
+TError call_assign(FILE *input); // P: xx, xx
 TError terms(FILE *input); // P: 32, 33
 TError terms_n(FILE *input); // P: 34, 35
 TError if_n(FILE *input); // P: 43, 44

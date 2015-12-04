@@ -55,7 +55,7 @@ void getNextToken(FILE *input, string *attr)
 TError parse(FILE *input)
 {
 	#ifdef DEBUG
-	printf("parse\n");
+	fprintf(stderr, "parse\n");
 	#endif
 	TError error = ESYN;
 
@@ -84,7 +84,7 @@ TError parse(FILE *input)
 	// 1: <PROGRAM> -> <FUNC_N>
 	error = func_n(input);
 	#ifdef DEBUG
-	printf("parse: func_n vratilo: %d\n", error);
+	fprintf(stderr, "parse: func_n vratilo: %d\n", error);
 	#endif
 
 	//outputSymbolTable(commTable);
@@ -121,13 +121,13 @@ TError parse(FILE *input)
 TError func_n(FILE *input)
 {
 	#ifdef DEBUG
-	printf("func_n\n");
+	fprintf(stderr, "func_n\n");
 	#endif
 	TError error = ENOTFOUND;
 	// 2: <FUNC_N> -> <FUNC> <FUNC_N>
 	error = func(input);
 	#ifdef DEBUG
-	printf("func_n: func vratilo: %d\n", error);
+	fprintf(stderr, "func_n: func vratilo: %d\n", error);
 	#endif
 	if(error == ENOP)
 	{
@@ -135,7 +135,7 @@ TError func_n(FILE *input)
 		getNextToken(input, &attr);
 		error = func_n(input);
 		#ifdef DEBUG
-		printf("func_n: func_n vratilo: %d\n", error);
+		fprintf(stderr, "func_n: func_n vratilo: %d\n", error);
 		#endif
 		if(error == ENOP)
 		{
@@ -155,7 +155,7 @@ TError func_n(FILE *input)
 	else if(token.type == T_EOF)
 	{
 		#ifdef DEBUG
-		printf("konec souboru\n");
+		fprintf(stderr, "konec souboru\n");
 		#endif
 		error = EEMPTY;
 	}
@@ -169,13 +169,13 @@ TError func_n(FILE *input)
 TError func(FILE *input)
 {
 	#ifdef DEBUG
-	printf("func\n");
+	fprintf(stderr, "func\n");
 	#endif
 	TError error = ENOTFOUND;
 	// 11: <FUNC> -> <TYPE> id <PAR_DEF_LIST> <DEC_OR_DEF>
 	error = type();
 	#ifdef DEBUG
-	printf("func: type vratilo: %d\n", error);
+	fprintf(stderr, "func: type vratilo: %d\n", error);
 	#endif
 	if(error == ENOP)
 	{
@@ -263,7 +263,7 @@ TError func(FILE *input)
 TError par_def_list(FILE *input)
 {
 	#ifdef DEBUG
-	printf("par_def_list\n");
+	fprintf(stderr, "par_def_list\n");
 	#endif
 	TError error = ENOTFOUND;
 	// 14: <PAR_DEF_LIST> -> ( <PARAMS> )
@@ -272,7 +272,7 @@ TError par_def_list(FILE *input)
 		getNextToken(input, &attr);
 		error = params(input);
 		#ifdef DEBUG
-		printf("par_def_list: params vratilo: %d\n", error);
+		fprintf(stderr, "par_def_list: params vratilo: %d\n", error);
 		#endif
 		// neni potreba kontrolovat, zda pravidlo
 		// proslo na epsilon, negetujeme dalsi token
@@ -306,13 +306,13 @@ TError par_def_list(FILE *input)
 TError dec_or_def(FILE *input)
 {
 	#ifdef DEBUG
-	printf("dec_or_def\n");
+	fprintf(stderr, "dec_or_def\n");
 	#endif
 	TError error = ENOTFOUND;
 	// 12: <DEC_OR_DEF> -> <COMM_SEQ>
 	error = comm_seq(input);
 	#ifdef DEBUG
-	printf("dec_or_def: comm_seq vratilo: %d\n", error);
+	fprintf(stderr, "dec_or_def: comm_seq vratilo: %d\n", error);
 	#endif
 	if(error == ENOP)
 	{
@@ -339,7 +339,7 @@ TError dec_or_def(FILE *input)
 TError comm_seq(FILE *input)
 {
 	#ifdef DEBUG
-	printf("comm_seq\n");
+	fprintf(stderr, "comm_seq\n");
 	#endif
 	TError error = ENOTFOUND;
 	// 19: <COMM_SEQ> -> { <STMT_LIST> }
@@ -364,7 +364,7 @@ TError comm_seq(FILE *input)
 		getNextToken(input, &attr);
 		error = stmt_list(input);
 		#ifdef DEBUG
-		printf("comm_seq: stmt_list vratilo: %d\n", error);
+		fprintf(stderr, "comm_seq: stmt_list vratilo: %d\n", error);
 		#endif
 		// /SYNTAKTICKA ANALYZA
 		
@@ -372,7 +372,7 @@ TError comm_seq(FILE *input)
 		// SEMANTICKA ANALYZA
 		gStackPop(&tableStack);
 		#ifdef DEBUG
-		printf("POPPUJU na %d\n", token.line);
+		fprintf(stderr, "POPPUJU na %d\n", token.line);
 		#endif
 		commTable = tableStack.top->table;
 		// /SEMANTICKA ANALYZA
@@ -404,20 +404,20 @@ TError comm_seq(FILE *input)
 TError stmt_list(FILE *input)
 {
 	#ifdef DEBUG
-	printf("stmt_list\n");
+	fprintf(stderr, "stmt_list\n");
 	#endif
 	TError error = ENOTFOUND;
 	// 20: <STMT_LIST> -> <STMT> <STMT_LIST>
 	error = stmt(input);
 	#ifdef DEBUG
-	printf("stmt_list: stmt vratilo: %d\n", error);
+	fprintf(stderr, "stmt_list: stmt vratilo: %d\n", error);
 	#endif
 	if(error == ENOP)
 	{
 		getNextToken(input, &attr);
 		error = stmt_list(input);
 		#ifdef DEBUG
-		printf("stmt_list: stmt_list vratilo: %d\n", error);
+		fprintf(stderr, "stmt_list: stmt_list vratilo: %d\n", error);
 		#endif
 		// neni potreba kontrolovat, zda pravidlo
 		// proslo na epsilon, negetujeme dalsi token
@@ -452,7 +452,7 @@ TError stmt_list(FILE *input)
 TError stmt(FILE *input)
 {
 	#ifdef DEBUG
-	printf("stmt\n");
+	fprintf(stderr, "stmt\n");
 	#endif
 	TError error = ENOTFOUND;
 
@@ -561,7 +561,7 @@ TError stmt(FILE *input)
 	else if((error = comm_seq(input)) == ENOP || error == ESYN)
 	{
 		#ifdef DEBUG
-		printf("stmt: comm_seq vratilo: %d\n", error);
+		fprintf(stderr, "stmt: comm_seq vratilo: %d\n", error);
 		#endif
 		return error;
 	}
@@ -569,7 +569,7 @@ TError stmt(FILE *input)
 	else if((error = var_def(input)) == ENOP || error == ESYN)
 	{
 		#ifdef DEBUG
-		printf("stmt: var_def vratilo: %d\n", error);
+		fprintf(stderr, "stmt: var_def vratilo: %d\n", error);
 		#endif
 		return error;
 	}
@@ -689,11 +689,11 @@ TError stmt(FILE *input)
 	else if((error = ret(input)) == ENOP || error == ESYN)
 	{
 		#ifdef DEBUG
-		printf("stmt: ret vratilo: %d\n", error);
+		fprintf(stderr, "stmt: ret vratilo: %d\n", error);
 		#endif
 		return error;
 	}
-	// 29) <STMT> -> id = <FCALL_OR_ASSIGN>
+	// 29) <STMT> -> id <CALL_ASSIGN>
 	else if(token.type == T_Id)
 	{
 		// SEMANTICKA ANALYZA
@@ -709,27 +709,77 @@ TError stmt(FILE *input)
 		// /SEMANTICKA ANALYZA
 
 		getNextToken(input, &attr);
-		if(token.type == T_Assig)
+		error = call_assign(input);
+		#ifdef DEBUG
+		fprintf(stderr, "stmt: call_assign vratilo: %d\n", error);
+		#endif
+		if(error == ENOP)
 		{
-			getNextToken(input, &attr);
-			error = fcall_or_assign(input);
-			#ifdef DEBUG
-			printf("stmt: fcall_or_assign vratilo: %d\n", error);
-			#endif
-			if(error == ENOP)
-			{
-				return error;
-			}
-			else if(error == ESYN)
-			{
-				return error;
-			}
+			return ENOP;
 		}
 		else
 		{
 			return ESYN;
 		}	
 	}
+	return error;
+}
+
+/**
+ * Simuluje pravidla xx a xx.
+ * @param  input Soubor obsahujici vstupni kod.
+ * @param  attr  String lexemu.
+ * @return       Index do enumerace chyb.
+ */
+TError call_assign(FILE *input)
+{
+	#ifdef DEBUG
+	fprintf(stderr, "params\n");
+	#endif
+	TError error = ENOTFOUND;
+	// xx: <CALL_ASSIGN> -> = <EXPR>
+	if(token.type == T_Assig)
+	{
+		getNextToken(input, &attr);
+		error = expr(input, &attr, 0, &counterVar, &commTable);
+		#ifdef DEBUG
+		fprintf(stderr, "call_assign: expr vratilo: %d\n", error);
+		#endif
+		if(error == ENOP)
+		{
+			return ENOP;
+		}
+		else
+		{
+			return ESYN;
+		}
+	}
+	// xx: <CALL_ASSIGN> -> (<terms>);
+	else if(token.type == T_LeftParenthesis)
+	{
+		getNextToken(input, &attr);
+		error = terms(input);
+		#ifdef DEBUG
+		fprintf(stderr, "call_assign: terms vratilo: %d\n", error);
+		#endif
+		if(error == ENOP || error == EEMPTY)
+		{
+			getNextToken(input, &attr);
+			if(token.type == T_Semicolon)
+			{
+				return ENOP;
+			}
+			else
+			{
+				return ESYN;
+			}
+		}
+		else
+		{
+			return ESYN;
+		}
+	}
+
 	return error;
 }
 
@@ -742,13 +792,13 @@ TError stmt(FILE *input)
 TError params(FILE *input)
 {
 	#ifdef DEBUG
-	printf("params\n");
+	fprintf(stderr, "params\n");
 	#endif
 	TError error = ENOTFOUND;
 	// 15: <PARAMS> -> <TYPE> id <PARAMS_N>
 	error = type();
 	#ifdef DEBUG
-	printf("params: type vratilo: %d\n", error);
+	fprintf(stderr, "params: type vratilo: %d\n", error);
 	#endif
 	if(error == ENOP)
 	{
@@ -803,7 +853,7 @@ TError params(FILE *input)
 TError params_n(FILE *input)
 {
 	#ifdef DEBUG
-	printf("params_n\n");
+	fprintf(stderr, "params_n\n");
 	#endif
 	TError error = ENOTFOUND;
 	// 17: <PARAMS_N> -> , <TYPE> id <PARAMS_N>
@@ -812,7 +862,7 @@ TError params_n(FILE *input)
 		getNextToken(input, &attr);
 		error = type();
 		#ifdef DEBUG
-		printf("params_n: type vratilo: %d\n", error);
+		fprintf(stderr, "params_n: type vratilo: %d\n", error);
 		#endif
 		if(error == ENOP)
 		{
@@ -823,7 +873,7 @@ TError params_n(FILE *input)
 				/**
 				 * todo vkladani do tabulky symbolu funkce
 				 */
-				// KONEC SEMANTICKE ANALYZY
+				// /SEMANTICKE ANALYZY
 				getNextToken(input, &attr);
 				error = params_n(input);
 				#ifdef DEBUG
@@ -868,7 +918,7 @@ TError params_n(FILE *input)
 TError ret(FILE *input)
 {
 	#ifdef DEBUG
-	printf("ret\n");
+	fprintf(stderr, "ret\n");
 	#endif
 	TError error = ENOTFOUND;
 	// 42: <RETURN> -> return <EXPR>;
@@ -877,7 +927,7 @@ TError ret(FILE *input)
 		getNextToken(input, &attr);
 		error = expr(input, &attr, 0, &counterVar, &commTable);
 		#ifdef DEBUG
-		printf("ret: expr vratilo: %d\n", error);
+		fprintf(stderr, "ret: expr vratilo: %d\n", error);
 		#endif
 		if(error == ENOP)
 		{
@@ -900,7 +950,7 @@ TError ret(FILE *input)
 TError cout_term(FILE *input)
 {
 	#ifdef DEBUG
-	printf("cout_term\n");
+	fprintf(stderr, "cout_term\n");
 	#endif
 	TError error = ENOTFOUND;
 	// 39: <COUT_TERM> -> id <COUT_TERM_N>
@@ -914,7 +964,7 @@ TError cout_term(FILE *input)
 		getNextToken(input, &attr);
 		error = cout_term_n(input);
 		#ifdef DEBUG
-		printf("cout_term: cout_term_n vratilo: %d\n", error);
+		fprintf(stderr, "cout_term: cout_term_n vratilo: %d\n", error);
 		#endif
 		// neni potreba kontrolovat, zda pravidlo
 		// proslo na epsilon, negetujeme dalsi token
@@ -934,7 +984,7 @@ TError cout_term(FILE *input)
 		getNextToken(input, &attr);
 		error = cout_term_n(input);
 		#ifdef DEBUG
-		printf("cout_term: cout_term_n vratilo: %d\n", error);
+		fprintf(stderr, "cout_term: cout_term_n vratilo: %d\n", error);
 		#endif
 		// neni potreba kontrolovat, zda pravidlo
 		// proslo na epsilon, negetujeme dalsi token
@@ -961,7 +1011,7 @@ TError cout_term(FILE *input)
 TError cout_term_n(FILE *input)
 {
 	#ifdef DEBUG
-	printf("cout_term_n\n");
+	fprintf(stderr, "cout_term_n\n");
 	#endif
 	TError error = ENOTFOUND;
 	// 40: <COUT_TERM_N> -> << <COUT_TERM>
@@ -970,7 +1020,7 @@ TError cout_term_n(FILE *input)
 		getNextToken(input, &attr);
 		error = cout_term(input);
 		#ifdef DEBUG
-		printf("cout_term_n: cout_term vratilo: %d\n", error);
+		fprintf(stderr, "cout_term_n: cout_term vratilo: %d\n", error);
 		#endif
 		// neni potreba kontrolovat, zda pravidlo
 		// proslo na epsilon, negetujeme dalsi token
@@ -1001,7 +1051,7 @@ TError cout_term_n(FILE *input)
 TError cin_id_n(FILE *input)
 {
 	#ifdef DEBUG
-	printf("cin_id_n\n");
+	fprintf(stderr, "cin_id_n\n");
 	#endif
 	TError error = ENOTFOUND;
 	// 37) <CIN_ID_N> -> >> id <CIN_ID_N>
@@ -1074,7 +1124,7 @@ TError cin_id_n(FILE *input)
 TError assign(FILE *input)
 {
 	#ifdef DEBUG
-	printf("assign\n");
+	fprintf(stderr, "assign\n");
 	#endif
 	TError error = ENOTFOUND;
 	// 36: <ASSIGN> -> id = <EXPR> 
@@ -1120,14 +1170,14 @@ TError assign(FILE *input)
 TError var_def(FILE *input)
 {
 	#ifdef DEBUG
-	printf("var_def\n");
+	fprintf(stderr, "var_def\n");
 	#endif
 	TError error = ENOTFOUND;
 	// 4: <VAR_DEF> -> <TYPE> id <INIT>;
 	if((error = type()) == ENOP || error == ESYN)
 	{
 		#ifdef DEBUG
-		printf("var_def: type vratilo: %d\n", error);
+		fprintf(stderr, "var_def: type vratilo: %d\n", error);
 		#endif
 		if(error == ESYN)
 		{
@@ -1247,7 +1297,7 @@ TError var_def(FILE *input)
 TError init(FILE *input)
 {
 	#ifdef DEBUG
-	printf("init\n");
+	fprintf(stderr, "init\n");
 	#endif
 	TError error = ENOTFOUND;
 	// 6: <INIT> -> = <EXPR>
@@ -1256,7 +1306,7 @@ TError init(FILE *input)
 		getNextToken(input, &attr);
 		error = expr(input, &attr, 0, &counterVar, &commTable);
 		#ifdef DEBUG
-		printf("init: expr vratilo: %d\n", error);
+		fprintf(stderr, "init: expr vratilo: %d\n", error);
 		#endif
 		if(error == ENOP)
 		{
@@ -1284,7 +1334,7 @@ TError init(FILE *input)
 TError if_n(FILE *input)
 {
 	#ifdef DEBUG
-	printf("if_n\n");
+	fprintf(stderr, "if_n\n");
 	#endif
 	TError error = ENOTFOUND;
 	// 43) <IF_N> -> else <COMM_SEQ>
@@ -1293,7 +1343,7 @@ TError if_n(FILE *input)
 		getNextToken(input, &attr);
 		error = comm_seq(input);
 		#ifdef DEBUG
-		printf("if_n: comm_seq vratilo: %d\n", error);
+		fprintf(stderr, "if_n: comm_seq vratilo: %d\n", error);
 		#endif
 		if(error == ENOP)
 		{
@@ -1312,35 +1362,6 @@ TError if_n(FILE *input)
 	return error;
 }
 
-/**
- * Simuluje pravidla 30 a 31.
- * @param  input Soubor obsahujici vstupni kod.
- * @param  attr  String lexemu.
- * @return       Index do enumerace chyb.
- */
-TError fcall_or_assign(FILE *input)
-{
-	#ifdef DEBUG
-	printf("fcall_or_assign\n");
-	#endif
-	TError error = ENOTFOUND;
-	// 30: <FCALL_OR_ASSIGN> -> <EXPR> ;
-	if((error = expr(input, &attr, 0, &counterVar, &commTable)) == ENOP || error == ESYN)
-	{
-		#ifdef DEBUG
-		printf("fcall_or_assign: expr vratilo: %d\n", error);
-		#endif
-		if(error == ENOP)
-		{
-			return error;
-		}
-		else if(error == ESYN)
-		{
-			return error;
-		}
-	}
-	return error;
-}
 
 
 /**
@@ -1352,21 +1373,28 @@ TError fcall_or_assign(FILE *input)
 TError terms(FILE *input)
 {
 	#ifdef DEBUG
-	printf("terms\n");
+	fprintf(stderr, "terms\n");
 	#endif
 	TError error = ENOTFOUND;
 	// 32) <TERMS> -> id <TERMS_N>
 	if(token.type == T_Id)
 	{
 		// SEMANTICKA ANALYZA
-		/**
-		 * @todo semanticka analyza
-		 */
+		tData *tempData;
+		if((tempData = htRead(commTable, strGetStr(&attr))) == NULL)
+		{
+			#ifdef DEBUG
+			fprintf(stderr, "KONCIM V TERMS: 32)\n");
+			#endif
+
+			print_error(ESEM_DEF, token.line);
+			exit(ESEM_DEF);
+		}
 		// KONEC SEMANTICKE ANALYZY
 		getNextToken(input, &attr);
 		error = terms_n(input);
 		#ifdef DEBUG
-		printf("terms: terms_n vratilo: %d\n", error);
+		fprintf(stderr, "terms: terms_n vratilo: %d\n", error);
 		#endif
 		if(error == ENOP || error == EEMPTY)
 		{
@@ -1395,7 +1423,7 @@ TError terms(FILE *input)
 TError terms_n(FILE *input)
 {
 	#ifdef DEBUG
-	printf("terms_n\n");
+	fprintf(stderr, "terms_n\n");
 	#endif
 	TError error = ENOTFOUND;
 	// 34: <TERMS_N> -> , id <TERMS_N>
@@ -1445,7 +1473,7 @@ TError terms_n(FILE *input)
 TError type()
 {
 	#ifdef DEBUG
-	printf("type\n");
+	fprintf(stderr, "type\n");
 	#endif
 	TError error = ENOTFOUND;
 	// 8: <TYPE> ->	int
@@ -1465,7 +1493,7 @@ TError type()
 TError realtype()
 {
 	#ifdef DEBUG
-	printf("realtype\n");
+	fprintf(stderr, "realtype\n");
 	#endif
 	TError error = ENOTFOUND;
 	// P: UNDEF
