@@ -139,7 +139,7 @@ TError StackDispose(Tstack *stack)
 		// }
 		tempPtr = stack->top;
 		stack->top = stack->top->Lptr;
-		free(tempPtr);
+		//free(tempPtr);
 	}
 
 	stack->first = NULL;
