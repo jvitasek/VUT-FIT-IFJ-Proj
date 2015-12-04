@@ -11,13 +11,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "error.h"
-
+#include "gc.h"
+#include <string.h>
 #include "parser.h"
 #include "expression.h"
 
 //#define DEBUG 1
 
 int *counteerVar;	// sluzi pri tvorbe pomocnych premennych
+
+void ****ggc;
 
 //tHTable* globalTS;
 //PSymbols *exprStr;
@@ -76,7 +79,8 @@ TError StackInit(Tstack *stack)
 		error = EINT;
 		return error;
 	}
-
+	putInGC(*ggc,stack->top);
+	putInGC(*ggc,stack->first);
 	TstackElemPtr tempPtr = NULL;
 	if ((tempPtr = malloc(sizeof(struct TstackElem))) == NULL)
 	{
@@ -84,7 +88,7 @@ TError StackInit(Tstack *stack)
 		error = EINT;
 		return error;
 	}
-
+	putInGC(*ggc,tempPtr);
 	if (tempPtr != NULL)
 	{
 		tempPtr->Lptr = NULL;
@@ -125,7 +129,7 @@ TError StackDispose(Tstack *stack)
 		fprintf(stderr, "Chyba pri malloc.\n");
 		exit(EINT);
 	}
-
+	putInGC(*ggc,tempPtr);
 	// postupne rusim vsechny prvky na zasobniku
 	while (stack->top != NULL)
 	{
@@ -217,7 +221,7 @@ TError StackPush(Tstack *stack, int tokterm)
 		error = EINT;
 		return error;
 	}
-
+	putInGC(*ggc,tempPtr);
 	#ifdef DEBUG
 		printf("StackPush - vkladam termType: %d\n", tempPtr->termType);
 	#endif
@@ -261,7 +265,7 @@ TstackElemPtr StackTop(Tstack *stack)
 		fprintf(stderr, "Chyba pri malloc.\n");
 		print_error(EINT, token.line);
 	}
-
+	putInGC(*ggc,tempPtr);
 	// terminal je hned na vrcholu zasobniku
 	if (stack->top->termType <= PDollar)
 	{
@@ -345,7 +349,7 @@ TError StackShift(Tstack *stack, int tokterm)
 		error = EINT;
 		return error;
 	}
-
+	putInGC(*ggc,temp);
 	// vlozeni handle za term
 	temp->termType = PLessReduc; 
 	temp->idType = Tother;
@@ -717,7 +721,7 @@ TError findRule(Tstack *stack, ruleType rule)
 				error = EINT;
 				return error;
 			}
-			
+			putInGC(*ggc,tempPtr);
 			tempPtr->termType = PNonTerm;
 			tempPtr->idType = stack->top->idType;
 			tempPtr->data = NULL; /////////////////// zatim NULL
@@ -796,9 +800,10 @@ TError findRule(Tstack *stack, ruleType rule)
  * @param  count Pocitadlo potrebne pri tvorbe pomocnych premennych.
  * @return       Index do enumerace chyb.
  */
-TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **localTable)
+TError expr(FILE *input, void ****gc, string *attr, int semi_or_par, int *count, tHTable **localTable)
 {
 	counteerVar = count;
+	ggc = gc;
 	TError error = ENOTFOUND;
 	TstackElemPtr tempStack = NULL;
 	int counter = 0; // pro pocitani zavorek
@@ -816,7 +821,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 		StackDispose(&stack);
 		return error;
 	}
-
+	putInGC(*ggc,tempStack);
 	// inicializace zasobniku 
 	if ((error = StackInit(&stack)) != ENOP)
 	{

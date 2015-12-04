@@ -182,7 +182,7 @@ TError gStackPush(stack *stack, tHTable *table)
 	memcpy(tempPtr->table, table, sizeof(tHTable));
 	tempPtr->Lptr = stack->top;
 	stack->top = tempPtr;
-
+	free(tempPtr);
 	error = ENOP;
 	return error;
 }
@@ -215,4 +215,5 @@ void whatsInStacks(stack *stack)
 			outputSymbolTable(temp->table);
 		}
 	}
+	free(temp);
 }

@@ -18,6 +18,7 @@
 #include "parser.h"
 #include "expression.h"
 #include "istack.h"
+#include "gc.h"
 
 string attr; // vytvorime si string
 
@@ -25,6 +26,8 @@ int counterVar = 1;		// globalna premenna, ktora sluzi pri tvorbe pomocnych prem
 tHTable *commTable;
 tHTable *funcTable;
 stack tableStack;
+
+void ****ggc = NULL;		// globalny GC
 
 /**
  * @todo deklarace instruction listu
@@ -52,12 +55,15 @@ void getNextToken(FILE *input, string *attr)
  * @param  attr  String lexemu.
  * @return       Index do enumerace chyb.
  */
-TError parse(FILE *input)
+TError parse(FILE *input, void ***gc)
 {
 	#ifdef DEBUG
 	printf("parse\n");
 	#endif
 	TError error = ESYN;
+	
+	ggc = &gc;
+	printf("PARSER GGC %p\n",*ggc);
 
 	/**
 	 * inicializace stringu s nazvem tokenu
@@ -465,7 +471,7 @@ TError stmt(FILE *input)
 		if(token.type == T_LeftParenthesis)
 		{
 			getNextToken(input, &attr);
-			error = expr(input, &attr, 1, &counterVar, &commTable);
+			error = expr(input, ggc, &attr, 1, &counterVar, &commTable);
 			#ifdef DEBUG
 			printf("stmt: expr vratilo: %d\n", error);
 			printf("### token po expr: %d\n", token.type);
@@ -510,7 +516,7 @@ TError stmt(FILE *input)
 			if(error == ENOP)
 			{
 				getNextToken(input, &attr);
-				error = expr(input, &attr, 0, &counterVar, &commTable);
+				error = expr(input, ggc, &attr, 0, &counterVar, &commTable);
 				#ifdef DEBUG
 				printf("stmt: expr vratilo: %d\n", error);
 				#endif
@@ -875,7 +881,7 @@ TError ret(FILE *input)
 	if(token.type == T_Return)
 	{
 		getNextToken(input, &attr);
-		error = expr(input, &attr, 0, &counterVar, &commTable);
+		error = expr(input, ggc, &attr, 0, &counterVar, &commTable);
 		#ifdef DEBUG
 		printf("ret: expr vratilo: %d\n", error);
 		#endif
@@ -1089,7 +1095,7 @@ TError assign(FILE *input)
 		if(token.type == T_Assig)
 		{
 			getNextToken(input, &attr);
-			error = expr(input, &attr, 1, &counterVar, &commTable);
+			error = expr(input, ggc, &attr, 1, &counterVar, &commTable);
 			#ifdef DEBUG
 			printf("assign: expr vratilo: %d\n", error);
 			#endif
@@ -1254,7 +1260,7 @@ TError init(FILE *input)
 	if(token.type == T_Assig)
 	{
 		getNextToken(input, &attr);
-		error = expr(input, &attr, 0, &counterVar, &commTable);
+		error = expr(input, ggc, &attr, 0, &counterVar, &commTable);
 		#ifdef DEBUG
 		printf("init: expr vratilo: %d\n", error);
 		#endif
@@ -1325,7 +1331,7 @@ TError fcall_or_assign(FILE *input)
 	#endif
 	TError error = ENOTFOUND;
 	// 30: <FCALL_OR_ASSIGN> -> <EXPR> ;
-	if((error = expr(input, &attr, 0, &counterVar, &commTable)) == ENOP || error == ESYN)
+	if((error = expr(input, ggc, &attr, 0, &counterVar, &commTable)) == ENOP || error == ESYN)
 	{
 		#ifdef DEBUG
 		printf("fcall_or_assign: expr vratilo: %d\n", error);
@@ -1485,6 +1491,7 @@ TError initSTable(tHTable **table)
 	TError error = ENOP;
 	tHTItem *item;
 	item = (tHTItem *) malloc(sizeof(tHTItem));
+	putInGC(*ggc,item);
 
 	if(item != NULL)
 	{
@@ -1501,6 +1508,7 @@ TError initSTable(tHTable **table)
 
 	*table = NULL;
 	*table = (tHTable*) malloc(sizeof(tHTable));
+	putInGC(*ggc,*table);
 	if(*table != NULL)
 	{
 		for (int i=0; i<MAX_HTSIZE; (**table)[i++] = item);

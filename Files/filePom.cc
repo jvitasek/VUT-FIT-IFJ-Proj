@@ -12,7 +12,6 @@ int main(int param, string param2)
     cin >> test; // kontrola, jestli test byl definovan
   
 
-    int test;
     // tohle resi dusan v expr
     if(test + (lol + neco))
     {
@@ -28,19 +27,3 @@ int main(int param, string param2)
     return test;
 }
  
-// localTable: tester, 2, 1
-double tester(string lol, double testik, int next)
-{
-    if(testik)
-    {
-        return testik + (neco + (neco + lol));
-    }
-       
-    return 0;
-}
-
-// localTable: lolicek, 2, 0
-string wefkewpfpeowfkoewfkpowk()
-{
-	
-}

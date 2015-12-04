@@ -98,6 +98,6 @@ int tokToTerm(int tokenType);
 TError findRule(Tstack *stack, ruleType rule);
 void generateVariable(string *var, int *counter);
 void generateInst(tInstCode instType, void *op1, void *op2, void *res);
-TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **localTable); // P: @todo
+TError expr(FILE *input, void ****gc, string *attr, int semi_or_par, int *count, tHTable **localTable); // P: @todo
 
 #endif

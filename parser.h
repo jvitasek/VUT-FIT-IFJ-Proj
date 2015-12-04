@@ -13,7 +13,7 @@
 #define KW 10
  
  // HLAVNI FUNKCE
-TError parse(FILE *input); // P: 1
+TError parse(FILE *input,void ***gc); // P: 1
 
 // POM. FUNKCE
 void getNextToken(FILE *input, string *attr);
