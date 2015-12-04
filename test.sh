@@ -181,5 +181,17 @@ else
 	echo "Test 14: ERROR, EXPECTED 20, GOT $ret" >> test.out
 fi
 
+# volani funkce s parametry
+./main tests/test15.cc
+ret=$?
+
+if [ "$ret" -eq 0 ];
+then
+	succ=$((succ+1))
+	echo "Test 15: SUCCESS" >> test.out
+else
+	echo "Test 15: ERROR, EXPECTED 0, GOT $ret" >> test.out
+fi
+
 echo "#################"
-echo "SUCCESS: $succ/14"
+echo "SUCCESS: $succ/15"
