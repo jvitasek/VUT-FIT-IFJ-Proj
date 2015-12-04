@@ -1,9 +1,12 @@
 # vsechno ok
 rm adv-test.out
-./main adv-tests/001_R0_.c
-ret=$?
 success=0
 error=0
+
+
+# PROBLEM: vraci syntaktickou chybu, protoze PSA neumi volani fce
+./main adv-tests/001_R0_.c
+ret=$?
 
 if [ "$ret" -eq 0 ];
 then
@@ -14,6 +17,8 @@ else
 	echo "Test 1: ERROR, EXPECTED 0, GOT $ret" > adv-test.out
 fi
 
+# PROBLEM: vraci semantickou chybu, protoze nemame vyresene zastineni
+# 		   nizsiho ramce ve vyssim ramci
 ./main adv-tests/002_R0_.c
 ret=$?
 
@@ -26,6 +31,7 @@ else
 	echo "Test 2: ERROR, EXPECTED 0, GOT $ret" >> adv-test.out
 fi
 
+# PROBLEM: vraci syntaktickou chybu, protoze PSA neumi volani fce
 ./main adv-tests/003_R0_.c
 ret=$?
 
@@ -86,7 +92,8 @@ else
 	echo "Test 7: ERROR, EXPECTED 0, GOT $ret" >> adv-test.out
 fi
 
-./main adv-tests/008_R0_.c
+# PROBLEM: vraci syntaktickou chybu misto lexikalni
+./main adv-tests/008_R1_.c
 ret=$?
 
 if [ "$ret" -eq 0 ];
@@ -110,6 +117,8 @@ else
 	echo "Test 9: ERROR, EXPECTED 10, GOT $ret" >> adv-test.out
 fi
 
+# PROBLEM: nevraci chybu, ma vracet lexikalni – konstanta
+# 		   vetsi nez MAXINT (asi)
 ./main adv-tests/010_R1_.c
 ret=$?
 
@@ -194,6 +203,7 @@ else
 	echo "Test 16: ERROR, EXPECTED 20, GOT $ret" >> adv-test.out
 fi
 
+# PROBLEM: vraci syntaktickou chybu, protoze PSA neumi volani fce
 ./main adv-tests/017_R3_.c
 ret=$?
 
@@ -206,6 +216,7 @@ else
 	echo "Test 17: ERROR, EXPECTED 30, GOT $ret" >> adv-test.out
 fi
 
+# PROBLEM: vraci syntaktickou chybu, protoze PSA neumi volani fce
 ./main adv-tests/018_R3_.c
 ret=$?
 
@@ -218,6 +229,7 @@ else
 	echo "Test 18: ERROR, EXPECTED 30, GOT $ret" >> adv-test.out
 fi
 
+# PROBLEM: vraci syntaktickou chybu, protoze PSA neumi volani fce
 ./main adv-tests/019_R3_.c
 ret=$?
 
@@ -230,6 +242,7 @@ else
 	echo "Test 19: ERROR, EXPECTED 30, GOT $ret" >> adv-test.out
 fi
 
+# PROBLEM: vraci syntaktickou chybu, protoze PSA neumi volani fce
 ./main adv-tests/020_R3_.c
 ret=$?
 
@@ -254,6 +267,8 @@ else
 	echo "Test 21: ERROR, EXPECTED 30, GOT $ret" >> adv-test.out
 fi
 
+# PROBLEM: nevraci chybu, mel by vracet semantickou, protoze length
+# 		   je nazev vestavene funkce
 ./main adv-tests/022_R3_.c
 ret=$?
 
@@ -266,6 +281,8 @@ else
 	echo "Test 22: ERROR, EXPECTED 30, GOT $ret" >> adv-test.out
 fi
 
+# PROBLEM: nevraci chybu, mel by vracet semantickou, protoze main
+# 		   nesmi mit parametry
 ./main adv-tests/023_R3_.c
 ret=$?
 
@@ -278,6 +295,9 @@ else
 	echo "Test 23: ERROR, EXPECTED 30, GOT $ret" >> adv-test.out
 fi
 
+# PROBLEM: vraci syntaktickou chybu, ma vracet semantickou,
+# 		   protoze foo je jen deklarovano, ne definovano,
+# 		   ale je volano v mainu
 ./main adv-tests/024_R3_.c
 ret=$?
 
@@ -290,6 +310,7 @@ else
 	echo "Test 24: ERROR, EXPECTED 30, GOT $ret" >> adv-test.out
 fi
 
+# PROBLEM: parametry nesouhlasi
 ./main adv-tests/025_R4_.c
 ret=$?
 
