@@ -163,11 +163,6 @@ TError StackPop(Tstack *stack)
 	{
 		tempPtr = stack->top;
 
-		// if (stack->top->data != NULL)
-		// {
-		// 	free(stack->top->data);
-		// }
-
 		if (stack->top->Lptr != NULL)
 		{
 			#ifdef DEBUG
@@ -264,8 +259,7 @@ TstackElemPtr StackTop(Tstack *stack)
 	if ((tempPtr = malloc(sizeof(struct TstackElem))) == NULL)
 	{
 		fprintf(stderr, "Chyba pri malloc.\n");
-		//error = EINT;
-		//return error;
+		print_error(EINT, token.line);
 	}
 
 	// terminal je hned na vrcholu zasobniku
