@@ -63,7 +63,6 @@ TError parse(FILE *input, void ***gc)
 	TError error = ESYN;
 	
 	ggc = &gc;
-	printf("PARSER GGC %p\n",*ggc);
 
 	/**
 	 * inicializace stringu s nazvem tokenu
