@@ -15,7 +15,7 @@
 #include "parser.h"
 #include "expression.h"
 
-//#define DEBUG 1
+#define DEBUG 1
 
 int *counteerVar;	// sluzi pri tvorbe pomocnych premennych
 
@@ -383,7 +383,7 @@ TError StackShift(Tstack *stack, int tokterm)
  * Pomocna funkce pro vypis celeho zasobniku.
  * @param stack
  */
-void whatsInStacks(Tstack *stack)
+void whatInStacks(Tstack *stack)
 {
 	int i = 1;
 	TstackElemPtr temp = stack->top;
@@ -502,7 +502,7 @@ TError findRule(Tstack *stack, ruleType rule)
 			}
 			#ifdef DEBUG
 			 	printf("Pravidlo ADD po pop a push\n");
-				whatsInStacks(stack);
+				whatInStacks(stack);
 			#endif
 
 			error = ENOP;
@@ -536,7 +536,7 @@ TError findRule(Tstack *stack, ruleType rule)
 			}
 			#ifdef DEBUG
 			 	printf("Pravidlo SUB_RULE po pop a push\n");
-				whatsInStacks(stack);
+				whatInStacks(stack);
 			#endif
 
 			error = ENOP;
@@ -570,7 +570,7 @@ TError findRule(Tstack *stack, ruleType rule)
 			}
 			#ifdef DEBUG
 			 	printf("Pravidlo MUL_RULE po pop a push\n");
-				whatsInStacks(stack);
+				whatInStacks(stack);
 			#endif
 
 			error = ENOP;
@@ -604,7 +604,7 @@ TError findRule(Tstack *stack, ruleType rule)
 			}
 			#ifdef DEBUG
 			 	printf("Pravidlo DIV_RULE po pop a push\n");
-				whatsInStacks(stack);
+				whatInStacks(stack);
 			#endif
 
 			error = ENOP;
@@ -638,7 +638,7 @@ TError findRule(Tstack *stack, ruleType rule)
 			}
 			#ifdef DEBUG
 			 	printf("Pravidlo LESSGREAT_RULE po pop a push\n");
-				whatsInStacks(stack);
+				whatInStacks(stack);
 			#endif
 
 			error = ENOP;
@@ -672,7 +672,7 @@ TError findRule(Tstack *stack, ruleType rule)
 			}
 			#ifdef DEBUG
 			 	printf("Pravidlo EQ_RULE po pop a push\n");
-				whatsInStacks(stack);
+				whatInStacks(stack);
 			#endif
 
 			error = ENOP;
@@ -706,7 +706,7 @@ TError findRule(Tstack *stack, ruleType rule)
 			}
 			#ifdef DEBUG
 			 	printf("Pravidlo PAR_RULE po pop a push\n");
-				whatsInStacks(stack);
+				whatInStacks(stack);
 			#endif
 		break;
 
@@ -733,7 +733,7 @@ TError findRule(Tstack *stack, ruleType rule)
 			stack->top = tempPtr;
 			#ifdef DEBUG
 			 	printf("Pravidlo ID_E_RULE po pop.\n");
-				whatsInStacks(stack);
+				whatInStacks(stack);
 			#endif
 
 			error = ENOP;
@@ -801,6 +801,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 	counteerVar = count;
 	TError error = ENOTFOUND;
 	TstackElemPtr tempStack = NULL;
+	int prevTok;
 	int counter = 0; // pro pocitani zavorek
 	//char *tempData = NULL;
 	int tokterm = 0;
@@ -867,7 +868,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 
 			#ifdef DEBUG
 				printf("----- ---- --- --%d.-- Cyklus while do-- --- ---- -----\n", index);
-				whatsInStacks(&stack);
+				whatInStacks(&stack);
 				printf("-------------------------------------------------------\n");
 			#endif
 
@@ -976,17 +977,29 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 					}
 				break;
 				case empty:
-					if (counter == 0 && tokterm == PDollar)
+					// kontrola, zda se jedna o funkci
+					if (prevTok == PIden && tokterm == PLeftP)
 					{
+						StackPop(&stack); //popnu id
+						if ((error = StackPush(&stack, PIdFun)) != ENOP) // id nahradim za f
+						{
+							fprintf(stderr, "Chyba pri StackPush.\n");
+							StackDispose(&stack);
+							return error;
+						}
 						#ifdef DEBUG
-							printf("Empty - Counter == 0 && tokterm == $.\n");
-						#endif
+							printf("---FUNKCEEEEE!!!!! - menim zasobnik na:\n");
+							whatInStacks(&stack);
+							printf("---ZMENENY ZASOBNIK ////////\n");
+						#endif					
 						continue;
 					}
-
-					#ifdef DEBUG
-						printf("Empty - CHYBA.\n");
-					#endif
+					else
+					{
+						#ifdef DEBUG
+							printf("Empty - CHYBA.\n");
+						#endif
+					}
 
 					fprintf(stderr, "Chyba vyrazu.\n");
 					StackDispose(&stack);
@@ -1024,6 +1037,10 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 				}
 				printf("-------------------------------------------------------\n");
 			#endif
+
+			prevTok = tokterm;
+
+			printf("---PREV TOK: %d......\n", prevTok);
 
 		} while(!((tempStack->termType == PDollar) && (tokToTerm(token.type) == PDollar)));
 	}
@@ -1074,7 +1091,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 
 			#ifdef DEBUG
 				printf("----- ---- --- --%d.-- Cyklus while do-- --- ---- -----\n", index);
-				whatsInStacks(&stack);
+				whatInStacks(&stack);
 				printf("-------------------------------------------------------\n");
 			#endif
 
