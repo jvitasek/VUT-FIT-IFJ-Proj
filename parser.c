@@ -360,7 +360,7 @@ TError comm_seq(FILE *input)
 		}
 		++currScope; // menime scope, inkrementace
 		gStackPush(&tableStack, commTable);
-		printf("PUSHUJU na %d\n", token.line);
+		fprintf(stderr, "PUSHUJU na %d\n", token.line);
 		commTable = tableStack.top->table;
 		// /SEMANTICKA ANALYZA
 
@@ -473,15 +473,15 @@ TError stmt(FILE *input)
 			getNextToken(input, &attr);
 			error = expr(input, &attr, 1, &counterVar, &commTable);
 			#ifdef DEBUG
-			printf("stmt: expr vratilo: %d\n", error);
-			printf("### token po expr: %d\n", token.type);
+			fprintf(stderr, "stmt: expr vratilo: %d\n", error);
+			fprintf(stderr, "### token po expr: %d\n", token.type);
 			#endif
 			if(error == ENOP)
 			{
 				getNextToken(input, &attr);
 				error = comm_seq(input);
 				#ifdef DEBUG
-				printf("stmt: comm_seq vratilo: %d\n", error);
+				fprintf(stderr, "stmt: comm_seq vratilo: %d\n", error);
 				#endif
 				if(error == ENOP)
 				{
@@ -511,28 +511,28 @@ TError stmt(FILE *input)
 			getNextToken(input, &attr);
 			error = var_def(input);
 			#ifdef DEBUG
-			printf("stmt: var_def vratilo: %d\n", error);
+			fprintf(stderr, "stmt: var_def vratilo: %d\n", error);
 			#endif
 			if(error == ENOP)
 			{
 				getNextToken(input, &attr);
 				error = expr(input, &attr, 0, &counterVar, &commTable);
 				#ifdef DEBUG
-				printf("stmt: expr vratilo: %d\n", error);
+				fprintf(stderr, "stmt: expr vratilo: %d\n", error);
 				#endif
 				if(error == ENOP)
 				{
 					getNextToken(input, &attr);
 					error = assign(input);
 					#ifdef DEBUG
-					printf("stmt: assign vratilo: %d\n", error);
+					fprintf(stderr, "stmt: assign vratilo: %d\n", error);
 					#endif
 					if(error == ENOP)
 					{
 						getNextToken(input, &attr);
 						error = comm_seq(input);
 						#ifdef DEBUG
-						printf("stmt: comm_seq vratilo: %d\n", error);
+						fprintf(stderr, "stmt: comm_seq vratilo: %d\n", error);
 						#endif
 						if(error == ENOP)
 						{
@@ -603,7 +603,7 @@ TError stmt(FILE *input)
 				getNextToken(input, &attr);
 				error = cin_id_n(input);
 				#ifdef DEBUG
-				printf("stmt: cin_id_n vratilo: %d\n", error);
+				fprintf(stderr, "stmt: cin_id_n vratilo: %d\n", error);
 				#endif
 				// neni potreba kontrolovat, zda pravidlo
 				// proslo na epsilon, negetujeme dalsi token
@@ -629,7 +629,7 @@ TError stmt(FILE *input)
 				getNextToken(input, &attr);
 				error = cin_id_n(input);
 				#ifdef DEBUG
-				printf("stmt: cin_id_n vratilo: %d\n", error);
+				fprintf(stderr, "stmt: cin_id_n vratilo: %d\n", error);
 				#endif
 				// neni potreba kontrolovat, zda pravidlo
 				// proslo na epsilon, negetujeme dalsi token
@@ -668,7 +668,7 @@ TError stmt(FILE *input)
 			getNextToken(input, &attr);
 			error = cout_term(input);
 			#ifdef DEBUG
-			printf("stmt: cout_term vratilo: %d\n", error);
+			fprintf(stderr, "stmt: cout_term vratilo: %d\n", error);
 			#endif
 			if(error == ENOP)
 			{
@@ -819,7 +819,7 @@ TError params(FILE *input)
 			getNextToken(input, &attr);
 			error = params_n(input);
 			#ifdef DEBUG
-			printf("params: params_n vratilo: %d\n", error);
+			fprintf(stderr, "params: params_n vratilo: %d\n", error);
 			#endif
 			// neni potreba kontrolovat, zda pravidlo
 			// proslo na epsilon, negetujeme dalsi token
@@ -883,7 +883,7 @@ TError params_n(FILE *input)
 				getNextToken(input, &attr);
 				error = params_n(input);
 				#ifdef DEBUG
-				printf("params_n: params_n vratilo: %d\n", error);
+				fprintf(stderr, "params_n: params_n vratilo: %d\n", error);
 				#endif
 				// neni potreba kontrolovat, zda pravidlo
 				// proslo na epsilon, negetujeme dalsi token
@@ -1074,7 +1074,7 @@ TError cin_id_n(FILE *input)
 			getNextToken(input, &attr);
 			error = cin_id_n(input);
 			#ifdef DEBUG
-			printf("cin_id_n: cin_id_n vratilo: %d\n", error);
+			fprintf(stderr, "cin_id_n: cin_id_n vratilo: %d\n", error);
 			#endif
 			// neni potreba kontrolovat, zda pravidlo
 			// proslo na epsilon, negetujeme dalsi token
@@ -1094,7 +1094,7 @@ TError cin_id_n(FILE *input)
 			getNextToken(input, &attr);
 			error = cin_id_n(input);
 			#ifdef DEBUG
-			printf("cin_id_n: cin_id_n vratilo: %d\n", error);
+			fprintf(stderr, "cin_id_n: cin_id_n vratilo: %d\n", error);
 			#endif
 			// neni potreba kontrolovat, zda pravidlo
 			// proslo na epsilon, negetujeme dalsi token
@@ -1147,7 +1147,7 @@ TError assign(FILE *input)
 			getNextToken(input, &attr);
 			error = expr(input, &attr, 1, &counterVar, &commTable);
 			#ifdef DEBUG
-			printf("assign: expr vratilo: %d\n", error);
+			fprintf(stderr, "assign: expr vratilo: %d\n", error);
 			#endif
 			if(error == ENOP)
 			{
@@ -1201,9 +1201,9 @@ TError var_def(FILE *input)
 			// redefinice
 			if(tempData && tempData->scope == currScope)
 			{
-				//#ifdef DEBUG
+				#ifdef DEBUG
 				fprintf(stderr, "KONCIM – TOKEN: %s, SCOPE: %d, CURRENT: %d\n", strGetStr(&attr), tempData->scope, currScope);
-				//#endif
+				#endif
 				print_error(ESEM_DEF, token.line);
 			}
 			// probehne zastineni
@@ -1214,15 +1214,15 @@ TError var_def(FILE *input)
 				data.scope = currScope;
 				data.timesUsed = 0;
 				htInsert(commTable, strGetStr(&attr), data);
-				//#ifdef DEBUG
+				#ifdef DEBUG
 				fprintf(stderr, "VKLADAM %s, SCOPE: %d, CURRENT: %d\n", strGetStr(&attr), data.scope, currScope);
-				//#endif
+				#endif
 			}
 			// KONEC SEMANTICKE ANALYZY
 			getNextToken(input, &attr);
 			error = init(input);
 			#ifdef DEBUG
-			printf("var_def: init vratilo: %d\n", error);
+			fprintf(stderr, "var_def: init vratilo: %d\n", error);
 			#endif
 			if(error == ENOP || error == EEMPTY)
 			{
@@ -1275,7 +1275,7 @@ TError var_def(FILE *input)
 			getNextToken(input, &attr);
 			error = init(input);
 			#ifdef DEBUG
-			printf("var_def: init vratilo: %d\n", error);
+			fprintf(stderr, "var_def: init vratilo: %d\n", error);
 			#endif
 			// neni potreba kontrolovat, zda pravidlo
 			// proslo na epsilon, negetujeme dalsi token
@@ -1448,7 +1448,7 @@ TError terms_n(FILE *input)
 			getNextToken(input, &attr);
 			error = terms_n(input);
 			#ifdef DEBUG
-			printf("terms: terms_n vratilo: %d\n", error);
+			fprintf(stderr, "terms: terms_n vratilo: %d\n", error);
 			#endif
 			if(error == ENOP || error == EEMPTY)
 			{
