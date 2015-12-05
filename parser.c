@@ -21,10 +21,11 @@
 
 string attr; // vytvorime si string
 
-int counterVar = 1;		// globalna premenna, ktora sluzi pri tvorbe pomocnych premennych na medzivypocty
+int counterVar = 1;	// globalna premenna, ktora sluzi pri tvorbe pomocnych premennych na medzivypocty
 tHTable *commTable;
 tHTable *funcTable;
 stack tableStack;
+int currScope;
 
 /**
  * @todo deklarace instruction listu
@@ -58,6 +59,7 @@ TError parse(FILE *input)
 	fprintf(stderr, "parse\n");
 	#endif
 	TError error = ESYN;
+	currScope = 0;
 
 	/**
 	 * inicializace stringu s nazvem tokenu
@@ -192,6 +194,7 @@ TError func(FILE *input)
 					tData data;
 					data.type = tempData->type;
 					data.timesUsed = tempData->timesUsed + 1;
+					data.scope = -1;
 					htInsert(funcTable, strGetStr(&attr), data);
 					#ifdef DEBUG
 					fprintf(stderr, "VKLADAM %s\n", strGetStr(&attr));
@@ -214,6 +217,7 @@ TError func(FILE *input)
 					tData data;
 					data.type = FUNC;
 					data.timesUsed = 0;
+					data.scope = -1;
 					htInsert(funcTable, strGetStr(&attr), data);
 					#ifdef DEBUG
 					fprintf(stderr, "VKLADAM %s\n", strGetStr(&attr));
@@ -354,6 +358,7 @@ TError comm_seq(FILE *input)
 		{
 			commTable = funcTable;
 		}
+		++currScope; // menime scope, inkrementace
 		gStackPush(&tableStack, commTable);
 		printf("PUSHUJU na %d\n", token.line);
 		commTable = tableStack.top->table;
@@ -370,6 +375,7 @@ TError comm_seq(FILE *input)
 		
 
 		// SEMANTICKA ANALYZA
+		--currScope; // menime scope, dekrementace
 		gStackPop(&tableStack);
 		#ifdef DEBUG
 		fprintf(stderr, "POPPUJU na %d\n", token.line);
@@ -1189,28 +1195,58 @@ TError var_def(FILE *input)
 		{
 			// SEMANTICKA ANALYZA
 			tData *tempData;
-			if((tempData = htRead(commTable, strGetStr(&attr))) != NULL)
-			{
-				#ifdef DEBUG
-				fprintf(stderr, "KONCIM VE VAR_DEF: 4)\n");
-				#endif
 
+			tempData = htReadScope(commTable, strGetStr(&attr), currScope);
+
+			// redefinice
+			if(tempData)
+			{
+				//#ifdef DEBUG
+				fprintf(stderr, "KONCIM – TOKEN: %s, SCOPE: %d, CURRENT: %d\n", strGetStr(&attr), tempData->scope, currScope);
+				//#endif
 				print_error(ESEM_DEF, token.line);
-				exit(ESEM_DEF);
 			}
-			// promenna jeste neni v tabulce
+			// probehne zastineni
 			else
 			{
-				if(strGetStr(&attr) != NULL)
-				{
-					tData data;
-					data.type = VAR;
-					data.timesUsed = 0;
-					htInsert(commTable, strGetStr(&attr), data);
-					fprintf(stderr, "VKLADAM %s, LINE: %d\n", strGetStr(&attr), token.type);
-					currentVar = strGetStr(&attr);
-				}
+				tData data;
+				data.type = VAR;
+				data.scope = currScope;
+				data.timesUsed = 0;
+				htInsert(commTable, strGetStr(&attr), data);
+				//#ifdef DEBUG
+				fprintf(stderr, "VKLADAM %s, SCOPE: %d, CURRENT: %d\n", strGetStr(&attr), data.scope, currScope);
+				//#endif
 			}
+
+
+
+
+
+			// tData *tempData;
+			// if((tempData = htRead(commTable, strGetStr(&attr))) != NULL)
+			// {
+			// 	#ifdef DEBUG
+			// 	fprintf(stderr, "KONCIM VE VAR_DEF: 4)\n");
+			// 	#endif
+
+			// 	print_error(ESEM_DEF, token.line);
+			// 	exit(ESEM_DEF);
+			// }
+			// // promenna jeste neni v tabulce
+			// else
+			// {
+			// 	if(strGetStr(&attr) != NULL)
+			// 	{
+			// 		tData data;
+			// 		data.type = VAR;
+			// 		data.scope = currScope;
+			// 		data.timesUsed = 0;
+			// 		htInsert(commTable, strGetStr(&attr), data);
+			// 		fprintf(stderr, "VKLADAM %s, SCOPE: %d\n", strGetStr(&attr), data.scope);
+			// 		currentVar = strGetStr(&attr);
+			// 	}
+			// }
 			// KONEC SEMANTICKE ANALYZY
 			getNextToken(input, &attr);
 			error = init(input);
@@ -1257,8 +1293,9 @@ TError var_def(FILE *input)
 					tData data;
 					data.type = VAR;
 					data.timesUsed = 0;
+					data.scope = currScope;
 					htInsert(commTable, strGetStr(&attr), data);
-					fprintf(stderr, "VKLADAM %s, LINE: %d\n", strGetStr(&attr), token.type);
+					fprintf(stderr, "VKLADAM %s, SCOPE: %d\n", strGetStr(&attr), data.scope);
 					currentVar = strGetStr(&attr);
 				}
 			}
@@ -1519,6 +1556,7 @@ TError initSTable(tHTable **table)
 		item->key = "*UNDEF*";
 		item->data.type = 0;
 		item->data.timesUsed = 0;
+		item->data.scope = 0;
 		item->ptrnext = NULL;
 	}
 	else
