@@ -16,36 +16,36 @@ fi
 ./main tests/test2.cc
 ret=$?
 
-if [ "$ret" -eq 10 ];
+if [ "$ret" -eq 1 ];
 then
 	succ=$((succ+1))
 	echo "Test 2: SUCCESS" >> test.out
 else
-	echo "Test 2: ERROR, EXPECTED 10, GOT $ret" >> test.out
+	echo "Test 2: ERROR, EXPECTED 1, GOT $ret" >> test.out
 fi
 
 # syntakticka chyba
 ./main tests/test3.cc
 ret=$?
 
-if [ "$ret" -eq 20 ];
+if [ "$ret" -eq 2 ];
 then
 	succ=$((succ+1))
 	echo "Test 3: SUCCESS" >> test.out
 else
-	echo "Test 3: ERROR, EXPECTED 20, GOT $ret" >> test.out
+	echo "Test 3: ERROR, EXPECTED 2, GOT $ret" >> test.out
 fi
 
 # semanticka chyba – redefinice funkce
 ./main tests/test4.cc
 ret=$?
 
-if [ "$ret" -eq 30 ];
+if [ "$ret" -eq 3 ];
 then
 	succ=$((succ+1))
 	echo "Test 4: SUCCESS" >> test.out
 else
-	echo "Test 4: ERROR, EXPECTED 30, GOT $ret" >> test.out
+	echo "Test 4: ERROR, EXPECTED 3, GOT $ret" >> test.out
 fi
 
 # semanticka chyba – nedefinovana promenna
@@ -53,12 +53,12 @@ fi
 ./main tests/test5.cc
 ret=$?
 
-if [ "$ret" -eq 30 ];
+if [ "$ret" -eq 3 ];
 then
 	succ=$((succ+1))
 	echo "Test 5: SUCCESS" >> test.out
 else
-	echo "Test 5: ERROR, EXPECTED 30, GOT $ret" >> test.out
+	echo "Test 5: ERROR, EXPECTED 3, GOT $ret" >> test.out
 fi
 
 # semantika – ramce funkci, stejna promenna
@@ -106,12 +106,12 @@ fi
 ./main tests/test9.cc
 ret=$?
 
-if [ "$ret" -eq 20 ];
+if [ "$ret" -eq 2 ];
 then
 	succ=$((succ+1))
 	echo "Test 9: SUCCESS" >> test.out
 else
-	echo "Test 9: ERROR, EXPECTED 20, GOT $ret" >> test.out
+	echo "Test 9: ERROR, EXPECTED 2, GOT $ret" >> test.out
 fi
 
 # precedencni syntakticka analyza
@@ -120,12 +120,12 @@ fi
 ./main tests/test10.cc
 ret=$?
 
-if [ "$ret" -eq 20 ];
+if [ "$ret" -eq 2 ];
 then
 	succ=$((succ+1))
 	echo "Test 10: SUCCESS" >> test.out
 else
-	echo "Test 10: ERROR, EXPECTED 20, GOT $ret" >> test.out
+	echo "Test 10: ERROR, EXPECTED 2, GOT $ret" >> test.out
 fi
 
 # precedencni syntakticka analyza
@@ -134,12 +134,12 @@ fi
 ./main tests/test11.cc
 ret=$?
 
-if [ "$ret" -eq 20 ];
+if [ "$ret" -eq 2 ];
 then
 	succ=$((succ+1))
 	echo "Test 11: SUCCESS" >> test.out
 else
-	echo "Test 11: ERROR, EXPECTED 20, GOT $ret" >> test.out
+	echo "Test 11: ERROR, EXPECTED 2, GOT $ret" >> test.out
 fi
 
 # precedencni syntakticka analyza
@@ -148,12 +148,12 @@ fi
 ./main tests/test12.cc
 ret=$?
 
-if [ "$ret" -eq 20 ];
+if [ "$ret" -eq 2 ];
 then
 	succ=$((succ+1))
 	echo "Test 12: SUCCESS" >> test.out
 else
-	echo "Test 12: ERROR, EXPECTED 20, GOT $ret" >> test.out
+	echo "Test 12: ERROR, EXPECTED 2, GOT $ret" >> test.out
 fi
 
 # precedencni syntakticka analyza
@@ -161,24 +161,24 @@ fi
 ./main tests/test13.cc
 ret=$?
 
-if [ "$ret" -eq 20 ];
+if [ "$ret" -eq 2 ];
 then
 	succ=$((succ+1))
 	echo "Test 13: SUCCESS" >> test.out
 else
-	echo "Test 13: ERROR, EXPECTED 20, GOT $ret" >> test.out
+	echo "Test 13: ERROR, EXPECTED 2, GOT $ret" >> test.out
 fi
 
 # prazdny soubor
 ./main tests/test14.cc
 ret=$?
 
-if [ "$ret" -eq 20 ];
+if [ "$ret" -eq 2 ];
 then
 	succ=$((succ+1))
 	echo "Test 14: SUCCESS" >> test.out
 else
-	echo "Test 14: ERROR, EXPECTED 20, GOT $ret" >> test.out
+	echo "Test 14: ERROR, EXPECTED 2, GOT $ret" >> test.out
 fi
 
 # volani funkce s parametry
