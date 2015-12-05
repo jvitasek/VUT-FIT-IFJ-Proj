@@ -15,7 +15,7 @@
 #include "parser.h"
 #include "expression.h"
 
-#define DEBUG 1
+//#define DEBUG 1
 
 int *counteerVar;	// sluzi pri tvorbe pomocnych premennych
 //tHTable* globalTS;
@@ -1094,7 +1094,9 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 
 			prevTok = tokterm;
 
-			printf("---PREV TOK: %d......\n", prevTok);
+			#ifdef DEBUG
+				printf("---PREV TOK: %d......\n", prevTok);
+			#endif
 
 		} while(!((tempStack->termType == PDollar) && (tokToTerm(token.type) == PDollar)));
 	}
@@ -1343,7 +1345,9 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 
 			prevTok = tokterm;
 
-			printf("---PREV TOK: %d......\n", prevTok);
+			#ifdef DEBUG
+				printf("---PREV TOK: %d......\n", prevTok);
+			#endif
 
 		} while(!((tempStack->termType == PDollar) && (tokterm == PDollar)));
 	}
