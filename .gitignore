@@ -17,3 +17,4 @@ Files/*.cc
 # testovaci output
 test.out
 adv-test.out
+is_it_ok.sh
