@@ -10,6 +10,8 @@
  */
 
 
+//#define DEBUG 1
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -258,10 +260,14 @@ tHTItem* htSearchScope(tHTable* ptrht, char *key, int scope)
 		tHTItem *temp = (*ptrht)[rkey]; // helper placeholder
 		while(temp && (strcmp(temp->key,key) == 0)) // until there is something to search + we haven't yet found it
 		{
-			printf("proveruji %s, scope: %d\n", key, temp->data.scope);
+			#ifdef DEBUG
+			fprintf(stderr, "proveruji %s, scope: %d\n", key, temp->data.scope);
+			#endif
 			if(temp->data.scope == scope)
 			{
-				printf("nasel jsem %s, scope: %d = %d \n", key, temp->data.scope, scope);
+				#ifdef DEBUG
+				fprintf(stderr, "nasel jsem %s, scope: %d = %d \n", key, temp->data.scope, scope);
+				#endif
 				return temp;
 			}
 			temp = temp->ptrnext; // move onto the next value
@@ -367,17 +373,23 @@ tData* htReadScope(tHTable* ptrht, char *key, int scope)
 		return NULL; // end here, let us know we found nothing
 	else // we have somewhere to look
 	{
-		printf("hledam: %s ve scopu %d\n", key, scope);
+		#ifdef DEBUG
+		fprintf(stderr, "hledam: %s ve scopu %d\n", key, scope);
+		#endif
 		tHTItem *temp = htSearchScope(ptrht, key, scope); // search for the item with our key
 
 		if(temp) // if we found the item
 		{
-			printf("nasel jsem: %d\n", scope);
+			#ifdef DEBUG
+			fprintf(stderr, "nasel jsem: %d\n", scope);
+			#endif
 			return &(temp->data); // return its data
 		}
 		else // haven't found it
 		{
-			printf("NULL\n");
+			#ifdef DEBUG
+			fprintf(stderr, "NULL\n");
+			#endif
 			return NULL; // end here, let us know we found nothing
 		}
 	}

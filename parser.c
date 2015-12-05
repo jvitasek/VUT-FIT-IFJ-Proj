@@ -360,7 +360,9 @@ TError comm_seq(FILE *input)
 		}
 		++currScope; // menime scope, inkrementace
 		gStackPush(&tableStack, commTable);
+		#ifdef DEBUG
 		fprintf(stderr, "PUSHUJU na %d\n", token.line);
+		#endif
 		commTable = tableStack.top->table;
 		// /SEMANTICKA ANALYZA
 
