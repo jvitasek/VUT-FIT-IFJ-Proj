@@ -1218,35 +1218,6 @@ TError var_def(FILE *input)
 				fprintf(stderr, "VKLADAM %s, SCOPE: %d, CURRENT: %d\n", strGetStr(&attr), data.scope, currScope);
 				//#endif
 			}
-
-
-
-
-
-			// tData *tempData;
-			// if((tempData = htRead(commTable, strGetStr(&attr))) != NULL)
-			// {
-			// 	#ifdef DEBUG
-			// 	fprintf(stderr, "KONCIM VE VAR_DEF: 4)\n");
-			// 	#endif
-
-			// 	print_error(ESEM_DEF, token.line);
-			// 	exit(ESEM_DEF);
-			// }
-			// // promenna jeste neni v tabulce
-			// else
-			// {
-			// 	if(strGetStr(&attr) != NULL)
-			// 	{
-			// 		tData data;
-			// 		data.type = VAR;
-			// 		data.scope = currScope;
-			// 		data.timesUsed = 0;
-			// 		htInsert(commTable, strGetStr(&attr), data);
-			// 		fprintf(stderr, "VKLADAM %s, SCOPE: %d\n", strGetStr(&attr), data.scope);
-			// 		currentVar = strGetStr(&attr);
-			// 	}
-			// }
 			// KONEC SEMANTICKE ANALYZY
 			getNextToken(input, &attr);
 			error = init(input);
