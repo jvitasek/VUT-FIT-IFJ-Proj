@@ -10,6 +10,8 @@
  */
 
 
+//#define DEBUG 1
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -250,6 +252,32 @@ tHTItem* htSearch(tHTable* ptrht, char *key)
 		return NULL; // end here, haven't found anything
 }
 
+tHTItem* htSearchScope(tHTable* ptrht, char *key, int scope)
+{
+	if(ptrht)
+	{
+		int rkey = hashCode(key); // we decode our key and store it
+		tHTItem *temp = (*ptrht)[rkey]; // helper placeholder
+		while(temp && (strcmp(temp->key,key) == 0)) // until there is something to search + we haven't yet found it
+		{
+			#ifdef DEBUG
+			fprintf(stderr, "proveruji %s, scope: %d\n", key, temp->data.scope);
+			#endif
+			if(temp->data.scope == scope)
+			{
+				#ifdef DEBUG
+				fprintf(stderr, "nasel jsem %s, scope: %d = %d \n", key, temp->data.scope, scope);
+				#endif
+				return temp;
+			}
+			temp = temp->ptrnext; // move onto the next value
+		}
+		return temp; // found it, return it
+	}
+	else // nothing to do or we ran out of values
+		return NULL; // end here, haven't found anything
+}
+
 /**
  * [htInsert  description]
  * @param ptrht [description]
@@ -273,6 +301,7 @@ void htInsert(tHTable* ptrht, char *key, tData data)
 				{
 					ntemp->data.timesUsed = data.timesUsed; // insert the data
 					ntemp->data.type = data.type;
+					ntemp->data.scope = data.scope;
 					return; // end here
 				}
 				ntemp = ntemp->ptrnext; // otherwise, move onto the next item
@@ -287,6 +316,7 @@ void htInsert(tHTable* ptrht, char *key, tData data)
 					return; // end here
 				temp->data.timesUsed = data.timesUsed;
 				temp->data.type = data.type;
+				temp->data.scope = data.scope;
 				temp->key = malloc(sizeof(char)*strlen(key)+1);
 				strcpy(temp->key, key);
 
@@ -301,6 +331,7 @@ void htInsert(tHTable* ptrht, char *key, tData data)
 				
 				(*ptrht)[rkey]->data.timesUsed = data.timesUsed; // passing the data specified
 				(*ptrht)[rkey]->data.type = data.type;
+				(*ptrht)[rkey]->data.scope = data.scope;
 				(*ptrht)[rkey]->key = malloc(sizeof(char)*strlen(key)+1);
 				strcpy((*ptrht)[rkey]->key, key);
 				(*ptrht)[rkey]->ptrnext = NULL; // nowhere else to go
@@ -331,6 +362,36 @@ tData* htRead(tHTable* ptrht, char *key)
 			return &(temp->data); // return its data
 		else // haven't found it
 			return NULL; // end here, let us know we found nothing
+	}
+	return NULL; // end here, let us know we found nothing
+}
+
+tData* htReadScope(tHTable* ptrht, char *key, int scope)
+{
+
+	if(!ptrht || !((*ptrht)[hashCode(key)]) ) // nowhere to look or not initialized
+		return NULL; // end here, let us know we found nothing
+	else // we have somewhere to look
+	{
+		#ifdef DEBUG
+		fprintf(stderr, "hledam: %s ve scopu %d\n", key, scope);
+		#endif
+		tHTItem *temp = htSearchScope(ptrht, key, scope); // search for the item with our key
+
+		if(temp) // if we found the item
+		{
+			#ifdef DEBUG
+			fprintf(stderr, "nasel jsem: %d\n", scope);
+			#endif
+			return &(temp->data); // return its data
+		}
+		else // haven't found it
+		{
+			#ifdef DEBUG
+			fprintf(stderr, "NULL\n");
+			#endif
+			return NULL; // end here, let us know we found nothing
+		}
 	}
 	return NULL; // end here, let us know we found nothing
 }
