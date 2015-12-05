@@ -1199,7 +1199,7 @@ TError var_def(FILE *input)
 			tempData = htReadScope(commTable, strGetStr(&attr), currScope);
 
 			// redefinice
-			if(tempData)
+			if(tempData && tempData->scope == currScope)
 			{
 				//#ifdef DEBUG
 				fprintf(stderr, "KONCIM – TOKEN: %s, SCOPE: %d, CURRENT: %d\n", strGetStr(&attr), tempData->scope, currScope);

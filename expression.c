@@ -1345,7 +1345,9 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 
 			prevTok = tokterm;
 
+			#ifdef DEBUG
 			printf("---PREV TOK: %d......\n", prevTok);
+			#endif
 
 		} while(!((tempStack->termType == PDollar) && (tokterm == PDollar)));
 	}
