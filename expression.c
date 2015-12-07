@@ -15,11 +15,9 @@
 #include "parser.h"
 #include "expression.h"
 
-#define DEBUG 1
+//#define DEBUG 1
 
 int *counteerVar;	// sluzi pri tvorbe pomocnych premennych
-//tHTable* globalTS;
-//PSymbols *exprStr;
 Tstack stack;
 
 /**
@@ -1175,26 +1173,27 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 					#ifdef DEBUG
 						printf("TOKTERM JE ID!!...attr: %s.\n", strGetStr(attr));
 					#endif
-					if((tempData = htRead(*localTable, strGetStr(attr))) != NULL)
+					if((tempItem = htSearch(*localTable, strGetStr(attr))) != NULL)
 					{
+						tempData = htRead(*localTable, strGetStr(attr));
 						if (tempData->type == FUNC)
 						{
 							tokterm = PIdFun;
 							#ifdef DEBUG
-								printf("!!!!!!!!!!!!!ID je FUNKCE!!!!!!!!!!!!!!!!!.\n");
+								printf("!!!!ID je FUNKCE!!!!!.\n");
 							#endif
 						}
 						else
 						{
 							tokterm = PIden;
 							#ifdef DEBUG
-								printf("!!!!!!!!!!!!!ID je ID!!!!!!!!!!!!!!!!!.\n");
+								printf("!!!!!ID je ID!!!!!!!.\n");
 							#endif
 
-							if((tempData = htRead(*localTable, strGetStr(attr))) == NULL)
+							if((tempItem = htSearch(*localTable, strGetStr(attr))) == NULL)
 							{
 								#ifdef DEBUG
-									fprintf(stderr, "NNNNNNNNNNNNNNNNenasel jsem IDENTIFIKATHOOOR!!!\n");
+									fprintf(stderr, "Nenasel jsem IDENTIFIKATHOOOR!!!\n");
 								#endif
 
 								print_error(ESEM_DEF, token.line);
