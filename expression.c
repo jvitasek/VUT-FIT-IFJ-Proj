@@ -40,7 +40,7 @@ int preceden_tab[19][19] = {
 	{great, great, great, great, great, great, great, great, great, great, empty, empty, empty, empty, empty, empty, great, great, great},	// int
 	{great, great, great, great, great, great, great, great, great, great, empty, empty, empty, empty, empty, empty, great, great, great},	// id
 	{empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, less, less, less, empty, empty, equal, empty, empty, empty},	// f
-	{less, less, less, less, less, less, less, less, less, less, less, less, less, less, empty, less, equal, equal, empty},				// (
+	{less, less, less, less, less, less, less, less, less, less, less, less, less, less, less, less, equal, equal, empty},				// (
 	{great, great, great, great, great, great, great, great, great, great, less, less, less, empty, empty, empty, great, empty, great},	// )
 	{empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, less, less, less, less, less, empty, equal, equal, empty},	// ,
 	{less, less, less, less, less, less, less, less, less, less, less, less, less, less, less, less, less, empty, empty}				// $
@@ -392,7 +392,7 @@ void whatInStacks(Tstack *stack)
 	temp->data = stack->top->data;
 	
 	printf("|--VRCHOL- -top->termType- -%d-\t-top->idType- -%d-\t-akt. token- -%d--|\n"
-		"|--VRCHOL- -termType- -%d-\t-idType- -%d-\t\t-akt. token- -%d--|\n", 
+		"|--VRCHOL- \t-termType- -%d-\t-idType- -%d-\t\t-akt. token- -%d--|\n", 
 		stack->top->termType, stack->top->idType, tokToTerm(token.type),
 		temp->termType, temp->idType, tokToTerm(token.type));
 	
@@ -961,10 +961,21 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 								fprintf(stderr, "Nenasel jsem IDENTIFIKATHOOOR!!!\n");
 							#endif
 
+							StackDispose(&stack);
 							print_error(ESEM_DEF, token.line);
 							exit(ESEM_DEF);
 						}
 					}
+				}
+				else
+				{
+					#ifdef DEBUG
+						fprintf(stderr, "Nenasel jsem IDENTIFIKATHOOOR!!!\n");
+					#endif
+
+					StackDispose(&stack);
+					print_error(ESEM_DEF, token.line);
+					exit(ESEM_DEF);
 				}
 				
 			}
@@ -1241,6 +1252,16 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 							}
 						}
 					}
+					else
+					{
+						#ifdef DEBUG
+							fprintf(stderr, "Nenasel jsem IDENTIFIKATHOOOR!!!\n");
+						#endif
+
+						StackDispose(&stack);
+						print_error(ESEM_DEF, token.line);
+						exit(ESEM_DEF);
+					}
 				}
 			}
 			
@@ -1453,6 +1474,8 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 	}
 
 	StackDispose(&stack);
+
+	printf("Zmenena precedencni tabulka! Pushnout!\n");
 
 	return error;
 }

@@ -19,31 +19,31 @@
  * Mozne symboly ve vyrazech.
  */
 typedef enum PSymbols {
-	PPlus,    // 0 +
-	PMinus,   // 1 -
-	PMul,     // 2 *
-	PDiv,     // 3 /
-	PEqual,    // 4 ==
-	PNotEq,   // 5 !=
-	PLessEq,  // 6 <=
+	PPlus,   // 0 +
+	PMinus,  // 1 -
+	PMul,    // 2 *
+	PDiv,    // 3 /
+	PEqual,  // 4 ==
+	PNotEq,  // 5 !=
+	PLessEq, // 6 <=
 	PGreatEq, // 7 >=
-	PGreat,   // 8 >
-	PLess,    // 9 <
-	PInt,		// 10 integer
-	PDouble,	// 11 double
-	PString,	// 12 string
-	PIden,    // 13 id
-	PIdFun,   // 14 f
-	PLeftP,   // 15 (
-	PRightP,  // 16 )
-	PComma,   // 17 ,
-	PDollar,  // 18 $
+	PGreat,  // 8 >
+	PLess,	 // 9 <
+	PInt,	 // 10 integer
+	PDouble, // 11 double
+	PString, // 12 string
+	PIden,   // 13 id
+	PIdFun,  // 14 f
+	PLeftP,  // 15 (
+	PRightP, // 16 )
+	PComma,  // 17 ,
+	PDollar, // 18 $
 	PLessReduc,	// 19 < na zasobniku
-	PNonTerm,	// 20 neterminal
-	less,		// 21 < v preceden. tabulce
-	great,	// 22 > v preceden. tabulce
-	equal,	// 23 = v preceden. tabulce
-	empty,	// 24 'nic' v preceden. tabulce
+	PNonTerm, // 20 neterminal
+	less,	 // 21 < v preceden. tabulce
+	great,	 // 22 > v preceden. tabulce
+	equal,	 // 23 = v preceden. tabulce
+	empty,	 // 24 'nic' v preceden. tabulce
 	none
 } PSymbols;
 
