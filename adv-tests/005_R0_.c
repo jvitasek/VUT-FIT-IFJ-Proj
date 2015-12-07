@@ -1,3 +1,3 @@
 int main() {
-	return 5 + true / 1.2e5;
+	return 5 / 1.2e5;
 }
