@@ -217,5 +217,29 @@ else
 	echo "Test 17: ERROR, EXPECTED 0, GOT $ret" >> test.out
 fi
 
+# kontrola volani funkce
+./main tests/test18.cc
+ret=$?
+
+if [ "$ret" -eq 3 ];
+then
+	succ=$((succ+1))
+	echo "Test 18: SUCCESS" >> test.out
+else
+	echo "Test 18: ERROR, EXPECTED 0, GOT $ret" >> test.out
+fi
+
+# kontrola volani funkce
+./main tests/test19.cc
+ret=$?
+
+if [ "$ret" -eq 0 ];
+then
+	succ=$((succ+1))
+	echo "Test 19: SUCCESS" >> test.out
+else
+	echo "Test 19: ERROR, EXPECTED 0, GOT $ret" >> test.out
+fi
+
 echo "#################"
-echo "SUCCESS: $succ/17"
+echo "SUCCESS: $succ/19"
