@@ -25,24 +25,27 @@ Tstack stack;
 /**
  * Precedencni tabulka.
  */
-int preceden_tab[16][16] = {
-//	  +		-			*   /      ==     !=    <=      >=     >      <      id    f    (      )      ,       $
-	{great, great, less, less, great, great, great, great, great, great, less, less, less, great, great, great},		// +
-	{great, great, less, less, great, great, great, great, great, great, less, less, less, great, great, great},		// -
-	{great, great, great, great, great, great, great, great, great, great, less, less, less, great, great, great},		// *
-	{great, great, great, great, great, great, great, great, great, great, less, less, less, great, great, great},		// /
-	{less, less, less, less, great, great, great, great, great, great, less, less, less, great, great, great},			// ==
-	{less, less, less, less, great, great, great, great, great, great, less, less, less, great, great, great},			// !=
-	{less, less, less, less, great, great, great, great, great, great, less, less, less, great, great, great},			// <=
-	{less, less, less, less, great, great, great, great, great, great, less, less, less, great, great, great},			// >=
-	{less, less, less, less, great, great, great, great, great, great, less, less, less, great, great, great},			// >
-	{less, less, less, less, great, great, great, great, great, great, less, less, less, great, great, great},			// <
-	{great, great, great, great, great, great, great, great, great, great, empty, empty, empty, great, great, great},	// id
-	{empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, equal, empty, empty, empty},	// f
-	{less, less, less, less, less, less, less, less, less, less, less, empty, less, equal, equal, empty},					// (
-	{great, great, great, great, great, great, great, great, great, great, empty, empty, empty, great, empty, great},	// )
-	{empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, less, less, empty, equal, equal, empty},	// ,
-	{less, less, less, less, less, less, less, less, less, less, less, less, less, less, empty, empty}					// $
+int preceden_tab[19][19] = {
+//	  +		  -		*      /     ==     !=    <=      >=     >      <    str   doub  int    id    f    (      )      ,       $
+	{great, great, less, less, great, great, great, great, great, great, less, less, less, less, less, less, great, great, great},		// +
+	{great, great, less, less, great, great, great, great, great, great, less, less, less, less, less, less, great, great, great},		// -
+	{great, great, great, great, great, great, great, great, great, great, less, less, less, less, less, less, great, great, great},	// *
+	{great, great, great, great, great, great, great, great, great, great, less, less, less, less, less, less, great, great, great},	// /
+	{less, less, less, less, great, great, great, great, great, great, less, less, less, less, less, less, great, great, great},		// ==
+	{less, less, less, less, great, great, great, great, great, great, less, less, less, less, less, less, great, great, great},		// !=
+	{less, less, less, less, great, great, great, great, great, great, less, less, less, less, less, less, great, great, great},		// <=
+	{less, less, less, less, great, great, great, great, great, great, less, less, less, less, less, less, great, great, great},		// >=
+	{less, less, less, less, great, great, great, great, great, great, less, less, less, less, less, less, great, great, great},		// >
+	{less, less, less, less, great, great, great, great, great, great, less, less, less, less, less, less, great, great, great},		// <
+	{great, great, great, great, great, great, great, great, great, great, empty, empty, empty, empty, empty, empty, great, great, great},	// string
+	{great, great, great, great, great, great, great, great, great, great, empty, empty, empty, empty, empty, empty, great, great, great},	// double
+	{great, great, great, great, great, great, great, great, great, great, empty, empty, empty, empty, empty, empty, great, great, great},	// int
+	{great, great, great, great, great, great, great, great, great, great, empty, empty, empty, empty, empty, empty, great, great, great},	// id
+	{empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, less, less, less, empty, empty, equal, empty, empty, empty},	// f
+	{less, less, less, less, less, less, less, less, less, less, less, less, less, less, empty, less, equal, equal, empty},				// (
+	{great, great, great, great, great, great, great, great, great, great, less, less, less, empty, empty, empty, great, empty, great},	// )
+	{empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, less, less, less, less, less, empty, equal, equal, empty},	// ,
+	{less, less, less, less, less, less, less, less, less, less, less, less, less, less, less, less, less, empty, empty}				// $
 };
 
 /**
@@ -420,10 +423,10 @@ int tokToTerm(int tokenType)
 
 	switch (tokenType)
 	{
-		case T_Id:						//0
-		case T_Integ:					// cele cisla
-		case T_Doub:	 				// desatinne cisla
-		case T_Str: index = PIden; break;	// retazec 15				
+		case T_Id: index = PIden; break; //0
+		case T_Integ: index = PInt; break;	// cele cisla
+		case T_Doub: index = PDouble; break;	// desatinne cisla
+		case T_Str: index = PString; break;	// retazec 15				
 		case T_Plus: index = PPlus; break;		// + 16
 		case T_Min: index = PMinus; break;			// - 17
 		case T_Mul:	index = PMul; break;					// * 18
@@ -1060,6 +1063,9 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 							}						
 						break;
 						case PIden:
+						case PInt:
+						case PDouble:
+						case PString:
 							if ((error = findRule(&stack, ID_E_RULE)) != ENOP)
 							{
 								StackDispose(&stack);
@@ -1324,6 +1330,9 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 							}						
 						break;
 						case PIden:
+						case PInt:
+						case PDouble:
+						case PString:
 							if ((error = findRule(&stack, ID_E_RULE)) != ENOP)
 							{
 								StackDispose(&stack);
