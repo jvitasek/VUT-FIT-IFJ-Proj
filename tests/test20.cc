@@ -1,4 +1,4 @@
-int foo(int param1)
+int foo(int param1, int param2)
 {
 
 }

@@ -252,6 +252,26 @@ tHTItem* htSearch(tHTable* ptrht, char *key)
 		return NULL; // end here, haven't found anything
 }
 
+tHTItem* htSearchOrder(tHTable* ptrht, char *key, int order)
+{
+	if(ptrht)
+	{
+		int rkey = hashCode(key); // we decode our key and store it
+		tHTItem *temp = (*ptrht)[rkey]; // helper placeholder
+		while(temp && (strcmp(temp->key,key) == 0)) // until there is something to search + we haven't yet found it
+		{
+			if(temp->data.orderParams == order)
+			{
+				return temp;
+			}
+			temp = temp->ptrnext; // move onto the next value
+		}
+		return temp; // found it, return it
+	}
+	else // nothing to do or we ran out of values
+		return NULL; // end here, haven't found anything
+}
+
 tHTItem* htSearchScope(tHTable* ptrht, char *key, int scope)
 {
 	if(ptrht)
@@ -302,6 +322,7 @@ void htInsert(tHTable* ptrht, char *key, tData data)
 					ntemp->data.timesUsed = data.timesUsed; // insert the data
 					ntemp->data.type = data.type;
 					ntemp->data.varType = data.varType;
+					ntemp->data.orderParams = data.orderParams;
 					ntemp->data.scope = data.scope;
 					return; // end here
 				}
@@ -318,6 +339,7 @@ void htInsert(tHTable* ptrht, char *key, tData data)
 				temp->data.timesUsed = data.timesUsed;
 				temp->data.type = data.type;
 				temp->data.varType = data.varType;
+				temp->data.orderParams = data.orderParams;
 				temp->data.scope = data.scope;
 				temp->key = malloc(sizeof(char)*strlen(key)+1);
 				strcpy(temp->key, key);
@@ -334,6 +356,7 @@ void htInsert(tHTable* ptrht, char *key, tData data)
 				(*ptrht)[rkey]->data.timesUsed = data.timesUsed; // passing the data specified
 				(*ptrht)[rkey]->data.type = data.type;
 				(*ptrht)[rkey]->data.varType = data.varType;
+				(*ptrht)[rkey]->data.orderParams = data.orderParams;
 				(*ptrht)[rkey]->data.scope = data.scope;
 				(*ptrht)[rkey]->key = malloc(sizeof(char)*strlen(key)+1);
 				strcpy((*ptrht)[rkey]->key, key);
@@ -360,6 +383,23 @@ tData* htRead(tHTable* ptrht, char *key)
 	else // we have somewhere to look
 	{
 		tHTItem *temp = htSearch(ptrht, key); // search for the item with our key
+
+		if(temp) // if we found the item
+			return &(temp->data); // return its data
+		else // haven't found it
+			return NULL; // end here, let us know we found nothing
+	}
+	return NULL; // end here, let us know we found nothing
+}
+
+tData* htReadOrder(tHTable* ptrht, char *key, int order)
+{
+
+	if(!ptrht || !((*ptrht)[hashCode(key)]) ) // nowhere to look or not initialized
+		return NULL; // end here, let us know we found nothing
+	else // we have somewhere to look
+	{
+		tHTItem *temp = htSearchOrder(ptrht, key, order); // search for the item with our key
 
 		if(temp) // if we found the item
 			return &(temp->data); // return its data

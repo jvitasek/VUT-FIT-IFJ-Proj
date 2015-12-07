@@ -292,7 +292,7 @@ echo "22:"
 ./main tests/test22.cc
 ret=$?
 
-if [ "$ret" -eq 4 ];
+if [ "$ret" -eq 0 ];
 then
 	succ=$((succ+1))
 	echo "Test 22: SUCCESS" >> test.out

@@ -28,6 +28,8 @@ tHTable *funcTable;
 tHTable *paraTable;
 stack tableStack;
 int currScope;
+int currOrder;
+int currOrderTerm;
 char *currFunc; // globalni promenna pro nazev momentalni funkce
 T_Type currType;
 
@@ -47,7 +49,6 @@ void getNextToken(FILE *input, string *attr)
 	if(token.type == T_Error)
 	{
 		print_error(ELEX, token.line);
-		exit(ELEX);
 	}
 }
 
@@ -64,6 +65,8 @@ TError parse(FILE *input)
 	#endif
 	TError error = ESYN;
 	currScope = 0;
+	currOrder = 0;
+	currOrderTerm = 0;
 
 	/**
 	 * inicializace stringu s nazvem tokenu
@@ -829,16 +832,18 @@ TError params(FILE *input)
 			data.type = VAR;
 			data.varType = currType; // ulozeni typu parametru
 			data.timesUsed = 1;
+			data.orderParams = ++currOrder;
 			data.scope = 1; // nejnizsi scope nasledujiciho bloku
 			htInsert(funcTable, strGetStr(&attr), data);
 			htInsert(paraTable, currFunc, data); // vkladani do tabulky parametru
 			#ifdef DEBUG_SEM
-			fprintf(stderr, "VKLADAM %s, SCOPE: %d, TYPE: %d, CURRENT SCOPE: %d\n",
-					strGetStr(&attr), data.scope, data.varType, currScope);
+			fprintf(stderr, "VKLADAM %s, SCOPE: %d, TYPE: %d, ORDER: %d, CURRENT SCOPE: %d\n",
+					strGetStr(&attr), data.scope, data.varType, data.orderParams, currScope);
 			#endif
 			// KONEC SEMANTICKE ANALYZY
 			getNextToken(input, &attr);
 			error = params_n(input);
+			currOrder = 0;
 			#ifdef DEBUG
 			fprintf(stderr, "params: params_n vratilo: %d\n", error);
 			#endif
@@ -901,10 +906,15 @@ TError params_n(FILE *input)
 				tData data;
 				data.type = VAR;
 				data.varType = currType;
+				data.orderParams = ++currOrder;
 				data.timesUsed = 1;
 				data.scope = 1; // nejnizsi scope nasledujiciho bloku
 				htInsert(funcTable, strGetStr(&attr), data);
 				htInsert(paraTable, currFunc, data); // vkladani do tabulky parametru
+				#ifdef DEBUG_SEM
+				fprintf(stderr, "VKLADAM %s, SCOPE: %d, TYPE: %d, ORDER: %d, CURRENT SCOPE: %d\n",
+						strGetStr(&attr), data.scope, data.varType, data.orderParams, currScope);
+				#endif
 				// /SEMANTICKE ANALYZY
 				getNextToken(input, &attr);
 				error = params_n(input);
@@ -1445,7 +1455,7 @@ TError terms(FILE *input)
 			exit(ESEM_DEF);
 		}
 		// kontrola typu parametru
-		if((tempData = htRead(paraTable, currFunc)) != NULL)
+		if(((tempData = htReadOrder(paraTable, currFunc, ++currOrderTerm)) != NULL))
 		{
 			#ifdef DEBUG_SEM
 			fprintf(stderr, "tempData->varType: %d\n", tempData->varType);
@@ -1510,7 +1520,7 @@ TError terms_n(FILE *input)
 				exit(ESEM_DEF);
 			}
 			// kontrola typu parametru
-			if((tempData = htRead(paraTable, currFunc)) != NULL)
+			if((tempData = htReadOrder(paraTable, currFunc, ++currOrderTerm)) != NULL)
 			{
 				if(tempData->varType != currType)
 				{
@@ -1601,6 +1611,7 @@ TError initSTable(tHTable **table)
 		item->key = "*UNDEF*";
 		item->data.type = 0;
 		item->data.timesUsed = 0;
+		item->data.orderParams = 0;
 		item->data.varType = T_EOF;
 		item->data.scope = 0;
 		item->ptrnext = NULL;
