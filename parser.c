@@ -814,9 +814,14 @@ TError params(FILE *input)
 		if(token.type == T_Id)
 		{
 			// SEMANTICKA ANALYZA
-			/**
-			 * todo vlozeni do tabulky symbolu funkce
-			 */
+			tData data;
+			data.type = VAR;
+			data.timesUsed = 1;
+			data.scope = 1; // nejnizsi scope nasledujiciho bloku
+			htInsert(funcTable, strGetStr(&attr), data);
+			#ifdef DEBUG
+			fprintf(stderr, "VKLADAM %s\n", strGetStr(&attr));
+			#endif
 			// KONEC SEMANTICKE ANALYZY
 			getNextToken(input, &attr);
 			error = params_n(input);
@@ -1265,7 +1270,6 @@ TError var_def(FILE *input)
 		if(token.type == T_Id)
 		{
 			// SEMANTICKA ANALYZA
-			
 			tData *tempData;
 			if((tempData = htRead(commTable, strGetStr(&attr))) != NULL)
 			{
@@ -1290,8 +1294,8 @@ TError var_def(FILE *input)
 					currentVar = strGetStr(&attr);
 				}
 			}
-
 			// KONEC SEMANTICKE ANALYZY
+
 			getNextToken(input, &attr);
 			error = init(input);
 			#ifdef DEBUG
