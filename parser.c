@@ -1292,7 +1292,9 @@ TError var_def(FILE *input)
 					data.timesUsed = 0;
 					data.scope = currScope;
 					htInsert(commTable, strGetStr(&attr), data);
+					#ifdef DEBUG
 					fprintf(stderr, "VKLADAM %s, SCOPE: %d\n", strGetStr(&attr), data.scope);
+					#endif
 					currentVar = strGetStr(&attr);
 				}
 			}
