@@ -260,8 +260,61 @@ then
 else
 	echo "Test 19: ERROR, EXPECTED 0, GOT $ret" >> test.out
 fi
+
+# kontrola typu parametru volani funkce
+echo "20:"
+./main tests/test20.cc
+ret=$?
+
+if [ "$ret" -eq 0 ];
+then
+	succ=$((succ+1))
+	echo "Test 20: SUCCESS" >> test.out
+else
+	echo "Test 20: ERROR, EXPECTED 0, GOT $ret" >> test.out
+fi
+
+# kontrola typu parametru volani funkce
+echo "21:"
+./main tests/test21.cc
+ret=$?
+
+if [ "$ret" -eq 4 ];
+then
+	succ=$((succ+1))
+	echo "Test 21: SUCCESS" >> test.out
+else
+	echo "Test 21: ERROR, EXPECTED 0, GOT $ret" >> test.out
+fi
+
+# kontrola typu parametru volani funkce, vice parametru
+echo "22:"
+./main tests/test22.cc
+ret=$?
+
+if [ "$ret" -eq 4 ];
+then
+	succ=$((succ+1))
+	echo "Test 22: SUCCESS" >> test.out
+else
+	echo "Test 22: ERROR, EXPECTED 0, GOT $ret" >> test.out
+fi
+
+# kontrola typu parametru volani funkce, vice parametru
+echo "23:"
+./main tests/test23.cc
+ret=$?
+
+if [ "$ret" -eq 4 ];
+then
+	succ=$((succ+1))
+	echo "Test 23: SUCCESS" >> test.out
+else
+	echo "Test 23: ERROR, EXPECTED 0, GOT $ret" >> test.out
+fi
+
 echo "#################"
-echo "SUCCESS: $succ/19"
+echo "SUCCESS: $succ/23"
 
 
 

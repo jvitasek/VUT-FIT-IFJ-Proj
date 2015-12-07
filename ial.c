@@ -301,6 +301,7 @@ void htInsert(tHTable* ptrht, char *key, tData data)
 				{
 					ntemp->data.timesUsed = data.timesUsed; // insert the data
 					ntemp->data.type = data.type;
+					ntemp->data.varType = data.varType;
 					ntemp->data.scope = data.scope;
 					return; // end here
 				}
@@ -316,6 +317,7 @@ void htInsert(tHTable* ptrht, char *key, tData data)
 					return; // end here
 				temp->data.timesUsed = data.timesUsed;
 				temp->data.type = data.type;
+				temp->data.varType = data.varType;
 				temp->data.scope = data.scope;
 				temp->key = malloc(sizeof(char)*strlen(key)+1);
 				strcpy(temp->key, key);
@@ -331,6 +333,7 @@ void htInsert(tHTable* ptrht, char *key, tData data)
 				
 				(*ptrht)[rkey]->data.timesUsed = data.timesUsed; // passing the data specified
 				(*ptrht)[rkey]->data.type = data.type;
+				(*ptrht)[rkey]->data.varType = data.varType;
 				(*ptrht)[rkey]->data.scope = data.scope;
 				(*ptrht)[rkey]->key = malloc(sizeof(char)*strlen(key)+1);
 				strcpy((*ptrht)[rkey]->key, key);

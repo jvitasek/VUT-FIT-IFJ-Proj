@@ -47,6 +47,7 @@ typedef enum symbolType {
  */
 typedef struct tData {
 	symbolType type;
+	T_Type varType;
 	int timesUsed;
 	int scope;
 } tData;

@@ -1475,7 +1475,5 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 
 	StackDispose(&stack);
 
-	printf("Zmenena precedencni tabulka! Pushnout!\n");
-
 	return error;
 }
