@@ -851,8 +851,8 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 	tData *tempData; // pro ukladani 
 	int prevTok; // predposledni nacteny token
 	int counter = 0; // pro pocitani zavorek
-	//char *tempData = NULL;
-	int tokterm = 0; // 
+	int tokterm = 0; // pro ukladani terminalu z tokenu
+	tHTItem *tempItem = NULL;
 	//outputSymbolTable(*localTable);
 	
 	#ifdef DEBUG
@@ -905,22 +905,42 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 				#ifdef DEBUG
 					printf("TOKTERM JE ID!!...attr: %s.\n", strGetStr(attr));
 				#endif
-				if((tempData = htRead(*localTable, strGetStr(attr))) != NULL)
+				if((tempItem = htSearch(*localTable, strGetStr(attr))) != NULL)
 				{
+					tempData = htRead(*localTable, strGetStr(attr));
 					if (tempData->type == FUNC)
 					{
 						tokterm = PIdFun;
 						#ifdef DEBUG
-							printf("!!!!!!!!!!!!!ID je FUNKCE!!!!!!!!!!!!!!!!!.\n");
+							printf("!!!!ID je FUNKCE!!!!!.\n");
 						#endif
 					}
 					else
 					{
 						tokterm = PIden;
 						#ifdef DEBUG
-							printf("!!!!!!!!!!!!!ID je ID!!!!!!!!!!!!!!!!!.\n");
+							printf("!!!!!ID je ID!!!!!!!.\n");
 						#endif
+
+						if((tempItem = htSearch(*localTable, strGetStr(attr))) == NULL)
+						{
+							#ifdef DEBUG
+								fprintf(stderr, "Nenasel jsem IDENTIFIKATHOOOR!!!\n");
+							#endif
+
+							print_error(ESEM_DEF, token.line);
+							exit(ESEM_DEF);
+						}
 					}
+				}
+				else
+				{
+					#ifdef DEBUG
+						fprintf(stderr, "Nenasel jsem IDENTIFIKATHOOOR!!!\n");
+					#endif
+
+					print_error(ESEM_DEF, token.line);
+					exit(ESEM_DEF);
 				}
 			}
 
@@ -1172,6 +1192,16 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 							#ifdef DEBUG
 								printf("!!!!!!!!!!!!!ID je ID!!!!!!!!!!!!!!!!!.\n");
 							#endif
+
+							if((tempData = htRead(*localTable, strGetStr(attr))) == NULL)
+							{
+								#ifdef DEBUG
+									fprintf(stderr, "NNNNNNNNNNNNNNNNenasel jsem IDENTIFIKATHOOOR!!!\n");
+								#endif
+
+								print_error(ESEM_DEF, token.line);
+								exit(ESEM_DEF);
+							}
 						}
 					}
 				}
