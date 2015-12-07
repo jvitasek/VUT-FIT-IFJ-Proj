@@ -15,7 +15,7 @@
 #include "parser.h"
 #include "expression.h"
 
-//#define DEBUG 1
+#define DEBUG 1
 
 int *counteerVar;	// sluzi pri tvorbe pomocnych premennych
 Tstack stack;
@@ -221,6 +221,26 @@ TError StackPush(Tstack *stack, int tokterm)
 	// #endif
 
 	tempPtr->termType = tokterm;
+	if (tokterm == PInt)
+	{ // jedna se o integer
+		tempPtr->idType = Tint;
+	}
+	else if (tokterm == PDouble)
+	{ // jedna se o double
+		tempPtr->idType = Tdouble;
+	}
+	else if (tokterm == PString)
+	{ // jedna se o string
+		tempPtr->idType = Tstring;
+	}
+	else if (tokterm == PIden)
+	{ // jedna se o identifikator
+		tempPtr->idType = Tid;
+	}
+	else
+	{ // jine
+		tempPtr->idType = Tother;
+	}
 
 	// vkladame teprve 1. prvek
 	if (stack->top->Lptr == NULL)
@@ -420,23 +440,23 @@ int tokToTerm(int tokenType)
 
 	switch (tokenType)
 	{
-		case T_Id: index = PIden; break; //0
-		case T_Integ: index = PInt; break;	// cele cisla
+		case T_Id: index = PIden; break; 		// 0
+		case T_Integ: index = PInt; break;		// cele cisla
 		case T_Doub: index = PDouble; break;	// desatinne cisla
-		case T_Str: index = PString; break;	// retazec 15				
+		case T_Str: index = PString; break;		// retazec 15			
 		case T_Plus: index = PPlus; break;		// + 16
-		case T_Min: index = PMinus; break;			// - 17
-		case T_Mul:	index = PMul; break;					// * 18
-		case T_Div:	index = PDiv; break;					// / 19
-		case T_LessThan: index = PLess; break;			// < 20
-		case T_LessEqual: index = PLessEq; break; 	// <= 21
-		case T_GreaterThan: index = PGreat; break;	// > 23
-		case T_GreaterEqual: index = PGreatEq; break;	// >= 24
-		case T_Equal: index = PEqual; break;			// == 26
-		case T_NotEqual: index = PNotEq; break;				// != 28
-		case T_Comma: index = PComma; break; 					// ,	29
-		case T_LeftParenthesis: index = PLeftP; break;		// ( 31
-		case T_RightParenthesis: index = PRightP; break; 	// ) 32
+		case T_Min: index = PMinus; break;		// - 17
+		case T_Mul:	index = PMul; break;		// * 18
+		case T_Div:	index = PDiv; break;		// / 19
+		case T_LessThan: index = PLess; break;	// < 20
+		case T_LessEqual: index = PLessEq; break; // <= 21
+		case T_GreaterThan: index = PGreat; break; // > 23
+		case T_GreaterEqual: index = PGreatEq; break; // >= 24
+		case T_Equal: index = PEqual; break;		// == 26
+		case T_NotEqual: index = PNotEq; break;		// != 28
+		case T_Comma: index = PComma; break; 		// ,	29
+		case T_LeftParenthesis: index = PLeftP; break;	// ( 31
+		case T_RightParenthesis: index = PRightP; break; // ) 32
 		case T_Semicolon: index = PDollar; break;
 		default: index = ESYN; break;
 	}
