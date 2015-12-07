@@ -965,9 +965,15 @@ TError cout_term(FILE *input)
 	if(token.type == T_Id)
 	{
 		// SEMANTICKA ANALYZA
-		/**
-		 * todo kontrola, zda id existuje v tabulce symbolu
-		 */
+		tData *tempData;
+		if((tempData = htRead(commTable, strGetStr(&attr))) == NULL)
+		{
+			#ifdef DEBUG
+			fprintf(stderr, "KONCIM V COUT_TERM: 39)\n");
+			#endif
+			print_error(ESEM_DEF, token.line);
+			exit(ESEM_DEF);
+		}
 		// KONEC SEMANTICKE ANALYZY
 		getNextToken(input, &attr);
 		error = cout_term_n(input);
@@ -1069,9 +1075,15 @@ TError cin_id_n(FILE *input)
 		if(token.type == T_Id)
 		{
 			// SEMANTICKA ANALYZA
-			/**
-			 * todo kontrola, zda id existuje v tabulce symbolu
-			 */
+			tData *tempData;
+			if((tempData = htRead(commTable, strGetStr(&attr))) == NULL)
+			{
+				#ifdef DEBUG
+				fprintf(stderr, "KONCIM V CIN_ID_N: 37)\n");
+				#endif
+				print_error(ESEM_DEF, token.line);
+				exit(ESEM_DEF);
+			}
 			// KONEC SEMANTICKE ANALYZY
 			getNextToken(input, &attr);
 			error = cin_id_n(input);
@@ -1139,10 +1151,17 @@ TError assign(FILE *input)
 	if(token.type == T_Id)
 	{
 		// SEMANTICKA ANALYZA
-		/**
-		 * todo kontrola, zda id existuje v tabulce symbolu
-		 */
+		tData *tempData;
+		if((tempData = htRead(commTable, strGetStr(&attr))) == NULL)
+		{
+			#ifdef DEBUG
+			fprintf(stderr, "KONCIM V ASSIGN: 36)\n");
+			#endif
+			print_error(ESEM_DEF, token.line);
+			exit(ESEM_DEF);
+		}
 		// KONEC SEMANTICKE ANALYZY
+
 		getNextToken(input, &attr);
 		if(token.type == T_Assig)
 		{
@@ -1197,9 +1216,7 @@ TError var_def(FILE *input)
 		{
 			// SEMANTICKA ANALYZA
 			tData *tempData;
-
 			tempData = htReadScope(commTable, strGetStr(&attr), currScope);
-
 			// redefinice
 			if(tempData && tempData->scope == currScope)
 			{
@@ -1221,6 +1238,7 @@ TError var_def(FILE *input)
 				#endif
 			}
 			// KONEC SEMANTICKE ANALYZY
+
 			getNextToken(input, &attr);
 			error = init(input);
 			#ifdef DEBUG
@@ -1443,9 +1461,16 @@ TError terms_n(FILE *input)
 		if(token.type == T_Id)
 		{
 			// SEMANTICKA ANALYZA
-			/**
-			 * @todo semanticka analyza
-			 */
+			tData *tempData;
+			if((tempData = htRead(commTable, strGetStr(&attr))) == NULL)
+			{
+				#ifdef DEBUG
+				fprintf(stderr, "KONCIM V TERMS_N: 34)\n");
+				#endif
+
+				print_error(ESEM_DEF, token.line);
+				exit(ESEM_DEF);
+			}
 			// KONEC SEMANTICKE ANALYZY
 			getNextToken(input, &attr);
 			error = terms_n(input);
