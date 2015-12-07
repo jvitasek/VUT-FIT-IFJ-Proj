@@ -1,5 +1,7 @@
 # vsechno ok
 rm test.out
+
+echo "1:"
 ./main tests/test1.cc
 ret=$?
 success=0
@@ -13,6 +15,7 @@ else
 fi
 
 # lexikalni chyba
+echo "2:"
 ./main tests/test2.cc
 ret=$?
 
@@ -25,6 +28,7 @@ else
 fi
 
 # syntakticka chyba
+echo "3:"
 ./main tests/test3.cc
 ret=$?
 
@@ -37,6 +41,7 @@ else
 fi
 
 # semanticka chyba – redefinice funkce
+echo "4:"
 ./main tests/test4.cc
 ret=$?
 
@@ -50,6 +55,7 @@ fi
 
 # semanticka chyba – nedefinovana promenna
 # plus test promenne z jineho ramce
+echo "5:"
 ./main tests/test5.cc
 ret=$?
 
@@ -63,6 +69,7 @@ fi
 
 # semantika – ramce funkci, stejna promenna
 # v ramci jine funkce
+echo "6:"
 ./main tests/test6.cc
 ret=$?
 
@@ -76,6 +83,7 @@ fi
 
 # precedencni syntakticka analyza
 # expression ukonecny zavorkou
+echo "7:"
 ./main tests/test7.cc
 ret=$?
 
@@ -89,6 +97,7 @@ fi
 
 # precedencni syntakticka analyza
 # expression ukonecny strednikem
+echo "8:"
 ./main tests/test8.cc
 ret=$?
 
@@ -103,6 +112,7 @@ fi
 # precedencni syntakticka analyza
 # expression ukonecny strednikem
 # > o jednu zavorku mene
+echo "9:"
 ./main tests/test9.cc
 ret=$?
 
@@ -117,6 +127,7 @@ fi
 # precedencni syntakticka analyza
 # expression ukonecny zavorkou
 # > o jednu zavorku mene
+echo "10:"
 ./main tests/test10.cc
 ret=$?
 
@@ -131,6 +142,7 @@ fi
 # precedencni syntakticka analyza
 # expression ukonecny strednikem
 # > o jednu zavorku vice
+echo "11:"
 ./main tests/test11.cc
 ret=$?
 
@@ -145,6 +157,7 @@ fi
 # precedencni syntakticka analyza
 # expression ukonecny zavorkou
 # > o jednu zavorku vice
+echo "12:"
 ./main tests/test12.cc
 ret=$?
 
@@ -158,6 +171,7 @@ fi
 
 # precedencni syntakticka analyza
 # dve plus vedle sebe
+echo "13:"
 ./main tests/test13.cc
 ret=$?
 
@@ -170,6 +184,7 @@ else
 fi
 
 # prazdny soubor
+echo "14:"
 ./main tests/test14.cc
 ret=$?
 
@@ -182,6 +197,7 @@ else
 fi
 
 # volani funkce s parametry
+echo "15:"
 ./main tests/test15.cc
 ret=$?
 
@@ -194,6 +210,7 @@ else
 fi
 
 # parametr pouzit v tele funkce
+echo "16:"
 ./main tests/test16.cc
 ret=$?
 
@@ -206,6 +223,7 @@ else
 fi
 
 # redefinice parametru
+echo "17:"
 ./main tests/test17.cc
 ret=$?
 
@@ -218,6 +236,7 @@ else
 fi
 
 # kontrola volani funkce
+echo "18:"
 ./main tests/test18.cc
 ret=$?
 
@@ -230,6 +249,7 @@ else
 fi
 
 # kontrola volani funkce
+echo "19:"
 ./main tests/test19.cc
 ret=$?
 
@@ -240,6 +260,8 @@ then
 else
 	echo "Test 19: ERROR, EXPECTED 0, GOT $ret" >> test.out
 fi
-
 echo "#################"
 echo "SUCCESS: $succ/19"
+
+
+

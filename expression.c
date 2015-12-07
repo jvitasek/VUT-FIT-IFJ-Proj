@@ -72,17 +72,15 @@ TError StackInit(Tstack *stack)
 	if (((stack->top = malloc(sizeof(struct TstackElem))) == NULL) || 
 		((stack->first = malloc(sizeof(struct TstackElem))) == NULL))
 	{
-		fprintf(stderr, "Chyba pri malloc.\n");
-		error = EINT;
-		return error;
+		StackDispose(stack);
+		print_error(EINT, token.line);
 	}
 
 	TstackElemPtr tempPtr = NULL;
 	if ((tempPtr = malloc(sizeof(struct TstackElem))) == NULL)
 	{
-		fprintf(stderr, "Chyba pri malloc.\n");
-		error = EINT;
-		return error;
+		StackDispose(stack);
+		print_error(EINT, token.line);
 	}
 
 	if (tempPtr != NULL)
@@ -120,8 +118,8 @@ TError StackDispose(Tstack *stack)
 
 	if ((tempPtr = malloc(sizeof(struct TstackElem))) == NULL)
 	{
-		fprintf(stderr, "Chyba pri malloc.\n");
-		exit(EINT);
+		StackDispose(stack);
+		print_error(EINT, token.line);
 	}
 
 	// postupne rusim vsechny prvky na zasobniku
@@ -187,7 +185,9 @@ TError StackPop(Tstack *stack)
 	}
 	else
 	{
+		#ifdef DEBUG
 		fprintf(stderr, "Chyba StackPop!\n");
+		#endif
 		error = ESYN;
 		return error;
 	}
@@ -212,8 +212,8 @@ TError StackPush(Tstack *stack, int tokterm)
 	
 	if ((tempPtr = malloc(sizeof(struct TstackElem))) == NULL)
 	{
-		error = EINT;
-		return error;
+		StackDispose(stack);
+		print_error(EINT, token.line);
 	}
 
 	// #ifdef DEBUG
@@ -256,7 +256,7 @@ TstackElemPtr StackTop(Tstack *stack)
 	TstackElemPtr tempPtr = NULL;
 	if ((tempPtr = malloc(sizeof(struct TstackElem))) == NULL)
 	{
-		fprintf(stderr, "Chyba pri malloc.\n");
+		StackDispose(stack);
 		print_error(EINT, token.line);
 	}
 
@@ -339,9 +339,8 @@ TError StackShift(Tstack *stack, int tokterm)
 
 	if ((temp = malloc(sizeof(struct TstackElem))) == NULL)
 	{
-		fprintf(stderr, "Chyba pri malloc.\n");
-		error = EINT;
-		return error;
+		StackDispose(stack);
+		print_error(EINT, token.line);
 	}
 
 	// vlozeni handle za term
@@ -475,7 +474,9 @@ TError findRule(Tstack *stack, ruleType rule)
 			if ((stack->top->termType != PNonTerm) || 
 				(stack->top->Lptr->Lptr->termType != PNonTerm))
 			{
+				#ifdef DEBUG
 				fprintf(stderr, "Chyba pravidla pro scitani.\n");
+				#endif
 				error = ESYN;
 				return error;
 			}
@@ -494,7 +495,9 @@ TError findRule(Tstack *stack, ruleType rule)
 			// pushnu neterminal na zasobnik
 			if ((error = StackPush(stack, PNonTerm)) != ENOP)
 			{
+				#ifdef DEBUG
 				fprintf(stderr, "Chyba pri StackPush.\n");
+				#endif
 				StackDispose(stack);
 				return error;
 			}
@@ -510,7 +513,9 @@ TError findRule(Tstack *stack, ruleType rule)
 			if ((stack->top->termType != PNonTerm) || 
 				(stack->top->Lptr->Lptr->termType != PNonTerm))
 			{
+				#ifdef DEBUG
 				fprintf(stderr, "Chyba pravidla pro odcitani.\n");
+				#endif
 				error = ESYN;
 				return error;
 			}
@@ -528,7 +533,9 @@ TError findRule(Tstack *stack, ruleType rule)
 			// pushnu neterminal na zasobnik
 			if ((error = StackPush(stack, PNonTerm)) != ENOP)
 			{
+				#ifdef DEBUG
 				fprintf(stderr, "Chyba pri StackPush.\n");
+				#endif
 				StackDispose(stack);
 				return error;
 			}
@@ -544,7 +551,9 @@ TError findRule(Tstack *stack, ruleType rule)
 			if ((stack->top->termType != PNonTerm) || 
 				(stack->top->Lptr->Lptr->termType != PNonTerm))
 			{
+				#ifdef DEBUG
 				fprintf(stderr, "Chyba pravidla pro nasobeni.\n");
+				#endif
 				error = ESYN;
 				return error;
 			}
@@ -562,7 +571,9 @@ TError findRule(Tstack *stack, ruleType rule)
 			// pushnu neterminal na zasobnik
 			if ((error = StackPush(stack, PNonTerm)) != ENOP)
 			{
+				#ifdef DEBUG
 				fprintf(stderr, "Chyba pri StackPush.\n");
+				#endif
 				StackDispose(stack);
 				return error;
 			}
@@ -578,7 +589,9 @@ TError findRule(Tstack *stack, ruleType rule)
 			if ((stack->top->termType != PNonTerm) || 
 				(stack->top->Lptr->Lptr->termType != PNonTerm))
 			{
+				#ifdef DEBUG
 				fprintf(stderr, "Chyba pravidla pro deleni.\n");
+				#endif
 				error = ESYN;
 				return error;
 			}
@@ -596,7 +609,9 @@ TError findRule(Tstack *stack, ruleType rule)
 			// pushnu neterminal na zasobnik
 			if ((error = StackPush(stack, PNonTerm)) != ENOP)
 			{
+				#ifdef DEBUG
 				fprintf(stderr, "Chyba pri StackPush.\n");
+				#endif
 				StackDispose(stack);
 				return error;
 			}
@@ -612,7 +627,9 @@ TError findRule(Tstack *stack, ruleType rule)
 			if ((stack->top->termType != PNonTerm) || 
 				(stack->top->Lptr->Lptr->termType != PNonTerm))
 			{
+				#ifdef DEBUG
 				fprintf(stderr, "Chyba pravidla pro porovnavani ( <, > ).\n");
+				#endif
 				error = ESYN;
 				return error;
 			}
@@ -630,7 +647,9 @@ TError findRule(Tstack *stack, ruleType rule)
 			// pushnu neterminal na zasobnik
 			if ((error = StackPush(stack, PNonTerm)) != ENOP)
 			{
+				#ifdef DEBUG
 				fprintf(stderr, "Chyba pri StackPush.\n");
+				#endif
 				StackDispose(stack);
 				return error;
 			}
@@ -646,7 +665,9 @@ TError findRule(Tstack *stack, ruleType rule)
 			if ((stack->top->termType != PNonTerm) || 
 				(stack->top->Lptr->Lptr->termType != PNonTerm))
 			{
+				#ifdef DEBUG
 				fprintf(stderr, "Chyba pravidla pro porovnavani ( ==, != ).\n");
+				#endif
 				error = ESYN;
 				return error;
 			}
@@ -664,7 +685,9 @@ TError findRule(Tstack *stack, ruleType rule)
 			// pushnu neterminal na zasobnik
 			if ((error = StackPush(stack, PNonTerm)) != ENOP)
 			{
+				#ifdef DEBUG
 				fprintf(stderr, "Chyba pri StackPush.\n");
+				#endif
 				StackDispose(stack);
 				return error;
 			}
@@ -680,7 +703,9 @@ TError findRule(Tstack *stack, ruleType rule)
 			if (stack->top->Lptr->termType != PNonTerm ||
 				stack->top->Lptr->Lptr->termType != PLeftP)
 			{
+				#ifdef DEBUG
 				fprintf(stderr, "Chyba pravidla PAR_RULE.\n");
+				#endif
 				error = ESYN;
 				return error;
 			}
@@ -698,7 +723,9 @@ TError findRule(Tstack *stack, ruleType rule)
 			// pushnu neterminal na zasobnik
 			if ((error = StackPush(stack, PNonTerm)) != ENOP)
 			{
+				#ifdef DEBUG
 				fprintf(stderr, "Chyba pri StackPush.\n");
+				#endif
 				StackDispose(stack);
 				return error;
 			}
@@ -711,9 +738,8 @@ TError findRule(Tstack *stack, ruleType rule)
 		case ID_E_RULE:	// E -> i ... i pro string, int, double
 			if ((tempPtr = malloc(sizeof(struct TstackElem))) == NULL)
 			{
-				fprintf(stderr, "Chyba pri malloc.\n");
-				error = EINT;
-				return error;
+				StackDispose(stack);
+				print_error(EINT, token.line);
 			}
 			
 			tempPtr->termType = PNonTerm;
@@ -754,7 +780,9 @@ TError findRule(Tstack *stack, ruleType rule)
 				// pushnu neterminal na zasobnik
 				if ((error = StackPush(stack, PNonTerm)) != ENOP)
 				{
+					#ifdef DEBUG
 					fprintf(stderr, "Chyba pri StackPush.\n");
+					#endif
 					StackDispose(stack);
 					return error;
 				}
@@ -773,14 +801,18 @@ TError findRule(Tstack *stack, ruleType rule)
 				// pushnu neterminal na zasobnik
 				if ((error = StackPush(stack, PNonTerm)) != ENOP)
 				{
+					#ifdef DEBUG
 					fprintf(stderr, "Chyba pri StackPush.\n");
+					#endif
 					StackDispose(stack);
 					return error;
 				}
 			}
 			else
 			{
+				#ifdef DEBUG
 				fprintf(stderr, "Chyba pravidla PAR_RULE.\n");
+				#endif
 				error = ESYN;
 				return error;
 			}
@@ -862,16 +894,16 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 
 	if ((tempStack = malloc(sizeof(struct TstackElem))) == NULL)
 	{
-		fprintf(stderr, "Chyba pri malloc.\n");
-		error = EINT;
 		StackDispose(&stack);
-		return error;
+		print_error(EINT, token.line);
 	}
 
 	// inicializace zasobniku 
 	if ((error = StackInit(&stack)) != ENOP)
 	{
+		#ifdef DEBUG
 		fprintf(stderr, "Inicializace se nezdarila\n");
+		#endif
 		StackDispose(&stack);
 
 		error = EINT;
@@ -968,7 +1000,9 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 					#endif
 					if ((error = StackPush(&stack, tokterm)) != ENOP)
 					{
+						#ifdef DEBUG
 						fprintf(stderr, "Chyba pri StackPush.\n");
+						#endif
 						StackDispose(&stack);
 						return error;
 					}
@@ -980,7 +1014,9 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 					#endif
 					if ((error = StackShift(&stack, tokterm)) != ENOP)
 					{
+						#ifdef DEBUG
 						fprintf(stderr, "Chyba pri StackShift.\n");
+						#endif
 						StackDispose(&stack);
 						return error;
 					}
@@ -1094,12 +1130,16 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 						print_error(ESEM_DEF, token.line);				
 					}
 
+					#ifdef DEBUG
 					fprintf(stderr, "Chyba vyrazu.\n");
+					#endif
 					StackDispose(&stack);
 					return ESYN;
 				break;
 				default:
+					#ifdef DEBUG
 					fprintf(stderr, "Chyba vyrazu.\n");
+					#endif
 					error = ESYN;
 					StackDispose(&stack);
 					return error;
@@ -1236,7 +1276,9 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 					#endif
 					if ((error = StackPush(&stack, tokterm)) != ENOP)
 					{
+						#ifdef DEBUG
 						fprintf(stderr, "Chyba pri StackPush.\n");
+						#endif
 						StackDispose(&stack);
 						return error;
 					}
@@ -1248,7 +1290,9 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 					#endif
 					if ((error = StackShift(&stack, tokterm)) != ENOP)
 					{
+						#ifdef DEBUG
 						fprintf(stderr, "Chyba pri StackShift.\n");
+						#endif
 						StackDispose(&stack);
 						return error;
 					}
@@ -1351,13 +1395,16 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 						StackDispose(&stack);
 						print_error(ESEM_DEF, token.line);				
 					}
-
+					#ifdef DEBUG
 					fprintf(stderr, "Chyba vyrazu.\n");
+					#endif
 					StackDispose(&stack);
 					return ESYN;
 				break;
 				default:
+					#ifdef DEBUG
 					fprintf(stderr, "Chyba vyrazu.\n");
+					#endif
 					error = ESYN;
 					StackDispose(&stack);
 					return error;
