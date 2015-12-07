@@ -883,9 +883,11 @@ TError params_n(FILE *input)
 			if(token.type == T_Id)
 			{
 				// SEMANTICKA ANALYZA
-				/**
-				 * todo vkladani do tabulky symbolu funkce
-				 */
+				tData data;
+				data.type = VAR;
+				data.timesUsed = 1;
+				data.scope = 1; // nejnizsi scope nasledujiciho bloku
+				htInsert(funcTable, strGetStr(&attr), data);
 				// /SEMANTICKE ANALYZY
 				getNextToken(input, &attr);
 				error = params_n(input);

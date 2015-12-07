@@ -1,6 +1,6 @@
 int testicek(int param1, double param2)
 {
-	param1 = 0;
+	int param1 = 0;
 	if(2+3)
 	{
 		param1 = 2;

@@ -193,5 +193,29 @@ else
 	echo "Test 15: ERROR, EXPECTED 0, GOT $ret" >> test.out
 fi
 
+# parametr pouzit v tele funkce
+./main tests/test16.cc
+ret=$?
+
+if [ "$ret" -eq 0 ];
+then
+	succ=$((succ+1))
+	echo "Test 16: SUCCESS" >> test.out
+else
+	echo "Test 16: ERROR, EXPECTED 0, GOT $ret" >> test.out
+fi
+
+# redefinice parametru
+./main tests/test17.cc
+ret=$?
+
+if [ "$ret" -eq 3 ];
+then
+	succ=$((succ+1))
+	echo "Test 17: SUCCESS" >> test.out
+else
+	echo "Test 17: ERROR, EXPECTED 0, GOT $ret" >> test.out
+fi
+
 echo "#################"
-echo "SUCCESS: $succ/15"
+echo "SUCCESS: $succ/17"

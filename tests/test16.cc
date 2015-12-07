@@ -1,5 +1,4 @@
-int main()
+int main(int param1)
 {
-	int test;
 	param1 = 2;	
 }
