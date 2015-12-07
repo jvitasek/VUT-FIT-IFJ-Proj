@@ -154,7 +154,7 @@ TError func_n(FILE *input)
 		return error;
 	}
 	// 3: <FUNC_N> -> E 
-	else if(token.type == T_EOF)
+	else if(token.type == T_EOF) // zbytecny commit kvuli Jardovi
 	{
 		#ifdef DEBUG
 		fprintf(stderr, "konec souboru\n");
