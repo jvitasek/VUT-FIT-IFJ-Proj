@@ -936,15 +936,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 						}
 					}
 				}
-				else
-				{
-					#ifdef DEBUG
-						fprintf(stderr, "Nenasel jsem IDENTIFIKATHOOOR!!!\n");
-					#endif
-
-					print_error(ESEM_DEF, token.line);
-					exit(ESEM_DEF);
-				}
+				
 			}
 
 			// kontrola zavorek
