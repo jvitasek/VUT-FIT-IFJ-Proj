@@ -226,17 +226,20 @@ TError StackPush(int tokterm, char *attr)
 	if (tokterm == PInt)
 	{ // jedna se o integer
 		tempPtr->idType = Tint;
-		tempPtr->data = attr;
+		//tempPtr->data = attr;
+		strcpy(tempPtr->data, attr);
 	}
 	else if (tokterm == PDouble)
 	{ // jedna se o double
 		tempPtr->idType = Tdouble;
-		tempPtr->data = attr;
+		//tempPtr->data = attr;
+		strcpy(tempPtr->data, attr);
 	}
 	else if (tokterm == PString)
 	{ // jedna se o string
 		tempPtr->idType = Tstring;
-		tempPtr->data = attr;
+		//tempPtr->data = attr;
+		strcpy(tempPtr->data, attr);
 	}
 	else if (tokterm == PIden)
 	{ // jedna se o identifikator
@@ -338,7 +341,8 @@ TstackElemPtr StackTop()
 			tempPtr->Rptr = stack.top;
 			tempPtr->termType = stack.top->Lptr->termType;
 			tempPtr->idType = stack.top->Lptr->idType;
-			tempPtr->data = stack.top->Lptr->data;
+			strcpy(tempPtr->data, stack.top->Lptr->data);
+			// tempPtr->data = stack.top->Lptr->data;
 
 			while(tempPtr->termType > PDollar)
 			{
@@ -954,6 +958,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 	int counter = 0; // pro pocitani zavorek
 	int tokterm = 0; // pro ukladani terminalu z tokenu
 	tHTItem *tempItem = NULL;
+	char *myAttr = "*UNDEF*";
 	//outputSymbolTable(*localTable);
 	
 	#ifdef DEBUG
@@ -978,6 +983,12 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 		return error;
 	}
 
+	if ((myAttr = malloc(sizeof(char)*strGetLength(attr))) == NULL)
+	{
+		StackDispose(&stack);
+		print_error(EINT, token.line);
+	}
+
 	/**
 	 * Zpracovavani vyrazu ukonceneho strednikem.
 	 */
@@ -996,6 +1007,8 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 				StackDispose(&stack);
 				return error;
 			}
+
+			strcpy(myAttr, strGetStr(attr));
 
 			// prevedu si token na term (PSymbols)
 			tokterm = tokToTerm(token.type);
@@ -1074,6 +1087,8 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 				printf("-------------------------------------------------------\n");
 			#endif
 
+
+
 			++index;
 			switch (getPrecSymbol(tempStack->termType, tokterm))
 			{				
@@ -1095,10 +1110,10 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 				case less:
 					#ifdef DEBUG
 						printf("Case LESS.\n");
-						printf("Attr: %s\n", strGetStr(attr));
-						printf("!...attr: %s.\n", strGetStr(attr));
+						printf("Attr: %s\n", myAttr);
+						printf("!...attr: %s.\n", myAttr);
 					#endif
-					if ((error = StackShift(tokterm, strGetStr(attr))) != ENOP)
+					if ((error = StackShift(tokterm, myAttr)) != ENOP)
 					{
 						#ifdef DEBUG
 						fprintf(stderr, "Chyba pri StackShift.\n");
@@ -1106,13 +1121,14 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 						StackDispose(&stack);
 						return error;
 					}
+					printf("GET NEXT TOKEN\n");
 					getNextToken(input, attr);
 				break;
 				case great:
 					#ifdef DEBUG
 						printf("Case GREAT.\n");
-						printf("Attr: %s\n", strGetStr(attr));
-						printf("!...attr: %s.\n", strGetStr(attr));
+						printf("Attr: %s\n", myAttr);
+						printf("!...attr: %s.\n", myAttr);
 					#endif
 
 					switch(tempStack->termType)
