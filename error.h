@@ -15,17 +15,17 @@
 #define _ERROR_H_
 
 typedef enum TError {
-	ENOP = 00, // No problem
-	ELEX = 10, // Lexikalni analyza
-	ESYN = 20, // Syntakticka analyza
-	ESEM_DEF = 30, // Semanticka analyza, redefinice
-	ESEM_TYP = 40, // Semanticka analyza, typova kompatibilita
-	ETYP = 50, // Odvozovani datoveho typu
-	ESEM = 60, // Semanticka analyza, ostatni
-	ERUN_IN = 70, // Behova chyba, vstup
-	ERUN_UNINIT = 80, // Behova chyba, neinicializovana promenna
-	ERUN_DIV = 90, // Deleni nulou
-	EOTH = 100, // Ostatni chyby
+	ENOP = 0, // No problem
+	ELEX = 1, // Lexikalni analyza
+	ESYN = 2, // Syntakticka analyza
+	ESEM_DEF = 3, // Semanticka analyza, redefinice
+	ESEM_TYP = 4, // Semanticka analyza, typova kompatibilita
+	ETYP = 5, // Odvozovani datoveho typu
+	ESEM = 6, // Semanticka analyza, ostatni
+	ERUN_IN = 7, // Behova chyba, vstup
+	ERUN_UNINIT = 8, // Behova chyba, neinicializovana promenna
+	ERUN_DIV = 9, // Deleni nulou
+	EOTH = 10, // Ostatni chyby
 	EINT = 99, // Interni chyba
 	EEMPTY = 123, // Epsilon pravidlo
 	ENOTFOUND = 321 // Nenalazeno pravidlo

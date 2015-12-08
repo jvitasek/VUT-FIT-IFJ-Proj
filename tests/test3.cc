@@ -1,4 +1,4 @@
-int main(double param, int param2)
+int main()
 {
 	int tester = 0;
 	int double string = 1;

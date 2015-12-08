@@ -186,33 +186,3 @@ TError gStackPush(stack *stack, tHTable *table)
 	error = ENOP;
 	return error;
 }
-
-void whatsInStacks(stack *stack)
-{
-	int i = 1;
-	struct stackItem *temp;
-	if((temp = malloc(sizeof(struct stackItem))) == NULL)
-	{
-		print_error(EINT, 0);
-		exit(EINT);
-	}
-
-	temp = stack->top;
-	temp->Lptr = stack->top->Lptr;
-	temp->table = stack->top->table;
-	
-	printf("|--VRCHOL- -top->table\n");
-	outputSymbolTable(stack->top->table);
-	
-	while(temp->Lptr != NULL)
-	{
-		temp = temp->Lptr;
-		printf("|--%d.-\t\t-table|\n", i);
-		i++;
-		if(temp->table != NULL)
-		{
-			printf("%d\n",i);
-			outputSymbolTable(temp->table);
-		}
-	}
-}
