@@ -92,13 +92,13 @@ typedef struct Tstack {
 
 TError StackInit(Tstack *stack); // inicialzace zasobniku
 TError StackDispose(Tstack *stack);	
-TError StackPop(Tstack *stack);
-TError StackPush(Tstack *stack, int tokterm);
-TstackElemPtr StackTop(Tstack *stack);
-TError StackShift(Tstack *stack, int tokterm);
-TError StackEmpty(Tstack *stack);
+TError StackPop();
+TError StackPush(int tokterm, char *attr);
+TstackElemPtr StackTop();
+TError StackShift(int tokterm, char *attr);
+
 int tokToTerm(int tokenType);
-TError findRule(Tstack *stack, ruleType rule);
+TError findRule(ruleType rule);
 void generateVariable(string *var, int *counter);
 void generateInst(tInstCode instType, void *op1, void *op2, void *res);
 TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **localTable); // P: @todo
