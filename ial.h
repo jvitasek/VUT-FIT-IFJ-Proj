@@ -47,7 +47,10 @@ typedef enum symbolType {
  */
 typedef struct tData {
 	symbolType type;
+	T_Type varType;
 	int timesUsed;
+	int orderParams;
+	int scope;
 } tData;
 
 /**
@@ -67,11 +70,14 @@ extern int HTSIZE;
 int hashCode (char *key);
 void htInit (tHTable* ptrht);
 tHTItem* htSearch (tHTable* ptrht, char *key);
+tHTItem* htSearchOrder(tHTable* ptrht, char *key, int order);
+tHTItem* htSearchScope(tHTable* ptrht, char *key, int scope);
 void htInsert (tHTable* ptrht, char *key, tData data);
 tData* htRead (tHTable* ptrht, char *key);
+tData* htReadOrder(tHTable* ptrht, char *key, int order);
+tData* htReadScope(tHTable* ptrht, char *key, int scope);
 void htDelete (tHTable* ptrht, char *key);
 void htClearAll (tHTable* ptrht);
-void outputSymbolTable(tHTable* ptrht);
 void arraySearch(int search_pole[], char *search_str, int search_length);
 void arrayAscii(int ascii_pole[], char *str, int length);
 

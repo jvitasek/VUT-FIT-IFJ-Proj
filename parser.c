@@ -8,7 +8,8 @@
  * 			xvalec00 – Dusan Valecky
  */
 
-#define DEBUG 1
+//#define DEBUG 1
+#define DEBUG_SEM 1
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -20,11 +21,21 @@
 #include "istack.h"
 
 string attr; // vytvorime si string
-
-int counterVar = 1;		// globalna premenna, ktora sluzi pri tvorbe pomocnych premennych na medzivypocty
+int counterVar = 1;	// globalna premenna, ktora sluzi pri tvorbe pomocnych premennych na medzivypocty
 tHTable *commTable;
 tHTable *funcTable;
+tHTable *paraTable;
 stack tableStack;
+int currScope;
+int currOrder;
+int currOrderTerm;
+char *currFunc; // globalni promenna pro nazev momentalni funkce
+T_Type currType;
+
+const char* builtin[BUILTIN] = {
+	"length", "concat", "substr",
+	"find", "sort"
+};
 
 /**
  * @todo deklarace instruction listu
@@ -42,8 +53,26 @@ void getNextToken(FILE *input, string *attr)
 	if(token.type == T_Error)
 	{
 		print_error(ELEX, token.line);
-		exit(ELEX);
 	}
+}
+
+/**
+ * Zkontroluje, zda je vlozeny retezec klicove slovo.
+ * @param  attr String lexemu.
+ * @return      0 pokud neni, 1 pokud je.
+ */
+int checkBuiltin(char *test)
+{
+	int idx = 0;
+	while(idx < BUILTIN)
+	{
+		if(strcmp(builtin[idx], test) == 0)
+		{
+			return 1;
+		}
+		++idx;
+	}
+	return 0;
 }
 
 /**
@@ -58,6 +87,9 @@ TError parse(FILE *input)
 	fprintf(stderr, "parse\n");
 	#endif
 	TError error = ESYN;
+	currScope = 0;
+	currOrder = 0;
+	currOrderTerm = 0;
 
 	/**
 	 * inicializace stringu s nazvem tokenu
@@ -69,6 +101,7 @@ TError parse(FILE *input)
 	 */
 	initSTable(&commTable);
 	initSTable(&funcTable);
+	initSTable(&paraTable);
 
 	/**
 	 * inicializace zasobniku tabulek symbolu
@@ -83,18 +116,24 @@ TError parse(FILE *input)
 	}
 	// 1: <PROGRAM> -> <FUNC_N>
 	error = func_n(input);
+	// SEMANTICKA KONTROLA
+	tData *tempData;
+	// byla funkce main?
+	if((tempData = htRead(funcTable, "main")) == NULL)
+	{
+		print_error(ESEM_DEF, 0);
+	}
+	// /SEMANTICKA KONTROLA
 	#ifdef DEBUG
 	fprintf(stderr, "parse: func_n vratilo: %d\n", error);
 	#endif
-
-	//outputSymbolTable(commTable);
-	//whatsInStacks(&tableStack);
 
 	/**
 	 * smazani tabulky symbolu
 	 */
 	htClearAll(commTable);
 	htClearAll(funcTable);
+	htClearAll(paraTable);
 
 	/**
 	 * smazani zasobniku tabulek symbolu
@@ -183,6 +222,12 @@ TError func(FILE *input)
 		if(token.type == T_Id)
 		{
 			// SEMANTICKA ANALYZA
+			// kontrola, jestli nazev neni stejny jako nejaka
+			// builtin funkce
+			if(checkBuiltin(strGetStr(&attr)) == 1)
+			{
+				print_error(ESEM_DEF, token.line);
+			}
 			tData *tempData;
 			// funkce jiz v tabulce je
 			if((tempData = htRead(funcTable, strGetStr(&attr))) != NULL)
@@ -192,8 +237,9 @@ TError func(FILE *input)
 					tData data;
 					data.type = tempData->type;
 					data.timesUsed = tempData->timesUsed + 1;
+					data.scope = -1;
 					htInsert(funcTable, strGetStr(&attr), data);
-					#ifdef DEBUG
+					#ifdef DEBUG_SEM
 					fprintf(stderr, "VKLADAM %s\n", strGetStr(&attr));
 					#endif
 				}
@@ -214,12 +260,15 @@ TError func(FILE *input)
 					tData data;
 					data.type = FUNC;
 					data.timesUsed = 0;
+					data.scope = -1;
 					htInsert(funcTable, strGetStr(&attr), data);
-					#ifdef DEBUG
+					#ifdef DEBUG_SEM
 					fprintf(stderr, "VKLADAM %s\n", strGetStr(&attr));
 					#endif
 				}
 			}
+			currFunc = malloc(sizeof(char)*strlen(strGetStr(&attr)));
+			strcpy(currFunc, strGetStr(&attr));
 			// KONEC SEMANTICKE ANALYZY
 
 
@@ -271,6 +320,13 @@ TError par_def_list(FILE *input)
 	{
 		getNextToken(input, &attr);
 		error = params(input);
+		// SEMANTICKA ANALYZA
+		// pokud ma main parametry, chyba
+		if((error == ENOP) && (strcmp(currFunc, "main") == 0))
+		{
+			print_error(ESEM_DEF, token.line);
+		}
+		// /SEMANTICKA ANALYZA
 		#ifdef DEBUG
 		fprintf(stderr, "par_def_list: params vratilo: %d\n", error);
 		#endif
@@ -354,8 +410,11 @@ TError comm_seq(FILE *input)
 		{
 			commTable = funcTable;
 		}
+		++currScope; // menime scope, inkrementace
 		gStackPush(&tableStack, commTable);
-		printf("PUSHUJU na %d\n", token.line);
+		#ifdef DEBUG
+		fprintf(stderr, "PUSHUJU na %d\n", token.line);
+		#endif
 		commTable = tableStack.top->table;
 		// /SEMANTICKA ANALYZA
 
@@ -370,6 +429,7 @@ TError comm_seq(FILE *input)
 		
 
 		// SEMANTICKA ANALYZA
+		--currScope; // menime scope, dekrementace
 		gStackPop(&tableStack);
 		#ifdef DEBUG
 		fprintf(stderr, "POPPUJU na %d\n", token.line);
@@ -467,15 +527,15 @@ TError stmt(FILE *input)
 			getNextToken(input, &attr);
 			error = expr(input, &attr, 1, &counterVar, &commTable);
 			#ifdef DEBUG
-			printf("stmt: expr vratilo: %d\n", error);
-			printf("### token po expr: %d\n", token.type);
+			fprintf(stderr, "stmt: expr vratilo: %d\n", error);
+			fprintf(stderr, "### token po expr: %d\n", token.type);
 			#endif
 			if(error == ENOP)
 			{
 				getNextToken(input, &attr);
 				error = comm_seq(input);
 				#ifdef DEBUG
-				printf("stmt: comm_seq vratilo: %d\n", error);
+				fprintf(stderr, "stmt: comm_seq vratilo: %d\n", error);
 				#endif
 				if(error == ENOP)
 				{
@@ -505,28 +565,28 @@ TError stmt(FILE *input)
 			getNextToken(input, &attr);
 			error = var_def(input);
 			#ifdef DEBUG
-			printf("stmt: var_def vratilo: %d\n", error);
+			fprintf(stderr, "stmt: var_def vratilo: %d\n", error);
 			#endif
 			if(error == ENOP)
 			{
 				getNextToken(input, &attr);
 				error = expr(input, &attr, 0, &counterVar, &commTable);
 				#ifdef DEBUG
-				printf("stmt: expr vratilo: %d\n", error);
+				fprintf(stderr, "stmt: expr vratilo: %d\n", error);
 				#endif
 				if(error == ENOP)
 				{
 					getNextToken(input, &attr);
 					error = assign(input);
 					#ifdef DEBUG
-					printf("stmt: assign vratilo: %d\n", error);
+					fprintf(stderr, "stmt: assign vratilo: %d\n", error);
 					#endif
 					if(error == ENOP)
 					{
 						getNextToken(input, &attr);
 						error = comm_seq(input);
 						#ifdef DEBUG
-						printf("stmt: comm_seq vratilo: %d\n", error);
+						fprintf(stderr, "stmt: comm_seq vratilo: %d\n", error);
 						#endif
 						if(error == ENOP)
 						{
@@ -597,7 +657,7 @@ TError stmt(FILE *input)
 				getNextToken(input, &attr);
 				error = cin_id_n(input);
 				#ifdef DEBUG
-				printf("stmt: cin_id_n vratilo: %d\n", error);
+				fprintf(stderr, "stmt: cin_id_n vratilo: %d\n", error);
 				#endif
 				// neni potreba kontrolovat, zda pravidlo
 				// proslo na epsilon, negetujeme dalsi token
@@ -623,7 +683,7 @@ TError stmt(FILE *input)
 				getNextToken(input, &attr);
 				error = cin_id_n(input);
 				#ifdef DEBUG
-				printf("stmt: cin_id_n vratilo: %d\n", error);
+				fprintf(stderr, "stmt: cin_id_n vratilo: %d\n", error);
 				#endif
 				// neni potreba kontrolovat, zda pravidlo
 				// proslo na epsilon, negetujeme dalsi token
@@ -662,7 +722,7 @@ TError stmt(FILE *input)
 			getNextToken(input, &attr);
 			error = cout_term(input);
 			#ifdef DEBUG
-			printf("stmt: cout_term vratilo: %d\n", error);
+			fprintf(stderr, "stmt: cout_term vratilo: %d\n", error);
 			#endif
 			if(error == ENOP)
 			{
@@ -706,6 +766,8 @@ TError stmt(FILE *input)
 			print_error(ESEM_DEF, token.line);
 			exit(ESEM_DEF);
 		}
+		currFunc = malloc(sizeof(char)*strlen(strGetStr(&attr)));
+		strcpy(currFunc, strGetStr(&attr));
 		// /SEMANTICKA ANALYZA
 
 		getNextToken(input, &attr);
@@ -802,18 +864,29 @@ TError params(FILE *input)
 	#endif
 	if(error == ENOP)
 	{
+		// /SEMANTICKA ANALYZA
 		getNextToken(input, &attr);
 		if(token.type == T_Id)
 		{
 			// SEMANTICKA ANALYZA
-			/**
-			 * todo vlozeni do tabulky symbolu funkce
-			 */
+			tData data;
+			data.type = VAR;
+			data.varType = currType; // ulozeni typu parametru
+			data.timesUsed = 1;
+			data.orderParams = ++currOrder;
+			data.scope = 1; // nejnizsi scope nasledujiciho bloku
+			htInsert(funcTable, strGetStr(&attr), data);
+			htInsert(paraTable, currFunc, data); // vkladani do tabulky parametru
+			#ifdef DEBUG_SEM
+			fprintf(stderr, "VKLADAM %s, SCOPE: %d, TYPE: %d, ORDER: %d, CURRENT SCOPE: %d\n",
+					strGetStr(&attr), data.scope, data.varType, data.orderParams, currScope);
+			#endif
 			// KONEC SEMANTICKE ANALYZY
 			getNextToken(input, &attr);
 			error = params_n(input);
+			currOrder = 0;
 			#ifdef DEBUG
-			printf("params: params_n vratilo: %d\n", error);
+			fprintf(stderr, "params: params_n vratilo: %d\n", error);
 			#endif
 			// neni potreba kontrolovat, zda pravidlo
 			// proslo na epsilon, negetujeme dalsi token
@@ -866,18 +939,28 @@ TError params_n(FILE *input)
 		#endif
 		if(error == ENOP)
 		{
+			// /SEMANTICKA ANALYZA
 			getNextToken(input, &attr);
 			if(token.type == T_Id)
 			{
 				// SEMANTICKA ANALYZA
-				/**
-				 * todo vkladani do tabulky symbolu funkce
-				 */
+				tData data;
+				data.type = VAR;
+				data.varType = currType;
+				data.orderParams = ++currOrder;
+				data.timesUsed = 1;
+				data.scope = 1; // nejnizsi scope nasledujiciho bloku
+				htInsert(funcTable, strGetStr(&attr), data);
+				htInsert(paraTable, currFunc, data); // vkladani do tabulky parametru
+				#ifdef DEBUG_SEM
+				fprintf(stderr, "VKLADAM %s, SCOPE: %d, TYPE: %d, ORDER: %d, CURRENT SCOPE: %d\n",
+						strGetStr(&attr), data.scope, data.varType, data.orderParams, currScope);
+				#endif
 				// /SEMANTICKE ANALYZY
 				getNextToken(input, &attr);
 				error = params_n(input);
 				#ifdef DEBUG
-				printf("params_n: params_n vratilo: %d\n", error);
+				fprintf(stderr, "params_n: params_n vratilo: %d\n", error);
 				#endif
 				// neni potreba kontrolovat, zda pravidlo
 				// proslo na epsilon, negetujeme dalsi token
@@ -957,9 +1040,15 @@ TError cout_term(FILE *input)
 	if(token.type == T_Id)
 	{
 		// SEMANTICKA ANALYZA
-		/**
-		 * todo kontrola, zda id existuje v tabulce symbolu
-		 */
+		tData *tempData;
+		if((tempData = htRead(commTable, strGetStr(&attr))) == NULL)
+		{
+			#ifdef DEBUG
+			fprintf(stderr, "KONCIM V COUT_TERM: 39)\n");
+			#endif
+			print_error(ESEM_DEF, token.line);
+			exit(ESEM_DEF);
+		}
 		// KONEC SEMANTICKE ANALYZY
 		getNextToken(input, &attr);
 		error = cout_term_n(input);
@@ -1061,14 +1150,20 @@ TError cin_id_n(FILE *input)
 		if(token.type == T_Id)
 		{
 			// SEMANTICKA ANALYZA
-			/**
-			 * todo kontrola, zda id existuje v tabulce symbolu
-			 */
+			tData *tempData;
+			if((tempData = htRead(commTable, strGetStr(&attr))) == NULL)
+			{
+				#ifdef DEBUG
+				fprintf(stderr, "KONCIM V CIN_ID_N: 37)\n");
+				#endif
+				print_error(ESEM_DEF, token.line);
+				exit(ESEM_DEF);
+			}
 			// KONEC SEMANTICKE ANALYZY
 			getNextToken(input, &attr);
 			error = cin_id_n(input);
 			#ifdef DEBUG
-			printf("cin_id_n: cin_id_n vratilo: %d\n", error);
+			fprintf(stderr, "cin_id_n: cin_id_n vratilo: %d\n", error);
 			#endif
 			// neni potreba kontrolovat, zda pravidlo
 			// proslo na epsilon, negetujeme dalsi token
@@ -1088,7 +1183,7 @@ TError cin_id_n(FILE *input)
 			getNextToken(input, &attr);
 			error = cin_id_n(input);
 			#ifdef DEBUG
-			printf("cin_id_n: cin_id_n vratilo: %d\n", error);
+			fprintf(stderr, "cin_id_n: cin_id_n vratilo: %d\n", error);
 			#endif
 			// neni potreba kontrolovat, zda pravidlo
 			// proslo na epsilon, negetujeme dalsi token
@@ -1131,17 +1226,24 @@ TError assign(FILE *input)
 	if(token.type == T_Id)
 	{
 		// SEMANTICKA ANALYZA
-		/**
-		 * todo kontrola, zda id existuje v tabulce symbolu
-		 */
+		tData *tempData;
+		if((tempData = htRead(commTable, strGetStr(&attr))) == NULL)
+		{
+			#ifdef DEBUG
+			fprintf(stderr, "KONCIM V ASSIGN: 36)\n");
+			#endif
+			print_error(ESEM_DEF, token.line);
+			exit(ESEM_DEF);
+		}
 		// KONEC SEMANTICKE ANALYZY
+
 		getNextToken(input, &attr);
 		if(token.type == T_Assig)
 		{
 			getNextToken(input, &attr);
 			error = expr(input, &attr, 1, &counterVar, &commTable);
 			#ifdef DEBUG
-			printf("assign: expr vratilo: %d\n", error);
+			fprintf(stderr, "assign: expr vratilo: %d\n", error);
 			#endif
 			if(error == ENOP)
 			{
@@ -1177,7 +1279,7 @@ TError var_def(FILE *input)
 	if((error = type()) == ENOP || error == ESYN)
 	{
 		#ifdef DEBUG
-		fprintf(stderr, "var_def: type vratilo: %d\n", error);
+		fprintf(stderr, "var_def: type vratilo: %d:\n", error);
 		#endif
 		if(error == ESYN)
 		{
@@ -1189,33 +1291,34 @@ TError var_def(FILE *input)
 		{
 			// SEMANTICKA ANALYZA
 			tData *tempData;
-			if((tempData = htRead(commTable, strGetStr(&attr))) != NULL)
+			tempData = htReadScope(commTable, strGetStr(&attr), currScope);
+			// redefinice
+			if(tempData && tempData->scope == currScope)
 			{
 				#ifdef DEBUG
-				fprintf(stderr, "KONCIM VE VAR_DEF: 4)\n");
+				fprintf(stderr, "KONCIM – TOKEN: %s, SCOPE: %d, CURRENT: %d\n", strGetStr(&attr), tempData->scope, currScope);
 				#endif
-
 				print_error(ESEM_DEF, token.line);
-				exit(ESEM_DEF);
 			}
-			// promenna jeste neni v tabulce
+			// probehne zastineni
 			else
 			{
-				if(strGetStr(&attr) != NULL)
-				{
-					tData data;
-					data.type = VAR;
-					data.timesUsed = 0;
-					htInsert(commTable, strGetStr(&attr), data);
-					fprintf(stderr, "VKLADAM %s, LINE: %d\n", strGetStr(&attr), token.type);
-					currentVar = strGetStr(&attr);
-				}
+				tData data;
+				data.type = VAR;
+				data.scope = currScope;
+				data.timesUsed = 0;
+				data.varType = currType;
+				htInsert(commTable, strGetStr(&attr), data);
+				#ifdef DEBUG_SEM
+				fprintf(stderr, "VKLADAM %s, SCOPE: %d, TYPE: %d, CURRENT: %d\n", strGetStr(&attr), data.scope, data.varType, currScope);
+				#endif
 			}
 			// KONEC SEMANTICKE ANALYZY
+
 			getNextToken(input, &attr);
 			error = init(input);
 			#ifdef DEBUG
-			printf("var_def: init vratilo: %d\n", error);
+			fprintf(stderr, "var_def: init vratilo: %d\n", error);
 			#endif
 			if(error == ENOP || error == EEMPTY)
 			{
@@ -1238,7 +1341,6 @@ TError var_def(FILE *input)
 		if(token.type == T_Id)
 		{
 			// SEMANTICKA ANALYZA
-			
 			tData *tempData;
 			if((tempData = htRead(commTable, strGetStr(&attr))) != NULL)
 			{
@@ -1257,17 +1359,19 @@ TError var_def(FILE *input)
 					tData data;
 					data.type = VAR;
 					data.timesUsed = 0;
+					data.scope = currScope;
 					htInsert(commTable, strGetStr(&attr), data);
-					fprintf(stderr, "VKLADAM %s, LINE: %d\n", strGetStr(&attr), token.type);
-					currentVar = strGetStr(&attr);
+					#ifdef DEBUG_SEM
+					fprintf(stderr, "VKLADAM %s, SCOPE: %d\n", strGetStr(&attr), data.scope);
+					#endif
 				}
 			}
-
 			// KONEC SEMANTICKE ANALYZY
+
 			getNextToken(input, &attr);
 			error = init(input);
 			#ifdef DEBUG
-			printf("var_def: init vratilo: %d\n", error);
+			fprintf(stderr, "var_def: init vratilo: %d\n", error);
 			#endif
 			// neni potreba kontrolovat, zda pravidlo
 			// proslo na epsilon, negetujeme dalsi token
@@ -1390,6 +1494,18 @@ TError terms(FILE *input)
 			print_error(ESEM_DEF, token.line);
 			exit(ESEM_DEF);
 		}
+		// kontrola typu parametru
+		if(((tempData = htReadOrder(paraTable, currFunc, ++currOrderTerm)) != NULL))
+		{
+			#ifdef DEBUG_SEM
+			fprintf(stderr, "tempData->varType: %d\n", tempData->varType);
+			fprintf(stderr, "currType: %d\n", currType);
+			#endif
+			if(tempData->varType != currType)
+			{
+				print_error(ESEM_TYP, token.line);
+			}
+		}
 		// KONEC SEMANTICKE ANALYZY
 		getNextToken(input, &attr);
 		error = terms_n(input);
@@ -1433,14 +1549,29 @@ TError terms_n(FILE *input)
 		if(token.type == T_Id)
 		{
 			// SEMANTICKA ANALYZA
-			/**
-			 * @todo semanticka analyza
-			 */
+			tData *tempData;
+			if((tempData = htRead(commTable, strGetStr(&attr))) == NULL)
+			{
+				#ifdef DEBUG
+				fprintf(stderr, "KONCIM V TERMS_N: 34)\n");
+				#endif
+
+				print_error(ESEM_DEF, token.line);
+				exit(ESEM_DEF);
+			}
+			// kontrola typu parametru
+			if((tempData = htReadOrder(paraTable, currFunc, ++currOrderTerm)) != NULL)
+			{
+				if(tempData->varType != currType)
+				{
+					print_error(ESEM_TYP, token.line);
+				}
+			}
 			// KONEC SEMANTICKE ANALYZY
 			getNextToken(input, &attr);
 			error = terms_n(input);
 			#ifdef DEBUG
-			printf("terms: terms_n vratilo: %d\n", error);
+			fprintf(stderr, "terms: terms_n vratilo: %d\n", error);
 			#endif
 			if(error == ENOP || error == EEMPTY)
 			{
@@ -1481,6 +1612,7 @@ TError type()
 	// 10: <TYPE> -> string 
 	if(token.type == T_Double || token.type == T_String || token.type == T_Int)
 	{
+		currType = token.type;
 		return ENOP;
 	}
 	return error;
@@ -1519,6 +1651,9 @@ TError initSTable(tHTable **table)
 		item->key = "*UNDEF*";
 		item->data.type = 0;
 		item->data.timesUsed = 0;
+		item->data.orderParams = 0;
+		item->data.varType = T_EOF;
+		item->data.scope = 0;
 		item->ptrnext = NULL;
 	}
 	else
