@@ -4,7 +4,6 @@
  * ial.c  -  Zakladni algoritmy
  * 
  * Autori:
- * 			xvyrou05 – Marek Vyroubal
  * 			xvitas02 – Jakub Vitasek
  * 			xvidaj00 – Juraj Vida
  */
@@ -323,6 +322,7 @@ void htInsert(tHTable* ptrht, char *key, tData data)
 					ntemp->data.type = data.type;
 					ntemp->data.varType = data.varType;
 					ntemp->data.orderParams = data.orderParams;
+					ntemp->data.isDefined = data.isDefined;
 					ntemp->data.scope = data.scope;
 					return; // end here
 				}
@@ -340,6 +340,7 @@ void htInsert(tHTable* ptrht, char *key, tData data)
 				temp->data.type = data.type;
 				temp->data.varType = data.varType;
 				temp->data.orderParams = data.orderParams;
+				temp->data.isDefined = data.isDefined;
 				temp->data.scope = data.scope;
 				temp->key = malloc(sizeof(char)*strlen(key)+1);
 				strcpy(temp->key, key);
@@ -357,6 +358,7 @@ void htInsert(tHTable* ptrht, char *key, tData data)
 				(*ptrht)[rkey]->data.type = data.type;
 				(*ptrht)[rkey]->data.varType = data.varType;
 				(*ptrht)[rkey]->data.orderParams = data.orderParams;
+				(*ptrht)[rkey]->data.isDefined = data.isDefined;
 				(*ptrht)[rkey]->data.scope = data.scope;
 				(*ptrht)[rkey]->key = malloc(sizeof(char)*strlen(key)+1);
 				strcpy((*ptrht)[rkey]->key, key);

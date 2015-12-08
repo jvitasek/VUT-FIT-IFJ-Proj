@@ -237,7 +237,7 @@ else
 	echo "Test 19: ERROR, EXPECTED 3, GOT $ret" >> adv-test.out
 fi
 
-# PROBLEM: vraci syntaktickou chybu, protoze PSA neumi volani fce
+# PROBLEM: nerozlisujeme mezi deklaraci a definici
 ./main adv-tests/020_R3_.c
 ret=$?
 

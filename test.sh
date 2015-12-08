@@ -331,12 +331,12 @@ echo "25:"
 ./main tests/test25.cc
 ret=$?
 
-if [ "$ret" -eq 4 ];
+if [ "$ret" -eq 3 ];
 then
 	succ=$((succ+1))
 	echo "Test 25: SUCCESS" >> test.out
 else
-	echo "Test 25: ERROR, EXPECTED 4, GOT $ret" >> test.out
+	echo "Test 25: ERROR, EXPECTED 3, GOT $ret" >> test.out
 fi
 
 # pocet parametru pri volani funkce
@@ -352,8 +352,34 @@ else
 	echo "Test 26: ERROR, EXPECTED 0, GOT $ret" >> test.out
 fi
 
+# volani deklarovane, ale nedefinovane funkce
+echo "27:"
+./main tests/test27.cc
+ret=$?
+
+if [ "$ret" -eq 3 ];
+then
+	succ=$((succ+1))
+	echo "Test 27: SUCCESS" >> test.out
+else
+	echo "Test 27: ERROR, EXPECTED 3, GOT $ret" >> test.out
+fi
+
+# volani definovane funkce
+echo "28:"
+./main tests/test28.cc
+ret=$?
+
+if [ "$ret" -eq 0 ];
+then
+	succ=$((succ+1))
+	echo "Test 28: SUCCESS" >> test.out
+else
+	echo "Test 28: ERROR, EXPECTED 0, GOT $ret" >> test.out
+fi
+
 echo "#################"
-echo "SUCCESS: $succ/26"
+echo "SUCCESS: $succ/28"
 
 
 

@@ -241,6 +241,7 @@ TError func(FILE *input)
 					data.type = tempData->type;
 					data.timesUsed = tempData->timesUsed + 1;
 					data.scope = -1;
+					data.isDefined = 0;	
 					htInsert(funcTable, strGetStr(&attr), data);
 					#ifdef DEBUG_SEM
 					fprintf(stderr, "VKLADAM %s\n", strGetStr(&attr));
@@ -264,6 +265,7 @@ TError func(FILE *input)
 					data.type = FUNC;
 					data.timesUsed = 0;
 					data.scope = -1;
+					data.isDefined = 0;
 					htInsert(funcTable, strGetStr(&attr), data);
 					#ifdef DEBUG_SEM
 					fprintf(stderr, "VKLADAM %s\n", strGetStr(&attr));
@@ -340,7 +342,6 @@ TError par_def_list(FILE *input)
 			//fprintf(stderr, "UPRAVUJI %s, POCET PARAMS: %d\n", currFunc, currOrder);
 			#endif
 		}
-		//currOrder = 0;
 		// SEMANTICKA ANALYZA
 		// pokud ma main parametry, chyba
 		if((error == ENOP) && (strcmp(currFunc, "main") == 0))
@@ -423,6 +424,24 @@ TError comm_seq(FILE *input)
 	if(token.type == T_LeftBrace)
 	{
 		// SEMANTICKA ANALYZA
+		/**
+		 * zapiseme, ze funkce byla definovana
+		 */
+		tData *tempData;
+		if((tempData = htRead(funcTable, currFunc)) != NULL)
+		{
+			tData data;
+			data.type = tempData->type;
+			data.timesUsed = tempData->timesUsed;
+			data.scope = tempData->scope;
+			data.orderParams = tempData->orderParams;
+			data.isDefined = 1;
+			htInsert(funcTable, currFunc, data);
+			#ifdef DEBUG_SEM
+			fprintf(stderr, "UPRAVUJI %s, DEFINOVANA: %d\n", currFunc, data.isDefined);
+			#endif
+		}
+
 		if(tableStack.top->table != NULL)
 		{
 			commTable = tableStack.top->table;
@@ -840,6 +859,23 @@ TError call_assign(FILE *input)
 	// xx: <CALL_ASSIGN> -> (<terms>);
 	else if(token.type == T_LeftParenthesis)
 	{
+		// SEMANTICKA ANALYZA
+		/**
+		 * kontrola, zda volana funkce byla definovana
+		 */
+		tData *tempData;
+		if((tempData = htRead(funcTable, currFunc)) != NULL)
+		{
+			fprintf(stderr, "je %s definovana: %d\n", currFunc, tempData->isDefined);
+			if(tempData->isDefined != 1)
+			{
+				#ifdef DEBUG_SEM
+				fprintf(stderr, "KONCIM V CALL_ASSIGN\n");
+				#endif
+				print_error(ESEM_DEF, token.line);
+			}
+		}
+		// /SEMANTICKA ANALYZA
 		getNextToken(input, &attr);
 		error = terms(input);
 		#ifdef DEBUG
@@ -1690,6 +1726,7 @@ TError initSTable(tHTable **table)
 		item->data.orderParams = 0;
 		item->data.varType = T_EOF;
 		item->data.scope = 0;
+		item->data.isDefined = 0;
 		item->ptrnext = NULL;
 	}
 	else

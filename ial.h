@@ -4,7 +4,6 @@
  * ial.c  -  Zakladni algoritmy
  * 
  * Autori:
- * 			xvyrou05 – Marek Vyroubal
  * 			xvitas02 – Jakub Vitasek
  */
 
@@ -50,6 +49,7 @@ typedef struct tData {
 	T_Type varType;
 	int timesUsed;
 	int orderParams;
+	int isDefined;
 	int scope;
 } tData;
 

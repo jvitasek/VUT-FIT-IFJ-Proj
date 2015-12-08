@@ -1,4 +1,7 @@
-double test(int param1, double param2);
+double test(int param1, double param2)
+{
+	return 1;
+}
 
 int main()
 {
