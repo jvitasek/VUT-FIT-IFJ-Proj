@@ -320,10 +320,13 @@ TError par_def_list(FILE *input)
 	{
 		getNextToken(input, &attr);
 		error = params(input);
+		// SEMANTICKA ANALYZA
+		// pokud ma main parametry, chyba
 		if((error == ENOP) && (strcmp(currFunc, "main") == 0))
 		{
 			print_error(ESEM_DEF, token.line);
 		}
+		// /SEMANTICKA ANALYZA
 		#ifdef DEBUG
 		fprintf(stderr, "par_def_list: params vratilo: %d\n", error);
 		#endif

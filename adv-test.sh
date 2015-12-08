@@ -3,8 +3,6 @@ rm adv-test.out
 success=0
 error=0
 
-
-# PROBLEM: vraci syntaktickou chybu, protoze PSA neumi volani fce
 ./main adv-tests/001_R0_.c
 ret=$?
 
@@ -17,8 +15,6 @@ else
 	echo "Test 1: ERROR, EXPECTED 0, GOT $ret" > adv-test.out
 fi
 
-# PROBLEM: vraci semantickou chybu, protoze nemame vyresene zastineni
-# 		   nizsiho ramce ve vyssim ramci
 ./main adv-tests/002_R0_.c
 ret=$?
 
@@ -31,7 +27,6 @@ else
 	echo "Test 2: ERROR, EXPECTED 0, GOT $ret" >> adv-test.out
 fi
 
-# PROBLEM: vraci syntaktickou chybu, protoze PSA neumi volani fce
 ./main adv-tests/003_R0_.c
 ret=$?
 
@@ -102,7 +97,7 @@ then
 	echo "Test 8: SUCCESS" >> adv-test.out
 else
 	error=$((error+1))
-	echo "Test 8: ERROR, EXPECTED 0, GOT $ret" >> adv-test.out
+	echo "Test 8: ERROR, EXPECTED 1, GOT $ret" >> adv-test.out
 fi
 
 ./main adv-tests/009_R1_.c
