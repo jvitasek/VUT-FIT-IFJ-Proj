@@ -497,26 +497,6 @@ void htClearAll(tHTable* ptrht)
 }
 
 /**
- * [outputSymbolTable description]
- * @param ptrht [description]
- */
-void outputSymbolTable(tHTable* ptrht)
-{
-	printf ("------------HASH TABLE--------------\n");
-	for ( int i=0; i<HTSIZE; i++ ) {
-		printf ("%i:",i);
-		tHTItem *ptr = malloc(sizeof(tHTItem));
-		ptr = (*ptrht)[i];
-		while ( ptr != NULL ) {
-			printf (" (%s,%d,%d)", ptr->key, ptr->data.type, ptr->data.timesUsed);
-			ptr = ptr->ptrnext;
-		}
-		printf ("\n");
-	}
-	printf ("------------------------------------\n");
-}
-
-/**
  * Vraci pocet znaku retezce.
  * @param  s String k vypoctu znaku.
  * @return   Pocet znaku.

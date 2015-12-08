@@ -21,7 +21,6 @@
 #include "istack.h"
 
 string attr; // vytvorime si string
-
 int counterVar = 1;	// globalna premenna, ktora sluzi pri tvorbe pomocnych premennych na medzivypocty
 tHTable *commTable;
 tHTable *funcTable;
@@ -32,6 +31,11 @@ int currOrder;
 int currOrderTerm;
 char *currFunc; // globalni promenna pro nazev momentalni funkce
 T_Type currType;
+
+const char* builtin[BUILTIN] = {
+	"length", "concat", "substr",
+	"find", "sort"
+};
 
 /**
  * @todo deklarace instruction listu
@@ -50,6 +54,25 @@ void getNextToken(FILE *input, string *attr)
 	{
 		print_error(ELEX, token.line);
 	}
+}
+
+/**
+ * Zkontroluje, zda je vlozeny retezec klicove slovo.
+ * @param  attr String lexemu.
+ * @return      0 pokud neni, 1 pokud je.
+ */
+int checkBuiltin(char *test)
+{
+	int idx = 0;
+	while(idx < BUILTIN)
+	{
+		if(strcmp(builtin[idx], test) == 0)
+		{
+			return 1;
+		}
+		++idx;
+	}
+	return 0;
 }
 
 /**
@@ -104,9 +127,6 @@ TError parse(FILE *input)
 	#ifdef DEBUG
 	fprintf(stderr, "parse: func_n vratilo: %d\n", error);
 	#endif
-
-	//outputSymbolTable(commTable);
-	//whatsInStacks(&tableStack);
 
 	/**
 	 * smazani tabulky symbolu
@@ -202,6 +222,12 @@ TError func(FILE *input)
 		if(token.type == T_Id)
 		{
 			// SEMANTICKA ANALYZA
+			// kontrola, jestli nazev neni stejny jako nejaka
+			// builtin funkce
+			if(checkBuiltin(strGetStr(&attr)) == 1)
+			{
+				print_error(ESEM_DEF, token.line);
+			}
 			tData *tempData;
 			// funkce jiz v tabulce je
 			if((tempData = htRead(funcTable, strGetStr(&attr))) != NULL)
@@ -1331,7 +1357,6 @@ TError var_def(FILE *input)
 					#ifdef DEBUG_SEM
 					fprintf(stderr, "VKLADAM %s, SCOPE: %d\n", strGetStr(&attr), data.scope);
 					#endif
-					currentVar = strGetStr(&attr);
 				}
 			}
 			// KONEC SEMANTICKE ANALYZY

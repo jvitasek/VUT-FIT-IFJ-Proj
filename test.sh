@@ -313,8 +313,21 @@ else
 	echo "Test 23: ERROR, EXPECTED 0, GOT $ret" >> test.out
 fi
 
+# kontrola, zda existuje funkce main
+echo "24:"
+./main tests/test24.cc
+ret=$?
+
+if [ "$ret" -eq 3 ];
+then
+	succ=$((succ+1))
+	echo "Test 24: SUCCESS" >> test.out
+else
+	echo "Test 24: ERROR, EXPECTED 3, GOT $ret" >> test.out
+fi
+
 echo "#################"
-echo "SUCCESS: $succ/23"
+echo "SUCCESS: $succ/24"
 
 
 

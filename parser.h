@@ -10,13 +10,14 @@
  
 #include "ial.h"
 #include <stdbool.h>
-#define KW 10
+#define BUILTIN 5
  
  // HLAVNI FUNKCE
 TError parse(FILE *input); // P: 1
 
 // POM. FUNKCE
 void getNextToken(FILE *input, string *attr);
+int checkBuiltin(char *test);
 TError initSTable(tHTable **table);
 
 // PRAVIDLA
@@ -44,4 +45,3 @@ TError cin_id_n(FILE *input); // P: 37
 TError ret(FILE *input); // P: 42
 
 T_Token token;
-char *currentVar;

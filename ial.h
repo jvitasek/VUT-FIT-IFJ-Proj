@@ -78,7 +78,6 @@ tData* htReadOrder(tHTable* ptrht, char *key, int order);
 tData* htReadScope(tHTable* ptrht, char *key, int scope);
 void htDelete (tHTable* ptrht, char *key);
 void htClearAll (tHTable* ptrht);
-void outputSymbolTable(tHTable* ptrht);
 void arraySearch(int search_pole[], char *search_str, int search_length);
 void arrayAscii(int ascii_pole[], char *str, int length);
 
