@@ -93,6 +93,14 @@ TError parse(FILE *input)
 	}
 	// 1: <PROGRAM> -> <FUNC_N>
 	error = func_n(input);
+	// SEMANTICKA KONTROLA
+	tData *tempData;
+	// byla funkce main?
+	if((tempData = htRead(funcTable, "main")) == NULL)
+	{
+		print_error(ESEM_DEF, 0);
+	}
+	// /SEMANTICKA KONTROLA
 	#ifdef DEBUG
 	fprintf(stderr, "parse: func_n vratilo: %d\n", error);
 	#endif

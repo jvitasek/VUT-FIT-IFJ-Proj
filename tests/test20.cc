@@ -9,7 +9,7 @@ int main()
 
 	{
 		int prom = 2;
-		foo(prom);
+		foo(prom, prom);
 	}
 
 	return 0;
