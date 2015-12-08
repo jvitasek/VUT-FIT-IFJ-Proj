@@ -25,17 +25,17 @@ Tstack stack;
  */
 int preceden_tab[19][19] = {
 //	  +		  -		*      /     ==     !=    <=      >=     >      <    str   doub  int    id    f    (      )      ,       $
-	{great, great, less, less, great, great, great, great, great, great, less, less, less, less, less, less, great, great, great},		// +
-	{great, great, less, less, great, great, great, great, great, great, less, less, less, less, less, less, great, great, great},		// -
-	{great, great, great, great, great, great, great, great, great, great, less, less, less, less, less, less, great, great, great},	// *
-	{great, great, great, great, great, great, great, great, great, great, less, less, less, less, less, less, great, great, great},	// /
+	{great, great, less, less, great, great, great, great, great, great, empty, less, less, less, less, less, great, great, great},		// +
+	{great, great, less, less, great, great, great, great, great, great, empty, less, less, less, less, less, great, great, great},		// -
+	{great, great, great, great, great, great, great, great, great, great, empty, less, less, less, less, less, great, great, great},	// *
+	{great, great, great, great, great, great, great, great, great, great, empty, less, less, less, less, less, great, great, great},	// /
 	{less, less, less, less, great, great, great, great, great, great, less, less, less, less, less, less, great, great, great},		// ==
 	{less, less, less, less, great, great, great, great, great, great, less, less, less, less, less, less, great, great, great},		// !=
 	{less, less, less, less, great, great, great, great, great, great, less, less, less, less, less, less, great, great, great},		// <=
 	{less, less, less, less, great, great, great, great, great, great, less, less, less, less, less, less, great, great, great},		// >=
 	{less, less, less, less, great, great, great, great, great, great, less, less, less, less, less, less, great, great, great},		// >
 	{less, less, less, less, great, great, great, great, great, great, less, less, less, less, less, less, great, great, great},		// <
-	{great, great, great, great, great, great, great, great, great, great, empty, empty, empty, empty, empty, empty, great, great, great},	// string
+	{empty, empty, empty, empty, great, great, great, great, great, great, empty, empty, empty, empty, empty, empty, great, great, great},	// string
 	{great, great, great, great, great, great, great, great, great, great, empty, empty, empty, empty, empty, empty, great, great, great},	// double
 	{great, great, great, great, great, great, great, great, great, great, empty, empty, empty, empty, empty, empty, great, great, great},	// int
 	{great, great, great, great, great, great, great, great, great, great, empty, empty, empty, empty, empty, empty, great, great, great},	// id

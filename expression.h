@@ -43,8 +43,8 @@ typedef enum PSymbols {
 	less,	 // 21 < v preceden. tabulce
 	great,	 // 22 > v preceden. tabulce
 	equal,	 // 23 = v preceden. tabulce
-	empty,	 // 24 'nic' v preceden. tabulce
-	none
+	empty,	 // 24 'empty' v preceden. tabulce
+	none	// jine
 } PSymbols;
 
 /**
