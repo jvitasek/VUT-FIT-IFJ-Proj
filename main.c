@@ -13,7 +13,6 @@
 #include <string.h>
 #include "error.h"
 #include "parser.h"
-#include "gc.h"
 
 
 int main(int argc, char **argv)
@@ -33,18 +32,9 @@ int main(int argc, char **argv)
 		print_error(ERUN_IN, 0);
 	}
 	
-	void **gc = NULL;		// garbage collector
-
-	
-	
-	
-	
-	
-
 	int result;
-	result = parse(input,&gc); // syntakticka analyza
+	result = parse(input); // syntakticka analyza
 	
-	freeGC(&gc);		// pouvolnujeme obsah
 	switch(result)
 	{
 		case ENOP:
