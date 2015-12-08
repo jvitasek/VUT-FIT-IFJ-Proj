@@ -32,6 +32,9 @@ int currOrderTerm;
 char *currFunc; // globalni promenna pro nazev momentalni funkce
 T_Type currType;
 
+/**
+ * @var pole nazvu vestavenych funkci
+ */
 const char* builtin[BUILTIN] = {
 	"length", "concat", "substr",
 	"find", "sort"
@@ -320,6 +323,24 @@ TError par_def_list(FILE *input)
 	{
 		getNextToken(input, &attr);
 		error = params(input);
+		/**
+		 * vlozime pocet parametru funkce
+		 */
+		tData *tempData;
+		// funkce jiz v tabulce je
+		if((tempData = htRead(funcTable, currFunc)) != NULL)
+		{
+			tData data;
+			data.type = tempData->type;
+			data.timesUsed = tempData->timesUsed;
+			data.scope = tempData->scope;
+			data.orderParams = currOrder;
+			htInsert(funcTable, strGetStr(&attr), data);
+			#ifdef DEBUG_SEM
+			//fprintf(stderr, "UPRAVUJI %s, POCET PARAMS: %d\n", currFunc, currOrder);
+			#endif
+		}
+		//currOrder = 0;
 		// SEMANTICKA ANALYZA
 		// pokud ma main parametry, chyba
 		if((error == ENOP) && (strcmp(currFunc, "main") == 0))
@@ -878,13 +899,14 @@ TError params(FILE *input)
 			htInsert(funcTable, strGetStr(&attr), data);
 			htInsert(paraTable, currFunc, data); // vkladani do tabulky parametru
 			#ifdef DEBUG_SEM
-			fprintf(stderr, "VKLADAM %s, SCOPE: %d, TYPE: %d, ORDER: %d, CURRENT SCOPE: %d\n",
-					strGetStr(&attr), data.scope, data.varType, data.orderParams, currScope);
+			fprintf(stderr, "VKLADAM %s, SCOPE: %d, TYPE: %d, CURRENT SCOPE: %d\n",
+				strGetStr(&attr), data.scope, data.varType, currScope);
+			fprintf(stderr, "VKLADAM PARAMETR %s s maskou %s, SCOPE: %d, TYPE: %d, ORDER: %d\n",
+				strGetStr(&attr), currFunc, data.scope, data.varType, data.orderParams);
 			#endif
 			// KONEC SEMANTICKE ANALYZY
 			getNextToken(input, &attr);
 			error = params_n(input);
-			currOrder = 0;
 			#ifdef DEBUG
 			fprintf(stderr, "params: params_n vratilo: %d\n", error);
 			#endif
@@ -953,8 +975,10 @@ TError params_n(FILE *input)
 				htInsert(funcTable, strGetStr(&attr), data);
 				htInsert(paraTable, currFunc, data); // vkladani do tabulky parametru
 				#ifdef DEBUG_SEM
-				fprintf(stderr, "VKLADAM %s, SCOPE: %d, TYPE: %d, ORDER: %d, CURRENT SCOPE: %d\n",
-						strGetStr(&attr), data.scope, data.varType, data.orderParams, currScope);
+				fprintf(stderr, "VKLADAM %s, SCOPE: %d, TYPE: %d, CURRENT SCOPE: %d\n",
+					strGetStr(&attr), data.scope, data.varType, currScope);
+				fprintf(stderr, "VKLADAM PARAMETR %s s maskou %s, SCOPE: %d, TYPE: %d, ORDER: %d\n",
+					strGetStr(&attr), currFunc, data.scope, data.varType, data.orderParams);
 				#endif
 				// /SEMANTICKE ANALYZY
 				getNextToken(input, &attr);
@@ -1509,6 +1533,18 @@ TError terms(FILE *input)
 		// KONEC SEMANTICKE ANALYZY
 		getNextToken(input, &attr);
 		error = terms_n(input);
+		/**
+		 * kontrola poctu parametru
+		 */
+		#ifdef DEBUG_SEM
+		fprintf(stderr, "volam funkci: %s, vlozeno parametru: %d, deklarovany pocet: %d\n", currFunc, currOrderTerm, currOrder);
+		#endif
+		if(currOrderTerm != currOrder)
+		{
+			print_error(ESEM_TYP, token.line);
+		}
+		currOrderTerm = 0;
+
 		#ifdef DEBUG
 		fprintf(stderr, "terms: terms_n vratilo: %d\n", error);
 		#endif

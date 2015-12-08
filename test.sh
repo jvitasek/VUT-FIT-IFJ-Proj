@@ -326,8 +326,34 @@ else
 	echo "Test 24: ERROR, EXPECTED 3, GOT $ret" >> test.out
 fi
 
+# pocet parametru pri volani funkce
+echo "25:"
+./main tests/test25.cc
+ret=$?
+
+if [ "$ret" -eq 4 ];
+then
+	succ=$((succ+1))
+	echo "Test 25: SUCCESS" >> test.out
+else
+	echo "Test 25: ERROR, EXPECTED 4, GOT $ret" >> test.out
+fi
+
+# pocet parametru pri volani funkce
+echo "26:"
+./main tests/test26.cc
+ret=$?
+
+if [ "$ret" -eq 0 ];
+then
+	succ=$((succ+1))
+	echo "Test 26: SUCCESS" >> test.out
+else
+	echo "Test 26: ERROR, EXPECTED 0, GOT $ret" >> test.out
+fi
+
 echo "#################"
-echo "SUCCESS: $succ/24"
+echo "SUCCESS: $succ/26"
 
 
 

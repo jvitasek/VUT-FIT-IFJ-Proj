@@ -1,6 +1,6 @@
 double test(string testing);
 
-int main(int param1)
+int main()
 {
 	int lol = 42;
 }

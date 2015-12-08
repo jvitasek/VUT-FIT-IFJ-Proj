@@ -1,13 +1,13 @@
-int main(int param1)
+int main()
 {
 	double lol = 42;
 }
 
-int main(int param1);
+int main();
 
 double tester(string characters)
 {
 	characters = "none";
 }
 
-int main(int param1);
+int main();
