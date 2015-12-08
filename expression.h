@@ -29,9 +29,9 @@ typedef enum PSymbols {
 	PGreatEq, // 7 >=
 	PGreat,  // 8 >
 	PLess,	 // 9 <
-	PInt,	 // 10 integer
+	PString, // 10 string
 	PDouble, // 11 double
-	PString, // 12 string
+	PInt, 	 // 12 integer
 	PIden,   // 13 id
 	PIdFun,  // 14 f
 	PLeftP,  // 15 (

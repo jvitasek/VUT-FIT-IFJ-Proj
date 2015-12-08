@@ -15,7 +15,7 @@
 #include "parser.h"
 #include "expression.h"
 
-//#define DEBUG 1
+#define DEBUG 1
 
 int *counteerVar;	// sluzi pri tvorbe pomocnych premennych
 Tstack stack;
@@ -411,8 +411,7 @@ void whatInStacks(Tstack *stack)
 	temp->idType = stack->top->idType;
 	temp->data = stack->top->data;
 	
-	printf("|--VRCHOL- -top->termType- -%d-\t-top->idType- -%d-\t-akt. token- -%d--|\n"
-		"|--VRCHOL- \t-termType- -%d-\t-idType- -%d-\t\t-akt. token- -%d--|\n", 
+	printf("|--VRCHOL- \t-termType- -%d-\t-idType- -%d-\t\t-akt. token- -%d--|\n", 
 		stack->top->termType, stack->top->idType, tokToTerm(token.type),
 		temp->termType, temp->idType, tokToTerm(token.type));
 	
@@ -424,8 +423,6 @@ void whatInStacks(Tstack *stack)
 		i++;
 	}
 
-	printf("|--FIRST- -first->termType- -%d- -first->idType- -%d-\t-akt. token- -%d--|\n", 
-		stack->first->termType, stack->first->idType, tokToTerm(token.type));
 }
 #endif
 
@@ -473,7 +470,7 @@ int tokToTerm(int tokenType)
 int getPrecSymbol(int ter1, int ter2)
 {
 	#ifdef DEBUG
-	printf("getPrecSymbol([%d][%d])\n", ter1, ter2);
+	printf("getPrecSymbol([%d][%d], tj. %d.)\n", ter1, ter2, preceden_tab[ter1][ter2]);
 	#endif
 	return preceden_tab[ter1][ter2];
 }
@@ -504,6 +501,11 @@ TError findRule(Tstack *stack, ruleType rule)
 			/**
 			 * @todo 3AC, Ilist
 			 */
+			
+			if (stack->top)
+			{
+				/* code */
+			}
 			
 			// nejdrive se zbavim: < E + E (4x pop)
 			StackPop(stack);			
@@ -1143,9 +1145,6 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 							 * @todo pravidlo f()
 							 * 
 							 */
-							#ifdef DEBUG
-								printf("<<<<<<<<<<<<<<<<<<<< !!!!!!!PIdFun!!!!!! >>>>>>>>\n");
-							#endif
 						break;
 						default: break;
 					}
@@ -1162,7 +1161,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 					}
 
 					#ifdef DEBUG
-					fprintf(stderr, "Chyba vyrazu.\n");
+					fprintf(stderr, "Chyba vyrazu!\n");
 					#endif
 					StackDispose(&stack);
 					return ESYN;
@@ -1204,10 +1203,6 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 
 			prevTok = tokterm;
 
-			#ifdef DEBUG
-				printf("---PREV TOK: %d......\n", prevTok);
-			#endif
-
 		} while(!((tempStack->termType == PDollar) && (tokToTerm(token.type) == PDollar)));
 	}
 	/**
@@ -1241,25 +1236,25 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 				// zjistim, jestli id je funkce
 				if (tokterm == PIden)
 				{
-					#ifdef DEBUG
-						printf("TOKTERM JE ID!!...attr: %s.\n", strGetStr(attr));
-					#endif
+					// #ifdef DEBUG
+					// 	printf("TOKTERM JE ID!!...attr: %s.\n", strGetStr(attr));
+					// #endif
 					if((tempItem = htSearch(*localTable, strGetStr(attr))) != NULL)
 					{
 						tempData = htRead(*localTable, strGetStr(attr));
 						if (tempData->type == FUNC)
 						{
 							tokterm = PIdFun;
-							#ifdef DEBUG
-								printf("!!!!ID je FUNKCE!!!!!.\n");
-							#endif
+							// #ifdef DEBUG
+							// 	printf("!!!!ID je FUNKCE!!!!!.\n");
+							// #endif
 						}
 						else
 						{
 							tokterm = PIden;
-							#ifdef DEBUG
-								printf("!!!!!ID je ID!!!!!!!.\n");
-							#endif
+							// #ifdef DEBUG
+							// 	printf("!!!!!ID je ID!!!!!!!.\n");
+							// #endif
 
 							if((tempItem = htSearch(*localTable, strGetStr(attr))) == NULL)
 							{
@@ -1313,7 +1308,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 			{				
 				case equal:
 					#ifdef DEBUG
-						printf("Case equal.\n");
+						printf("Case EQUAL.\n");
 					#endif
 					if ((error = StackPush(&stack, tokterm)) != ENOP)
 					{
@@ -1327,7 +1322,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 				break;
 				case less:
 					#ifdef DEBUG
-						printf("Case less.\n");
+						printf("Case LESS.\n");
 					#endif
 					if ((error = StackShift(&stack, tokterm)) != ENOP)
 					{
@@ -1341,7 +1336,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 				break;
 				case great:
 					#ifdef DEBUG
-						printf("Case great.\n");
+						printf("Case GREAT.\n");
 					#endif
 
 					switch(tempStack->termType)
@@ -1486,9 +1481,9 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 
 			prevTok = tokterm;
 
-			#ifdef DEBUG
-				printf("---PREV TOK: %d......\n", prevTok);
-			#endif
+			// #ifdef DEBUG
+			// 	printf("---PREV TOK: %d......\n", prevTok);
+			// #endif
 
 		} while(!((tempStack->termType == PDollar) && (tokterm == PDollar)));
 	}
