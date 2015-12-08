@@ -320,6 +320,10 @@ TError par_def_list(FILE *input)
 	{
 		getNextToken(input, &attr);
 		error = params(input);
+		if((error == ENOP) && (strcmp(currFunc, "main") == 0))
+		{
+			print_error(ESEM_DEF, token.line);
+		}
 		#ifdef DEBUG
 		fprintf(stderr, "par_def_list: params vratilo: %d\n", error);
 		#endif

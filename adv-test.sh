@@ -267,8 +267,6 @@ else
 	echo "Test 21: ERROR, EXPECTED 3, GOT $ret" >> adv-test.out
 fi
 
-# PROBLEM: nevraci chybu, mel by vracet semantickou, protoze length
-# 		   je nazev vestavene funkce
 ./main adv-tests/022_R3_.c
 ret=$?
 
