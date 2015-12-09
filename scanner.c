@@ -246,16 +246,16 @@ T_Token getToken(FILE *input, string *attr, int *line)
 					{
 						strAppend(attr,c);
 						state = S_Expo1;		// nastavim dalsi stav, ktory skontroluje ci je za e/E nepovinne +/-
-					}else if((isdigit(c)) || (c == ';'))
+					}else// if((isdigit(c)) || (c == ';'))
 					{
 						ungetc(c,input);	// vratim posledny nacitany znak
 						token.type =  T_Doub;
 						return token;
-					}else
+					}/*else
 					{
 						token.type =  T_Error;	// inak vracia error, lebo tam bolo nieco, co tam byt nema
 						return token;
-					}
+					}*/
 					break;
 				case S_Expo1:	// kontroluje spravny zapis expo. casti
 					if((c == '+') || (c == '-'))	// ide o expo. cislo aj s +/-
