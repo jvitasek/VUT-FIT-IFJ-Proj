@@ -12,33 +12,36 @@
 
 typedef enum
 {
-  C_Add,  //+ (C_Add,op1,op2,res)
-  C_Sub,  //- (C_Sub,op1,op2,res)
-  C_Mul,
-  C_Div,
+  C_Add,  		// + (C_Add,op1,op2,res)
+  C_Sub,  		// - (C_Sub,op1,op2,res)
+  C_Mul,  		// * (C_Mul,op1,op2,res)
+  C_Div,  		// / (C_Div,op1,op2,res)
 
-  C_Less,
-  C_Greater,
-  C_LessEq,		// <=
-  C_GreaterEq,	// >=
-  C_Equal,
-  C_NotEqual,	// <>
+  C_Less,		// <  (C_Less,op1,op2,res)
+  C_Greater,	// >  (C_Greater,op1,op2,res)
+  C_LessEq,		// <= (C_LessEq,op1,op2,res)
+  C_GreaterEq,	// >= (C_GreaterEq,op1,op2,res)
+  C_Equal,		// == (C_Equal,op1,op2,res)
+  C_NotEqual,	// != (C_NotEqual,op1,op2,res)
   
-  C_Read,
-  C_Write,
+  C_Cin,
+  C_Cout,
+  
   C_Length,
-  C_Sort,
+  C_Substr,
+  C_Concat,
   C_Find,
-  C_Copy,
+  C_Sort,
   
   C_Label,
   C_Not,
   C_IfGoTo,
   C_GoTo,
   
-  C_Ret,
+  C_Ret,		// (C_Ret,op1,-,-)
 
-  C_Assign		// :=
+  C_Assign,		// = (C_Assign,op1,-,res)
+  C_Stop,		// (C_Stop,-,-,-)
 } tInstCode;
 
 typedef struct
