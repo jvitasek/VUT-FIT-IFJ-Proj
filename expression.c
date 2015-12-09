@@ -729,11 +729,23 @@ TError findRule(ruleType rule)
 			 * @todo 3AC, Ilist
 			 */
 			
-			// deleni 0
-			if (strcmp(stack.top->data, "0") == 0)
+			// kontrola deleni 0
+			int nula = 1;
+			unsigned int i = 0;
+
+			for (i = 0; i < strlen(stack.top->data); i++)
+			{
+				if (stack.top->data[i] != '0' && stack.top->data[i] != '.')
+				{
+					nula = 0;
+				}
+			}
+
+			if (nula == 1)
 			{
 				print_error(ERUN_DIV, token.line);
 			}
+
 			
 			/**
 			 * kontrola typove kompatibility
