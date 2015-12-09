@@ -552,7 +552,8 @@ TError findRule(ruleType rule)
 			}
 			else 
 			{
-				printf("###############Chyba Nonterminalu - kompatibilita?.\n");
+			//	printf("###############Chyba Nonterminalu - kompatibilita?.\n"); @TODO vyresit pro ID
+			//	print_error(ESEM_TYP, token.line);
 			}
 			
 			// nejdrive se zbavim: < E + E (4x pop)
@@ -619,7 +620,8 @@ TError findRule(ruleType rule)
 			}
 			else 
 			{
-				printf("###############Chyba Nonterminalu - kompatibilita?.\n");
+			//	printf("###############Chyba Nonterminalu - kompatibilita?.\n"); @TODO vyresit pro ID
+			//	print_error(ESEM_TYP, token.line);
 			}		
 			
 			// nejdrive se zbavim: < E - E (4x pop)
@@ -685,7 +687,8 @@ TError findRule(ruleType rule)
 			}
 			else 
 			{
-				printf("###############Chyba Nonterminalu - kompatibilita?.\n");
+			//	printf("###############Chyba Nonterminalu - kompatibilita?.\n"); @TODO vyresit pro ID
+			//	print_error(ESEM_TYP, token.line);
 			}	
 			
 			// nejdrive se zbavim: < E * E (4x pop)
@@ -726,6 +729,12 @@ TError findRule(ruleType rule)
 			 * @todo 3AC, Ilist
 			 */
 			
+			// deleni 0
+			if (strcmp(stack.top->data, "0") == 0)
+			{
+				print_error(ERUN_DIV, token.line);
+			}
+			
 			/**
 			 * kontrola typove kompatibility
 			 */
@@ -741,11 +750,6 @@ TError findRule(ruleType rule)
 				#ifdef DEBUG
 				printf("--Op1 == int, op2 == double.--\n");
 				#endif
-
-				// if (/* condition */) // OP2 nesmi byt 0 !!!!!!! @TODO
-				// {
-				// 	/* code */
-				// }
 			}
 			// double / int
 			else if (stack.top->idType == Tdouble && stack.top->Lptr->Lptr->idType == Tint)
@@ -753,15 +757,11 @@ TError findRule(ruleType rule)
 				#ifdef DEBUG
 				printf("--Op1 == double, op2 == int.--\n");
 				#endif
-
-				// if (/* condition */) // OP2 nesmi byt 0 !!!!!!! @TODO
-				// {
-				// 	/* code */
-				// }
 			}
 			else 
 			{
-				printf("###############Chyba Nonterminalu - kompatibilita?.\n");
+			//	printf("###############Chyba Nonterminalu - kompatibilita?.\n"); @TODO vyresit pro ID
+			//	print_error(ESEM_TYP, token.line);
 			}
 			
 			// nejdrive se zbavim: < E / E (4x pop)
@@ -827,7 +827,8 @@ TError findRule(ruleType rule)
 			// }
 			// else 
 			// {
-			// 	printf("###############Chyba Nonterminalu - kompatibilita?.\n");
+			// 	printf("###############Chyba Nonterminalu - kompatibilita?.\n"); @TODO vyresit pro ID
+			//	print_error(ESEM_TYP, token.line);
 			// }	
 			
 			// nejdrive se zbavim: < E (<, >, <=, >=) E (4x pop)
@@ -893,7 +894,8 @@ TError findRule(ruleType rule)
 			// }
 			// else 
 			// {
-			// 	printf("###############Chyba Nonterminalu - kompatibilita?.\n");
+			// 	printf("###############Chyba Nonterminalu - kompatibilita?.\n"); @TODO vyresit pro ID
+			//	print_error(ESEM_TYP, token.line);
 			// }
 			
 			// nejdrive se zbavim: < E (==, !=) E (4x pop)
@@ -1145,7 +1147,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 			printf("################## Resim vyraz ukonceny strednikem. ###################\n");
 		#endif
 
-		outputSymbolTable(*localTable);
+		//outputSymbolTable(*localTable);
 		
 		int index = 0;
 		do {
@@ -1368,6 +1370,25 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 						#endif	
 						StackDispose(&stack);
 						print_error(ESEM_DEF, token.line);				
+					}
+					// string + - * / musi hodit ESEM_TYP
+					if (prevTok == PString && 
+						(tokterm == PPlus || tokterm == PMinus || tokterm == PMul || tokterm == PDiv))
+					{
+						#ifdef DEBUG
+							printf("---String + - * /----:\n");
+						#endif	
+						StackDispose(&stack);
+						print_error(ESEM_TYP, token.line);				
+					}
+					else if (tokterm == PString && 
+						(prevTok == PPlus || prevTok == PMinus || prevTok == PMul || prevTok == PDiv))
+					{
+						#ifdef DEBUG
+							printf("---String + - * /----:\n");
+						#endif	
+						StackDispose(&stack);
+						print_error(ESEM_TYP, token.line);				
 					}
 
 					#ifdef DEBUG
@@ -1646,6 +1667,26 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 						StackDispose(&stack);
 						print_error(ESEM_DEF, token.line);				
 					}
+					// string + - * / musi hodit ESEM_TYP
+					if (prevTok == PString && 
+						(tokterm == PPlus || tokterm == PMinus || tokterm == PMul || tokterm == PDiv))
+					{
+						#ifdef DEBUG
+							printf("---String + - * /----:\n");
+						#endif	
+						StackDispose(&stack);
+						print_error(ESEM_TYP, token.line);				
+					}
+					else if (tokterm == PString && 
+						(prevTok == PPlus || prevTok == PMinus || prevTok == PMul || prevTok == PDiv))
+					{
+						#ifdef DEBUG
+							printf("---String + - * /----:\n");
+						#endif	
+						StackDispose(&stack);
+						print_error(ESEM_TYP, token.line);				
+					}
+
 					#ifdef DEBUG
 					fprintf(stderr, "Chyba vyrazu.\n");
 					#endif
