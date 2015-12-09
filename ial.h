@@ -80,6 +80,7 @@ void htDelete (tHTable* ptrht, char *key);
 void htClearAll (tHTable* ptrht);
 void arraySearch(int search_pole[], char *search_str, int search_length);
 void arrayAscii(int ascii_pole[], char *str, int length);
+void outputSymbolTable(tHTable* ptrht);
 
 
 // vestavene funkce

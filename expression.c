@@ -14,12 +14,12 @@
 #include "error.h"
 #include "parser.h"
 #include "expression.h"
+#include "ial.h"
 
 #define DEBUG 1
 
 int *counteerVar;	// sluzi pri tvorbe pomocnych premennych
 Tstack stack;
-//char *myAttr;
 
 /**
  * Precedencni tabulka.
@@ -220,9 +220,9 @@ TError StackPush(int tokterm, char *attr)
 	tempPtr->data = malloc(sizeof(char)*strlen(attr));
 
 	tempPtr->termType = tokterm;
-	#ifdef DEBUG
-		printf("StackPush - vkladam termType: %d\n", tempPtr->termType);
-	#endif
+	// #ifdef DEBUG
+	// 	printf("StackPush - vkladam termType: %d\n", tempPtr->termType);
+	// #endif
 	if (tokterm == PInt)
 	{ // jedna se o integer
 		tempPtr->idType = Tint;
@@ -260,12 +260,6 @@ TError StackPush(int tokterm, char *attr)
 		tempPtr->Rptr = NULL;
 		stack.top = tempPtr;
 		stack.top->data = tempPtr->data; //////
-		#ifdef DEBUG
-			printf("--StackPush- -termType- -%d- -idType- -%d- -data- \"%s\"--|\n"
-				"--StackPush- -top->termType- -%d- -top->idType- -%d- -top->data- \"%s\"--|\n", 
-				tempPtr->termType, tempPtr->idType, tempPtr->data,
-				stack.top->termType, stack.top->idType, stack.top->data);
-		#endif
 	}
 	else
 	{
@@ -273,13 +267,7 @@ TError StackPush(int tokterm, char *attr)
 		tempPtr->Lptr = stack.top;
 		tempPtr->Rptr = NULL;
 		stack.top = tempPtr;
-		stack.top->data = tempPtr->data; //////
-		#ifdef DEBUG
-			printf("--StackPush- -termType- -%d- -idType- -%d- -data- \"%s\"--|\n"
-				"--StackPush- -top->termType- -%d- -top->idType- -%d- -top->data- \"%s\"--|\n", 
-				tempPtr->termType, tempPtr->idType, tempPtr->data,
-				stack.top->termType, stack.top->idType, stack.top->data);
-		#endif		
+		stack.top->data = tempPtr->data; //////	
 	}
 
 	error = ENOP;
@@ -297,9 +285,6 @@ TstackElemPtr StackTop()
 		printf("StackTop in progress.\n");
 	#endif
 
-	printf("|--!!!!!STACKTOP!!!!!!0!!!!!!!!-termType- -%d- -idType- -%d- -data- \"%s\"--|\n", 
-			stack.top->termType, stack.top->idType, stack.top->data);
-
 	TstackElemPtr tempPtr = NULL;
 	if ((tempPtr = malloc(sizeof(struct TstackElem))) == NULL)
 	{
@@ -309,15 +294,10 @@ TstackElemPtr StackTop()
 
 	tempPtr->data = malloc(sizeof(char)*strlen(stack.top->data));
 
-	tempPtr = stack.top;
-
 	// terminal je hned na vrcholu zasobniku
 	if (stack.top->termType <= PDollar)
 	{
-		printf("|--!!!!!STACKTOP!!!!!!1!!!!!!!!-termType- -%d- -idType- -%d- -data- \"%s\"--|\n", 
-			stack.top->termType, stack.top->idType, stack.top->data);
-
-		return tempPtr;
+		return stack.top;
 	}
 	// terminal neni na vrcholu zasobniku a existuje prvek vlevo
 	else if (stack.top->Lptr != NULL)
@@ -325,17 +305,11 @@ TstackElemPtr StackTop()
 		// prvek pod vrcholem obsahuje terminal
 		if (stack.top->Lptr->termType <= PDollar)
 		{
-			printf("|--!!!!!STACKTOP!!!!!!!2!!!!!!!-termType- -%d- -idType- -%d- -data- \"%s\"--|\n", 
-				stack.top->termType, stack.top->idType, stack.top->data);
-
 			return stack.top->Lptr;
 		}
 		// vytvorim pomocny prvek (2. ze shora) a hledam terminal hloubeji
 		else
 		{
-			printf("|--!!!!!STACKTOP!!!!!!!3!!!!!!!-termType- -%d- -idType- -%d- -data- \"%s\"--|\n", 
-			stack.top->termType, stack.top->idType, stack.top->data);
-
 			tempPtr = stack.top->Lptr;
 			tempPtr->Lptr = stack.top->Lptr->Lptr;
 			tempPtr->Rptr = stack.top;
@@ -427,10 +401,6 @@ TError StackShift(int tokterm, char *attr)
 	}
 
 	tempTop->Rptr = temp;
-
-	#ifdef DEBUG
-		printf("--StackShift--attr: %s.---\n", attr);
-	#endif
 
 	// pushnu token na zasobnik
 	if ((error = StackPush(tokterm, attr)) != ENOP)
@@ -557,6 +527,34 @@ TError findRule(ruleType rule)
 			 * @todo 3AC, Ilist
 			 */
 			
+			/**
+			 * kontrola typove kompatibility
+			 */
+			// string + cokoli jineho
+			if ((stack.top->idType == Tstring && stack.top->Lptr->Lptr->idType != Tstring) || 
+				(stack.top->idType != Tstring && stack.top->Lptr->Lptr->idType == Tstring))
+			{
+				print_error(ESEM_TYP, token.line);
+			}
+			// int + double
+			else if (stack.top->idType == Tint && stack.top->Lptr->Lptr->idType == Tdouble)
+			{
+				#ifdef DEBUG
+				printf("--Op1 == int, op2 == double.--\n");
+				#endif
+			}
+			// double + int
+			else if (stack.top->idType == Tdouble && stack.top->Lptr->Lptr->idType == Tint)
+			{
+				#ifdef DEBUG
+				printf("--Op1 == double, op2 == int.--\n");
+				#endif
+			}
+			else 
+			{
+				printf("###############Chyba Nonterminalu - kompatibilita?.\n");
+			}
+			
 			// nejdrive se zbavim: < E + E (4x pop)
 			StackPop();			
 			StackPop();			
@@ -594,7 +592,35 @@ TError findRule(ruleType rule)
 
 			/**
 			 * @todo 3AC, Ilist
-			 */			
+			 */	
+			
+			/**
+			 * kontrola typove kompatibility
+			 */
+			// string - cokoli jineho
+			if ((stack.top->idType == Tstring && stack.top->Lptr->Lptr->idType != Tstring) || 
+				(stack.top->idType != Tstring && stack.top->Lptr->Lptr->idType == Tstring))
+			{
+				print_error(ESEM_TYP, token.line);
+			}
+			// int - double
+			else if (stack.top->idType == Tint && stack.top->Lptr->Lptr->idType == Tdouble)
+			{
+				#ifdef DEBUG
+				printf("--Op1 == int, op2 == double.--\n");
+				#endif
+			}
+			// double - int
+			else if (stack.top->idType == Tdouble && stack.top->Lptr->Lptr->idType == Tint)
+			{
+				#ifdef DEBUG
+				printf("--Op1 == double, op2 == int.--\n");
+				#endif
+			}
+			else 
+			{
+				printf("###############Chyba Nonterminalu - kompatibilita?.\n");
+			}		
 			
 			// nejdrive se zbavim: < E - E (4x pop)
 			StackPop();
@@ -632,7 +658,35 @@ TError findRule(ruleType rule)
 
 			/**
 			 * @todo 3AC, Ilist
-			 */			
+			 */		
+			
+			/**
+			 * kontrola typove kompatibility
+			 */
+			// string * cokoli jineho
+			if ((stack.top->idType == Tstring && stack.top->Lptr->Lptr->idType != Tstring) || 
+				(stack.top->idType != Tstring && stack.top->Lptr->Lptr->idType == Tstring))
+			{
+				print_error(ESEM_TYP, token.line);
+			}
+			// int * double
+			else if (stack.top->idType == Tint && stack.top->Lptr->Lptr->idType == Tdouble)
+			{
+				#ifdef DEBUG
+				printf("--Op1 == int, op2 == double.--\n");
+				#endif
+			}
+			// double * int
+			else if (stack.top->idType == Tdouble && stack.top->Lptr->Lptr->idType == Tint)
+			{
+				#ifdef DEBUG
+				printf("--Op1 == double, op2 == int.--\n");
+				#endif
+			}
+			else 
+			{
+				printf("###############Chyba Nonterminalu - kompatibilita?.\n");
+			}	
 			
 			// nejdrive se zbavim: < E * E (4x pop)
 			StackPop();
@@ -672,6 +726,44 @@ TError findRule(ruleType rule)
 			 * @todo 3AC, Ilist
 			 */
 			
+			/**
+			 * kontrola typove kompatibility
+			 */
+			// string / cokoli jineho
+			if ((stack.top->idType == Tstring && stack.top->Lptr->Lptr->idType != Tstring) || 
+				(stack.top->idType != Tstring && stack.top->Lptr->Lptr->idType == Tstring))
+			{
+				print_error(ESEM_TYP, token.line);
+			}
+			// int / double
+			else if (stack.top->idType == Tint && stack.top->Lptr->Lptr->idType == Tdouble)
+			{
+				#ifdef DEBUG
+				printf("--Op1 == int, op2 == double.--\n");
+				#endif
+
+				// if (/* condition */) // OP2 nesmi byt 0 !!!!!!! @TODO
+				// {
+				// 	/* code */
+				// }
+			}
+			// double / int
+			else if (stack.top->idType == Tdouble && stack.top->Lptr->Lptr->idType == Tint)
+			{
+				#ifdef DEBUG
+				printf("--Op1 == double, op2 == int.--\n");
+				#endif
+
+				// if (/* condition */) // OP2 nesmi byt 0 !!!!!!! @TODO
+				// {
+				// 	/* code */
+				// }
+			}
+			else 
+			{
+				printf("###############Chyba Nonterminalu - kompatibilita?.\n");
+			}
+			
 			// nejdrive se zbavim: < E / E (4x pop)
 			StackPop();
 			StackPop();
@@ -710,6 +802,34 @@ TError findRule(ruleType rule)
 			 * @todo 3AC, Ilist
 			 */
 			
+			/**
+			 * kontrola typove kompatibility @TODO - pro porovnavani toho bude vic !!!!!!!!!
+			 */
+			// // string * cokoli jineho
+			// if ((stack.top->idType == Tstring && stack.top->Lptr->Lptr->idType != Tstring) || 
+			// 	(stack.top->idType != Tstring && stack.top->Lptr->Lptr->idType == Tstring))
+			// {
+			// 	print_error(ESEM_TYP, token.line);
+			// }
+			// // int * double
+			// else if (stack.top->idType == Tint && stack.top->Lptr->Lptr->idType == Tdouble)
+			// {
+			// 	#ifdef DEBUG
+			// 	printf("--Op1 == int, op2 == double.--\n");
+			// 	#endif
+			// }
+			// // double * int
+			// else if (stack.top->idType == Tdouble && stack.top->Lptr->Lptr->idType == Tint)
+			// {
+			// 	#ifdef DEBUG
+			// 	printf("--Op1 == double, op2 == int.--\n");
+			// 	#endif
+			// }
+			// else 
+			// {
+			// 	printf("###############Chyba Nonterminalu - kompatibilita?.\n");
+			// }	
+			
 			// nejdrive se zbavim: < E (<, >, <=, >=) E (4x pop)
 			StackPop();
 			StackPop();
@@ -747,6 +867,34 @@ TError findRule(ruleType rule)
 			/**
 			 * @todo 3AC, Ilist
 			 */
+			
+			/**
+			 * kontrola typove kompatibility @TODO - pro porovnavani toho bude vic !!!!!!!!!
+			 */
+			// // string * cokoli jineho
+			// if ((stack.top->idType == Tstring && stack.top->Lptr->Lptr->idType != Tstring) || 
+			// 	(stack.top->idType != Tstring && stack.top->Lptr->Lptr->idType == Tstring))
+			// {
+			// 	print_error(ESEM_TYP, token.line);
+			// }
+			// // int * double
+			// else if (stack.top->idType == Tint && stack.top->Lptr->Lptr->idType == Tdouble)
+			// {
+			// 	#ifdef DEBUG
+			// 	printf("--Op1 == int, op2 == double.--\n");
+			// 	#endif
+			// }
+			// // double * int
+			// else if (stack.top->idType == Tdouble && stack.top->Lptr->Lptr->idType == Tint)
+			// {
+			// 	#ifdef DEBUG
+			// 	printf("--Op1 == double, op2 == int.--\n");
+			// 	#endif
+			// }
+			// else 
+			// {
+			// 	printf("###############Chyba Nonterminalu - kompatibilita?.\n");
+			// }
 			
 			// nejdrive se zbavim: < E (==, !=) E (4x pop)
 			StackPop();
@@ -959,7 +1107,6 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 	int tokterm = 0; // pro ukladani terminalu z tokenu
 	tHTItem *tempItem = NULL;
 	char *myAttr = "*UNDEF*";
-	//outputSymbolTable(*localTable);
 	
 	#ifdef DEBUG
 		printf("expr\n");
@@ -997,6 +1144,8 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 		#ifdef DEBUG
 			printf("################## Resim vyraz ukonceny strednikem. ###################\n");
 		#endif
+
+		outputSymbolTable(*localTable);
 		
 		int index = 0;
 		do {
@@ -1080,10 +1229,6 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 			#ifdef DEBUG
 				printf("----- ---- --- --%d.-- Cyklus while do-- --- ---- -----\n", index);
 				whatInStacks();
-				#ifdef DEBUG
-					printf("--top->termType- -%d- -top->idType- -%d- -top->data- \"%s\"--|\n", 
-						stack.top->termType, stack.top->idType, stack.top->data);
-				#endif
 				printf("-------------------------------------------------------\n");
 			#endif
 
@@ -1095,9 +1240,8 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 				case equal:
 					#ifdef DEBUG
 						printf("Case EQUAL.\n");
-						printf("Attr: %s\n", strGetStr(attr));
 					#endif
-					if ((error = StackPush(tokterm, strGetStr(attr))) != ENOP)
+					if ((error = StackPush(tokterm, myAttr)) != ENOP)
 					{
 						#ifdef DEBUG
 						fprintf(stderr, "Chyba pri StackPush.\n");
@@ -1110,8 +1254,6 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 				case less:
 					#ifdef DEBUG
 						printf("Case LESS.\n");
-						printf("Attr: %s\n", myAttr);
-						printf("!...attr: %s.\n", myAttr);
 					#endif
 					if ((error = StackShift(tokterm, myAttr)) != ENOP)
 					{
@@ -1121,14 +1263,11 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 						StackDispose(&stack);
 						return error;
 					}
-					printf("GET NEXT TOKEN\n");
 					getNextToken(input, attr);
 				break;
 				case great:
 					#ifdef DEBUG
 						printf("Case GREAT.\n");
-						printf("Attr: %s\n", myAttr);
-						printf("!...attr: %s.\n", myAttr);
 					#endif
 
 					switch(tempStack->termType)
@@ -1268,8 +1407,6 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 				{
 					printf("-NE-KONCIM!! protoze stack.top->term: %d a akt. token: %d\n", 
 						tempStack->termType, tokToTerm(token.type));
-					// whatInStacks();
-					// printf("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n");
 				}
 				printf("-------------------------------------------------------\n");
 			#endif
@@ -1301,6 +1438,8 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 				StackDispose(&stack);
 				return error;
 			}
+
+			strcpy(myAttr, strGetStr(attr));
 
 			if (tokterm != PDollar)
 			{
@@ -1384,7 +1523,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 						printf("Case EQUAL.\n");
 						printf("Attr: %s\n", strGetStr(attr));
 					#endif
-					if ((error = StackPush(tokterm, strGetStr(attr))) != ENOP)
+					if ((error = StackPush(tokterm, myAttr)) != ENOP)
 					{
 						#ifdef DEBUG
 						fprintf(stderr, "Chyba pri StackPush.\n");
@@ -1399,7 +1538,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 						printf("Case LESS.\n");
 						printf("Attr: %s\n", strGetStr(attr));
 					#endif
-					if ((error = StackShift(tokterm, strGetStr(attr))) != ENOP)
+					if ((error = StackShift(tokterm, myAttr)) != ENOP)
 					{
 						#ifdef DEBUG
 						fprintf(stderr, "Chyba pri StackShift.\n");
@@ -1552,7 +1691,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 						tempStack->termType, tokterm);
 				}
 				printf("-------------------------------------------------------\n");
-				printf("############# COUTNER STATE: %d #############\n", counter);
+				printf("####### COUTNER STATE: %d #######\n", counter);
 			#endif
 
 			prevTok = tokterm;

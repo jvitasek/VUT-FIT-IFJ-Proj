@@ -653,3 +653,28 @@ string sort(string s)
 	s = toString(temp);
 	return s;
 }
+
+/**
+ * [outputSymbolTable description]
+ * @param ptrht [description]
+ */
+void outputSymbolTable(tHTable* ptrht)
+{
+	printf ("------------HASH TABLE--------------\n");
+	for ( int i = 0; i < HTSIZE; i++ ) {
+		printf ("%i:", i);
+		tHTItem *ptr = malloc(sizeof(tHTItem));
+		ptr = (*ptrht)[i];
+		//strcpy(ptr, (*ptrht)[i]);
+		
+		while ( ptr != NULL ) {
+			printf (" (%s, dT: %d, tU: %d, vT: %d, oP: %d, isD: %d, sc: %d)", 
+				ptr->key, ptr->data.type, ptr->data.timesUsed, ptr->data.varType, ptr->data.orderParams, 
+				ptr->data.isDefined, ptr->data.scope);
+			ptr = ptr->ptrnext;
+			//strcpy(ptr, ptr->ptrnext);
+		}
+		printf ("\n");
+	}
+	printf ("------------------------------------\n");
+}
