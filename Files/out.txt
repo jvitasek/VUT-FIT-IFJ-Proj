@@ -1,0 +1,26 @@
+void outputSymbolTable(tHTable* ptrht)
+{
+	if((*ptrht) != NULL)
+	{
+		tHTItem *ptr = NULL;
+		printf ("------------HASH TABLE--------------\n");
+		for ( int i=0; i<HTSIZE; i++ )
+		{
+			printf ("%i:",i);
+			if((*ptrht)[i] != NULL)
+			{
+				while ( (*ptrht)[i] != NULL )
+				{
+					ptr = (*ptrht)[i];
+					printf (" (%s,%d,%d)", ptr->key, ptr->data.type, ptr->data.timesUsed);
+					(*ptrht)[i] = (*ptrht)[i]->ptrnext;
+				}
+			}
+			printf ("\n");
+		}
+		printf ("------------------------------------\n");
+	}else
+	{
+		printf("Tabulka NULL\n");
+	}
+}
