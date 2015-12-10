@@ -1047,7 +1047,7 @@ TError findRule(ruleType rule)
 			}
 			*expRes = htSearch(*locTable,newVar.str);
 			// TODO vygenerovat odpovedajucu instrukciu
-			outputSymbolTable(*locTable);
+
 
 			// nejdrive se zbavim: < i (2x pop)
 			StackPop();			

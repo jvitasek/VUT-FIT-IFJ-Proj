@@ -9,7 +9,7 @@
  */
 
 //#define DEBUG 1
-#define DEBUG_SEM 0
+#define DEBUG_SEM 1
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -572,8 +572,8 @@ TError stmt(FILE *input)
 		{
 			getNextToken(input, &attr);
 			error = expr(input, &attr, 1, &counterVar, &commTable, &exprRes);
-			//outputSymbolTable(commTable);
 			#ifdef DEBUG
+			outputSymbolTable(commTable);
 			fprintf(stderr, "stmt: expr vratilo: %d\n", error);
 			fprintf(stderr, "### token po expr: %d\n", token.type);
 			#endif
@@ -1486,8 +1486,8 @@ TError init(FILE *input)
 		error = expr(input, &attr, 0, &counterVar, &commTable, &exprRes);
 		idAssign->data.value.ptrTS = exprRes;
 		exprRes = NULL;
-		//outputSymbolTable(commTable);
 		#ifdef DEBUG
+		outputSymbolTable(commTable);
 		fprintf(stderr, "init: expr vratilo: %d\n", error);
 		#endif
 		if(error == ENOP)
