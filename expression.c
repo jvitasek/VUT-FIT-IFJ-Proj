@@ -16,7 +16,7 @@
 #include "expression.h"
 #include "ial.h"
 
-#define DEBUG 1
+//#define DEBUG 1
 
 int *counteerVar;	// sluzi pri tvorbe pomocnych premennych
 Tstack stack;
@@ -40,10 +40,10 @@ int preceden_tab[19][19] = {
 	{great, great, great, great, great, great, great, great, great, great, empty, empty, empty, empty, empty, empty, great, great, great},	// double
 	{great, great, great, great, great, great, great, great, great, great, empty, empty, empty, empty, empty, empty, great, great, great},	// int
 	{great, great, great, great, great, great, great, great, great, great, empty, empty, empty, empty, empty, empty, great, great, great},	// id
-	{empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, less, less, less, empty, empty, equal, empty, empty, empty},	// f
+	{empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, equal, empty, empty, empty},	// f
 	{less, less, less, less, less, less, less, less, less, less, less, less, less, less, less, less, equal, equal, empty},				// (
-	{great, great, great, great, great, great, great, great, great, great, less, less, less, empty, empty, empty, great, empty, great},	// )
-	{empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, less, less, less, less, less, empty, equal, equal, empty},	// ,
+	{great, great, great, great, great, great, great, great, great, great, empty, empty, empty, empty, empty, empty, great, great, great},	// )
+	{less, less, less, less, less, less, less, less, less, less, less, less, less, less, less, less, equal, equal, empty},	// ,
 	{less, less, less, less, less, less, less, less, less, less, less, less, less, less, less, less, less, empty, empty}				// $
 };
 
