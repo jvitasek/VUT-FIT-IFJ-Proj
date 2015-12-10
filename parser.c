@@ -539,7 +539,19 @@ TError stmt(FILE *input)
 				#endif
 				if(error == ENOP)
 				{
-					return ENOP;
+					getNextToken(input, &attr);
+					error = if_n(input);
+					#ifdef DEBUG
+					fprintf(stderr, "stmt: if_n: %d\n", error);
+					#endif
+					if(error == ENOP)
+					{
+						return ENOP;
+					}
+					else if(error == ESYN)
+					{
+						return error;
+					}
 				}
 				else if(error == ESYN)
 				{

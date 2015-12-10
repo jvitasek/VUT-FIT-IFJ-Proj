@@ -16,7 +16,7 @@
 #include "expression.h"
 #include "ial.h"
 
-#define DEBUG 1
+//#define DEBUG 1
 
 int *counteerVar;	// sluzi pri tvorbe pomocnych premennych
 Tstack stack;
