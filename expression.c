@@ -68,7 +68,6 @@ void generateVariable(string *var, int *counter)
 		i = i / 10;
 	}
 	(*counter)++;
-	printf("NEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEWAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAR %s\n",var->str);
 }
 
 /**
@@ -133,7 +132,6 @@ TError StackInit(Tstack *stack)
 		tempPtr->termType = PDollar;
 		tempPtr->idType = Tother;
 		tempPtr->data = "PDollar";
-		//tempPtr->dataTS = null;
 		stack->first = tempPtr;
 		stack->top = tempPtr;
 	}
@@ -1049,7 +1047,7 @@ TError findRule(ruleType rule)
 			}
 			*expRes = htSearch(*locTable,newVar.str);
 			// TODO vygenerovat odpovedajucu instrukciu
-
+			outputSymbolTable(*locTable);
 
 			// nejdrive se zbavim: < i (2x pop)
 			StackPop();			
