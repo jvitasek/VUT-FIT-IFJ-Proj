@@ -19,6 +19,8 @@
 //#define DEBUG 1
 
 int *counteerVar;	// sluzi pri tvorbe pomocnych premennych
+tHTable **locTable;
+tHTItem **expRes;
 Tstack stack;
 
 /**
@@ -46,6 +48,46 @@ int preceden_tab[19][19] = {
 	{less, less, less, less, less, less, less, less, less, less, less, less, less, less, less, less, equal, equal, empty},	// ,
 	{less, less, less, less, less, less, less, less, less, less, less, less, less, less, less, less, less, empty, empty}				// $
 };
+
+
+/**
+ * Funkcia, ktora nam generuje pomocne premenne $x,
+ * do ktorych sa budu ukladat medzivypocty pri generovani 3AK.
+ * 
+ * @param	var	 	String vytvaranej premennej.
+ * @param 	counter	Pocitadlo potrebne pri tvorbe pomocnych premennych.
+ */
+void generateVariable(string *var, int *counter)
+{
+	strClear(var);
+	strAppend(var,'$');
+	int i = *counter;
+	while(i != 0)
+	{
+		strAppend(var, (char)(i % 10 + '0'));
+		i = i / 10;
+	}
+	(*counter)++;
+	printf("NEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEWAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAR %s\n",var->str);
+}
+
+/**
+ * Funkcia, ktora vytvori a vlozi novu instrukciu do zoznamu instrukcii.
+ * 
+ * @param  instType  Typ danej instrukcie.
+ * @param  op1		 Operand1 (ukazatel do tabulky symbolov)
+ * @param  op2		 Operand2 (ukazatel do tabulky sumbolov)
+ * @param  res		 Vysledok
+ */
+/*void generateInst(tInstCode instType, void *op1, void *op2, void *res)
+{
+	tInst inst;
+	inst.instType = instType;
+	inst.op1 = op1;
+	inst.op2 = op2;
+	inst.res = res;
+	listInsertLast(list,inst);	// list instrukci trba vytvorit v parsru
+}*/
 
 /**
  * Inicializace zasobniku.
@@ -91,6 +133,7 @@ TError StackInit(Tstack *stack)
 		tempPtr->termType = PDollar;
 		tempPtr->idType = Tother;
 		tempPtr->data = "PDollar";
+		//tempPtr->dataTS = null;
 		stack->first = tempPtr;
 		stack->top = tempPtr;
 	}
@@ -416,7 +459,7 @@ TError StackShift(int tokterm, char *attr)
 	return error;
 }
 
-#ifdef DEBUG
+//#ifdef DEBUG
 /**
  * Pomocna funkce pro vypis celeho zasobniku.
  * @param stack
@@ -443,13 +486,13 @@ void whatInStacks()
 	while (temp->Lptr != NULL)
 	{
 		temp = temp->Lptr;
-		printf("|--%d.-\t\t-termType- -%d-\t-idType- -%d-\t-data- \"%s\"--|\n", 
+		printf("|--%d.-\t\t-termType- -%d-\t-idType- -%d-\t-data- \"%p\"--|\n", 
 			i, temp->termType, temp->idType, temp->data);
 		i++;
 	}
 
 }
-#endif
+//#endif
 
 /**
 * Funkce vraci index do tabulky
@@ -979,6 +1022,34 @@ TError findRule(ruleType rule)
 			tempPtr->termType = PNonTerm;
 			tempPtr->idType = stack.top->idType;
 			tempPtr->data = stack.top->data;
+			
+			//tu musim vygenerovat prvu instrukciu a zaroven vlozit do TS tu pomocnu premennu
+			tData data;
+			string newVar;
+			strInit(&newVar);
+			if(tempPtr->idType == 2)
+			{
+				generateVariable(&newVar,counteerVar);
+				data.varType = T_Integ;
+				data.value.i = atoi(tempPtr->data);
+				htInsert(*locTable, newVar.str,data);
+
+			}else if(tempPtr->idType ==1)
+			{
+				generateVariable(&newVar,counteerVar);
+				data.varType = T_Doub;
+				data.value.d = atof(tempPtr->data);
+				htInsert(*locTable, newVar.str,data);
+			}else if(tempPtr->idType ==0)
+			{
+				generateVariable(&newVar,counteerVar);
+				data.varType = T_Str;
+				strcpy(data.value.str,tempPtr->data);
+				htInsert(*locTable, newVar.str,data);
+			}
+			*expRes = htSearch(*locTable,newVar.str);
+			// TODO vygenerovat odpovedajucu instrukciu
+
 
 			// nejdrive se zbavim: < i (2x pop)
 			StackPop();			
@@ -1065,43 +1136,6 @@ TError findRule(ruleType rule)
 	return error;
 }
 
-/**
- * Funkcia, ktora nam generuje pomocne premenne $x,
- * do ktorych sa budu ukladat medzivypocty pri generovani 3AK.
- * 
- * @param	var	 	String vytvaranej premennej.
- * @param 	counter	Pocitadlo potrebne pri tvorbe pomocnych premennych.
- */
-/*void generateVariable(string *var, int *counter)
-{
-	strClear(var);
-	strAppend(var,'$');
-	int i = *counter;
-	while(i != 0)
-	{
-		strAppend(var, (char)(i % 10 + '0'));
-		i = i / 10;
-	}
-	(*counter)++;
-}*/
-
-/**
- * Funkcia, ktora vytvori a vlozi novu instrukciu do zoznamu instrukcii.
- * 
- * @param  instType  Typ danej instrukcie.
- * @param  op1		 Operand1 (ukazatel do tabulky symbolov)
- * @param  op2		 Operand2 (ukazatel do tabulky sumbolov)
- * @param  res		 Vysledok
- */
-/*void generateInst(tInstCode instType, void *op1, void *op2, void *res)
-{
-	tInst inst;
-	inst.instType = instType;
-	inst.op1 = op1;
-	inst.op2 = op2;
-	inst.res = res;
-	listInsertLast(list,inst);	// list instrukci trba vytvorit v parsru
-}*/
 
 /**
  * Hlavni funkce vyrazu.
@@ -1110,8 +1144,10 @@ TError findRule(ruleType rule)
  * @param  count Pocitadlo potrebne pri tvorbe pomocnych premennych.
  * @return       Index do enumerace chyb.
  */
-TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **localTable)
+TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **localTable, tHTItem **exprRes)
 {
+	locTable = localTable;
+	expRes=exprRes;
 	counteerVar = count;
 	TError error = ENOTFOUND;
 	TstackElemPtr tempStack = NULL;

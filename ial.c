@@ -303,7 +303,7 @@ tHTItem* htSearchScope(tHTable* ptrht, char *key, int scope)
  * @param key   [description]
  * @param data  [description]
  */
-void htInsert(tHTable* ptrht, char *key, tData data)
+void htInsert(tHTable* ptrht, char *key,tData data)
 {
 	if(ptrht) // it there is something to work with
 	{
@@ -320,6 +320,7 @@ void htInsert(tHTable* ptrht, char *key, tData data)
 				{
 					ntemp->data.timesUsed = data.timesUsed; // insert the data
 					ntemp->data.type = data.type;
+					ntemp->data.value = data.value;
 					ntemp->data.varType = data.varType;
 					ntemp->data.orderParams = data.orderParams;
 					ntemp->data.isDefined = data.isDefined;
@@ -338,6 +339,7 @@ void htInsert(tHTable* ptrht, char *key, tData data)
 					return; // end here
 				temp->data.timesUsed = data.timesUsed;
 				temp->data.type = data.type;
+				temp->data.value = data.value;
 				temp->data.varType = data.varType;
 				temp->data.orderParams = data.orderParams;
 				temp->data.isDefined = data.isDefined;
@@ -356,6 +358,7 @@ void htInsert(tHTable* ptrht, char *key, tData data)
 				
 				(*ptrht)[rkey]->data.timesUsed = data.timesUsed; // passing the data specified
 				(*ptrht)[rkey]->data.type = data.type;
+				(*ptrht)[rkey]->data.value = data.value;
 				(*ptrht)[rkey]->data.varType = data.varType;
 				(*ptrht)[rkey]->data.orderParams = data.orderParams;
 				(*ptrht)[rkey]->data.isDefined = data.isDefined;
@@ -668,9 +671,50 @@ void outputSymbolTable(tHTable* ptrht)
 		//strcpy(ptr, (*ptrht)[i]);
 		
 		while ( ptr != NULL ) {
-			printf (" (%s, dT: %d, tU: %d, vT: %d, oP: %d, isD: %d, sc: %d)", 
-				ptr->key, ptr->data.type, ptr->data.timesUsed, ptr->data.varType, ptr->data.orderParams, 
-				ptr->data.isDefined, ptr->data.scope);
+			if(ptr->data.varType == T_Integ)
+			{
+				printf (" (%s, dT: %d, tU: %d, vT: %d, oP: %d, isD: %d, sc: %d, value: %d)", 
+					ptr->key, ptr->data.type, ptr->data.timesUsed, ptr->data.varType, ptr->data.orderParams, 
+					ptr->data.isDefined, ptr->data.scope,ptr->data.value.i);
+			}else if(ptr->data.varType == T_Doub)
+			{
+				printf (" (%s, dT: %d, tU: %d, vT: %d, oP: %d, isD: %d, sc: %d, value: %f)", 
+					ptr->key, ptr->data.type, ptr->data.timesUsed, ptr->data.varType, ptr->data.orderParams, 
+					ptr->data.isDefined, ptr->data.scope,ptr->data.value.d);
+			}else if(ptr->data.varType == T_Str)
+			{
+				printf (" (%s, dT: %d, tU: %d, vT: %d, oP: %d, isD: %d, sc: %d, value: %s)", 
+					ptr->key, ptr->data.type, ptr->data.timesUsed, ptr->data.varType, ptr->data.orderParams, 
+					ptr->data.isDefined, ptr->data.scope,ptr->data.value.str);
+			}else
+			{
+				tHTItem *pom = ptr->data.value.ptrTS;
+				if(pom != NULL)
+				{
+					if(pom->data.varType == T_Integ)
+					{
+						printf (" (%s, dT: %d, tU: %d, vT: %d, oP: %d, isD: %d, sc: %d, ptrTS: %p, ptrTSvalue: %d)", 
+							ptr->key, ptr->data.type, ptr->data.timesUsed, ptr->data.varType, ptr->data.orderParams, 
+							ptr->data.isDefined, ptr->data.scope,ptr->data.value.ptrTS, pom->data.value.i);
+					}else if(pom->data.varType == T_Doub)
+					{
+						printf (" (%s, dT: %d, tU: %d, vT: %d, oP: %d, isD: %d, sc: %d, ptrTS: %p, ptrTSvalue: %f)", 
+							ptr->key, ptr->data.type, ptr->data.timesUsed, ptr->data.varType, ptr->data.orderParams, 
+							ptr->data.isDefined, ptr->data.scope,ptr->data.value.ptrTS, pom->data.value.d);
+					}else if(pom->data.varType == T_Str)
+					{
+						printf (" (%s, dT: %d, tU: %d, vT: %d, oP: %d, isD: %d, sc: %d, ptrTS: %p, ptrTSvalue: %s)", 
+							ptr->key, ptr->data.type, ptr->data.timesUsed, ptr->data.varType, ptr->data.orderParams, 
+							ptr->data.isDefined, ptr->data.scope,ptr->data.value.ptrTS, pom->data.value.str);
+					}
+				}else
+				{
+					printf (" (%s, dT: %d, tU: %d, vT: %d, oP: %d, isD: %d, sc: %d, ptrTS: %p, ptrTSvalue: %p)", 
+						ptr->key, ptr->data.type, ptr->data.timesUsed, ptr->data.varType, ptr->data.orderParams, 
+						ptr->data.isDefined, ptr->data.scope,ptr->data.value.ptrTS,pom);
+				}
+			}
+			
 			ptr = ptr->ptrnext;
 			//strcpy(ptr, ptr->ptrnext);
 		}
