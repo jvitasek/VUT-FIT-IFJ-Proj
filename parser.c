@@ -25,6 +25,8 @@ int counterVar = 1;	// globalna premenna, ktora sluzi pri tvorbe pomocnych preme
 tHTable *commTable;
 tHTable *funcTable;
 tHTable *paraTable;
+tHTItem *idAssign = NULL;
+tHTItem *exprRes = NULL;
 stack tableStack;
 int currScope;
 int currOrder;
@@ -238,6 +240,7 @@ TError func(FILE *input)
 					data.type = tempData->type;
 					data.timesUsed = tempData->timesUsed + 1;
 					data.scope = -1;
+					data.value.ptrTS = NULL;
 					htInsert(funcTable, strGetStr(&attr), data);
 					#ifdef DEBUG_SEM
 					fprintf(stderr, "VKLADAM %s\n", strGetStr(&attr));
@@ -261,6 +264,7 @@ TError func(FILE *input)
 					data.type = FUNC;
 					data.timesUsed = 0;
 					data.scope = -1;
+					data.value.ptrTS = NULL;
 					htInsert(funcTable, strGetStr(&attr), data);
 					#ifdef DEBUG_SEM
 					fprintf(stderr, "VKLADAM %s\n", strGetStr(&attr));
@@ -525,7 +529,9 @@ TError stmt(FILE *input)
 		if(token.type == T_LeftParenthesis)
 		{
 			getNextToken(input, &attr);
-			error = expr(input, &attr, 1, &counterVar, &commTable);
+			error = expr(input, &attr, 1, &counterVar, &commTable, &exprRes);
+			outputSymbolTable(commTable);
+
 			#ifdef DEBUG
 			fprintf(stderr, "stmt: expr vratilo: %d\n", error);
 			fprintf(stderr, "### token po expr: %d\n", token.type);
@@ -570,7 +576,7 @@ TError stmt(FILE *input)
 			if(error == ENOP)
 			{
 				getNextToken(input, &attr);
-				error = expr(input, &attr, 0, &counterVar, &commTable);
+				error = expr(input, &attr, 0, &counterVar, &commTable, &exprRes);
 				#ifdef DEBUG
 				fprintf(stderr, "stmt: expr vratilo: %d\n", error);
 				#endif
@@ -766,6 +772,7 @@ TError stmt(FILE *input)
 			print_error(ESEM_DEF, token.line);
 			exit(ESEM_DEF);
 		}
+		idAssign = htSearch(commTable,strGetStr(&attr));
 		currFunc = malloc(sizeof(char)*strlen(strGetStr(&attr)));
 		strcpy(currFunc, strGetStr(&attr));
 		// /SEMANTICKA ANALYZA
@@ -803,7 +810,8 @@ TError call_assign(FILE *input)
 	if(token.type == T_Assig)
 	{
 		getNextToken(input, &attr);
-		error = expr(input, &attr, 0, &counterVar, &commTable);
+		error = expr(input, &attr, 0, &counterVar, &commTable, &exprRes);
+		idAssign->data.value.ptrTS = exprRes;
 		#ifdef DEBUG
 		fprintf(stderr, "call_assign: expr vratilo: %d\n", error);
 		#endif
@@ -875,6 +883,7 @@ TError params(FILE *input)
 			data.timesUsed = 1;
 			data.orderParams = ++currOrder;
 			data.scope = 1; // nejnizsi scope nasledujiciho bloku
+			data.value.ptrTS = NULL;
 			htInsert(funcTable, strGetStr(&attr), data);
 			htInsert(paraTable, currFunc, data); // vkladani do tabulky parametru
 			#ifdef DEBUG_SEM
@@ -950,6 +959,7 @@ TError params_n(FILE *input)
 				data.orderParams = ++currOrder;
 				data.timesUsed = 1;
 				data.scope = 1; // nejnizsi scope nasledujiciho bloku
+				data.value.ptrTS = NULL;
 				htInsert(funcTable, strGetStr(&attr), data);
 				htInsert(paraTable, currFunc, data); // vkladani do tabulky parametru
 				#ifdef DEBUG_SEM
@@ -1008,7 +1018,7 @@ TError ret(FILE *input)
 	if(token.type == T_Return)
 	{
 		getNextToken(input, &attr);
-		error = expr(input, &attr, 0, &counterVar, &commTable);
+		error = expr(input, &attr, 0, &counterVar, &commTable, &exprRes);
 		#ifdef DEBUG
 		fprintf(stderr, "ret: expr vratilo: %d\n", error);
 		#endif
@@ -1241,7 +1251,8 @@ TError assign(FILE *input)
 		if(token.type == T_Assig)
 		{
 			getNextToken(input, &attr);
-			error = expr(input, &attr, 1, &counterVar, &commTable);
+			error = expr(input, &attr, 1, &counterVar, &commTable, &exprRes);
+			
 			#ifdef DEBUG
 			fprintf(stderr, "assign: expr vratilo: %d\n", error);
 			#endif
@@ -1308,7 +1319,9 @@ TError var_def(FILE *input)
 				data.scope = currScope;
 				data.timesUsed = 0;
 				data.varType = currType;
+				data.value.ptrTS = exprRes;
 				htInsert(commTable, strGetStr(&attr), data);
+				idAssign = htSearch(commTable,strGetStr(&attr));
 				#ifdef DEBUG_SEM
 				fprintf(stderr, "VKLADAM %s, SCOPE: %d, TYPE: %d, CURRENT: %d\n", strGetStr(&attr), data.scope, data.varType, currScope);
 				#endif
@@ -1360,6 +1373,7 @@ TError var_def(FILE *input)
 					data.type = VAR;
 					data.timesUsed = 0;
 					data.scope = currScope;
+					data.value.ptrTS = NULL;
 					htInsert(commTable, strGetStr(&attr), data);
 					#ifdef DEBUG_SEM
 					fprintf(stderr, "VKLADAM %s, SCOPE: %d\n", strGetStr(&attr), data.scope);
@@ -1408,7 +1422,10 @@ TError init(FILE *input)
 	if(token.type == T_Assig)
 	{
 		getNextToken(input, &attr);
-		error = expr(input, &attr, 0, &counterVar, &commTable);
+		error = expr(input, &attr, 0, &counterVar, &commTable, &exprRes);
+		idAssign->data.value.ptrTS = exprRes;
+		exprRes=NULL;
+		outputSymbolTable(commTable);
 		#ifdef DEBUG
 		fprintf(stderr, "init: expr vratilo: %d\n", error);
 		#endif

@@ -12,6 +12,7 @@
 
 #include "scanner.h"
 
+
 /**
  * -----------------------------------------------------------------------------
  * Razeni - algoritmus Heap sort
@@ -41,12 +42,20 @@ typedef enum symbolType {
 	FUNC
 } symbolType;
 
+union tValue {
+	int i;
+	double d;
+	char str[100];
+	void *ptrTS;
+};
+
 /**
  * typ obsahu
  */
 typedef struct tData {
 	symbolType type;
 	T_Type varType;
+	union tValue value;
 	int timesUsed;
 	int orderParams;
 	int isDefined;
@@ -72,7 +81,7 @@ void htInit (tHTable* ptrht);
 tHTItem* htSearch (tHTable* ptrht, char *key);
 tHTItem* htSearchOrder(tHTable* ptrht, char *key, int order);
 tHTItem* htSearchScope(tHTable* ptrht, char *key, int scope);
-void htInsert (tHTable* ptrht, char *key, tData data);
+void htInsert (tHTable* ptrht, char *key,tData data);
 tData* htRead (tHTable* ptrht, char *key);
 tData* htReadOrder(tHTable* ptrht, char *key, int order);
 tData* htReadScope(tHTable* ptrht, char *key, int scope);
