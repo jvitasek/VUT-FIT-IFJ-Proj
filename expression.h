@@ -82,7 +82,6 @@ typedef struct TstackElem {
 	PSymbols termType;
 	hashType idType;
 	char *data;
-	//tHTItem data;
 	
 } *TstackElemPtr;
 
