@@ -378,8 +378,34 @@ else
 	echo "Test 28: ERROR, EXPECTED 0, GOT $ret" >> test.out
 fi
 
+# deleni nulou
+echo "29:"
+./main tests/test29.cc
+ret=$?
+
+if [ "$ret" -eq 9 ];
+then
+	succ=$((succ+1))
+	echo "Test 29: SUCCESS" >> test.out
+else
+	echo "Test 29: ERROR, EXPECTED 9, GOT $ret" >> test.out
+fi
+
+# deleni nulou
+echo "30:"
+./main tests/test30.cc
+ret=$?
+
+if [ "$ret" -eq 9 ];
+then
+	succ=$((succ+1))
+	echo "Test 30: SUCCESS" >> test.out
+else
+	echo "Test 30: ERROR, EXPECTED 9, GOT $ret" >> test.out
+fi
+
 echo "#################"
-echo "SUCCESS: $succ/28"
+echo "SUCCESS: $succ/30"
 
 
 
