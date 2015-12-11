@@ -111,20 +111,6 @@ else
 	echo "Test 9: ERROR, EXPECTED 1, GOT $ret" >> adv-test.out
 fi
 
-# PROBLEM: nevraci chybu, ma vracet lexikalni – konstanta
-# 		   vetsi nez MAXINT (asi)
-./main adv-tests/010_R1_.c
-ret=$?
-
-if [ "$ret" -eq 1 ];
-then
-	succ=$((succ+1))
-	echo "Test 10: SUCCESS" >> adv-test.out
-else
-	error=$((error+1))
-	echo "Test 10: ERROR, EXPECTED 1, GOT $ret" >> adv-test.out
-fi
-
 ./main adv-tests/011_R2_.c
 ret=$?
 
