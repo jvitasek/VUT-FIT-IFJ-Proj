@@ -9,7 +9,7 @@
  */
 
 //#define DEBUG 1
-//#define DEBUG_SEM 1
+#define DEBUG_SEM 1
 //#define DEBUG_INST 1
 
 #include <stdio.h>
@@ -1878,7 +1878,18 @@ TError type()
 	// 10: <TYPE> -> string 
 	if(token.type == T_Double || token.type == T_String || token.type == T_Int)
 	{
-		currType = token.type;
+		if(token.type == T_Double)
+		{
+			currType = T_Doub;
+		}
+		else if(token.type == T_String)
+		{
+			currType = T_Str;
+		}
+		else if(token.type == T_Int)
+		{
+			currType = T_Integ;
+		}
 		return ENOP;
 	}
 	return error;
@@ -1897,18 +1908,7 @@ TError realtype()
 	// P: UNDEF
 	if(token.type == T_Doub || token.type == T_Str || token.type == T_Integ)
 	{
-		if(token.type == T_Doub)
-		{
-			currType = T_Double;
-		}
-		else if(token.type == T_Str)
-		{
-			currType = T_String;
-		}
-		else
-		{
-			currType = T_Int;
-		}
+		currType = token.type;
 		return ENOP;
 	}
 	return error;
