@@ -20,6 +20,8 @@
 #include "parser.h"
 #include "expression.h"
 #include "istack.h"
+#include "ilist.h"
+#include "stack.h"
 
 string attr; // vytvorime si string
 int counterVar = 1;	// globalna premenna, ktora sluzi pri tvorbe pomocnych premennych na medzivypocty
@@ -30,6 +32,27 @@ tHTItem *idAssign = NULL;
 tHTItem *exprRes = NULL;
 stack tableStack;
 tInstList List;	// zoznam instrukcii
+
+/**
+ * interpretacky promenny
+ */
+int currScope;
+tListOfInstr *list;
+union dat_typ_obsah unie;
+union dat_typ_obsah unie2;
+extern void *lastI;
+extern void *afterIf;
+extern void *behindFor;
+tStackP stackI;
+tStackP forstack;
+extern void *beforeFor;
+extern void *startLab = NULL;
+extern void *endOfMain = NULL;
+
+// n - jeste ne
+// a - prave se tam nachazim
+// y - uz jsem tam byl
+char *I_am_in= "n";
 
 /**
  * seznam vestavenych funkci
@@ -56,6 +79,35 @@ void get_next_token(FILE *input, string *attr)
 	{
 		print_error(ELEX, token.line);
 	}
+}
+
+/**
+ * Vlozi novou instrukci do seznamu instrukci
+ * @param instType [description]
+ * @param typ1     [description]
+ * @param op1      [description]
+ * @param typ2     [description]
+ * @param op2      [description]
+ * @param typ3     [description]
+ * @param op3      [description]
+ */
+void generateInstruction(tInstCode instType, TypeI typ1, union dat_typ_obsah *op1, TypeI typ2, union dat_typ_obsah *op2, TypeI typ3, union dat_typ_obsah *op3)
+{
+   tInst* I = malloc(sizeof(struct tInst));
+   I = malloc(sizeof(tInst));
+   I->op1 = malloc(sizeof(iOperand));
+   I->op2 = malloc(sizeof(iOperand));
+   I->res = malloc(sizeof(iOperand));
+   
+   I->instType = instType;
+  
+   I->op1->type = typ1;
+   I->op1->obsah = *op1;
+   I->op2->type = typ2;
+   I->op2->obsah = *op2;
+   I->res->type = typ3;
+
+   listInsertLast(list, *I);
 }
 
 /**
@@ -92,6 +144,8 @@ TError parse(FILE *input)
 	currScope = 0;
 	currOrder = 0;
 	currOrderTerm = 0;
+	SInitP(&stackI);
+	SInitP(&forstack);
 
 	/**
 	 * inicializace stringu s nazvem tokenu
@@ -101,6 +155,8 @@ TError parse(FILE *input)
 	/**
 	 * inicializace hlavni tabulky symbolu
 	 */
+	init_table(&commTable);
+	init_table(&funcTable);
 	init_table(&commTable);
 	init_table(&funcTable);
 	init_table(&paraTable);
@@ -150,6 +206,9 @@ TError parse(FILE *input)
 	{
 		return ESYN;
 	}
+	unie.obsah=4;
+	unie2.obsah=5;
+	generateInstruction(I_STOP, INT, &unie, INT, &unie2,  DOUBLE, NULL);
 	return error;
 }
 
@@ -232,6 +291,9 @@ TError func(FILE *input)
 			}
 			tData *tempData;
 			// funkce jiz v tabulce je
+			#ifdef DEBUG_INST
+			fprintf(stderr, "VYPISSSSSSS ? : %s\n",strGetStr(&attr) );
+			#endif
 			if((tempData = htRead(funcTable, strGetStr(&attr))) != NULL)
 			{
 				if(tempData->retType == currType)
@@ -274,6 +336,27 @@ TError func(FILE *input)
 					fprintf(stderr, "VKLADAM %s\n", strGetStr(&attr));
 					#endif
 				}
+				/**
+				 * interpret
+				 */
+				if(strcmp((strGetStr(&attr)),"main") == 0)
+				{
+					generateInstruction(I_START, INT, &unie, STRING, &unie2,  DOUBLE, NULL);
+					startLab = listGetPointerLast(list);
+					printf("startLab: %d\n",startLab );
+					I_am_in = "a";
+				}
+				else if ((I_am_in == "a") && (strcmp((strGetStr(&attr)),"main") != 0))
+				{
+					I_am_in = "y";
+					generateInstruction(I_MAIN_END, INT, &unie, STRING, &unie2,  DOUBLE, NULL);
+					endOfMain = listGetPointerLast(list);
+					printf("end of main: %d\n", endOfMain);
+				}
+				printf("VYPISSSSSSS neni : %s\n",strGetStr(&attr) );
+				/**
+				 * end interpret
+				 */
 			}
 			currFunc = malloc(sizeof(char)*strlen(strGetStr(&attr)));
 			strcpy(currFunc, strGetStr(&attr));
@@ -305,6 +388,8 @@ TError func(FILE *input)
 					data.isDeclared = 1;
 					htInsert(funcTable, strGetStr(&attr), data);
 				}
+
+
 				
 
 
@@ -604,7 +689,16 @@ TError stmt(FILE *input)
 		{
 			get_next_token(input, &attr);
 			error = expr(input, &attr, 1, &counterVar, &commTable, &exprRes);
-			
+			/**
+			 * interpret
+			 */
+			lastI = listGetPointerLast(list);
+			unie.obsah = afterIf;
+			//je-li podminka pravdiva, skacu za if (afterIf)
+			generateInstruction(I_IFGOTO, INT, &unie, STRING, &unie2,  DOUBLE, NULL);
+			/**
+			 * end interpret
+			 */
 			#ifdef DEBUG
 			//outputSymbolTable(commTable);
 			fprintf(stderr, "stmt: expr vratilo: %d\n", error);
@@ -614,6 +708,17 @@ TError stmt(FILE *input)
 			{
 				get_next_token(input, &attr);
 				error = comm_seq(input);
+				/**
+				 * interpret
+				 */
+				SPushP(&stackI, lastI);
+				afterIf = listGetPointerLast(list);
+				SPushP(&stackI, afterIf);
+				unie.obsah=afterIf;
+				//generateInstruction(I_IFGOTO, INT, &unie, STRING, &unie2,  DOUBLE, NULL);
+				/**
+				 * end interpret
+				 */
 				#ifdef DEBUG
 				fprintf(stderr, "stmt: comm_seq vratilo: %d\n", error);
 				#endif
@@ -663,6 +768,15 @@ TError stmt(FILE *input)
 			{
 				get_next_token(input, &attr);
 				error = expr(input, &attr, 0, &counterVar, &commTable, &exprRes);
+				/**
+				 * interpret
+				 */
+				unie.obsah=5;
+				unie2.obsah=10;
+				generateInstruction(I_SET_FOR, INT, &unie, STRING, &unie2,  DOUBLE, NULL);
+				/**
+				 * end interpret
+				 */
 				#ifdef DEBUG
 				fprintf(stderr, "stmt: expr vratilo: %d\n", error);
 				#endif
@@ -676,7 +790,21 @@ TError stmt(FILE *input)
 					if(error == ENOP)
 					{
 						get_next_token(input, &attr);
+						beforeFor = listGetPointerLast(list);
+						#ifdef DEBUG_INST
+						fprintf(stderr, "ADRESA ADRESA ADRESA: --------> %d\n", beforeFor);
+						#endif
 						error = comm_seq(input);
+						/**
+						 * interpret
+						 */
+						generateInstruction(I_FOR_GOTO, INT, &unie, STRING, &unie2,  DOUBLE, NULL);
+						SPushP(&forstack, beforeFor);
+						behindFor = listGetPointerLast(list);
+						SPushP(&forstack, behindFor);
+						/**
+						 * end interpret
+						 */
 						#ifdef DEBUG
 						fprintf(stderr, "stmt: comm_seq vratilo: %d\n", error);
 						#endif
@@ -909,7 +1037,7 @@ TError call_assign(FILE *input)
 			{
 				fprintf(stderr, "\tParserDoub: CODE:%d|OPE1 %s %f ||Vysl %s\n",C_Assign,exprRes->key,exprRes->data.value.d,idAssign->key);
 			}
-			else //if(exprRes->data.varType == T_Str)
+			else if(exprRes->data.varType == T_Str)
 			{
 				fprintf(stderr, "\tParserStr: CODE:%d|OPE1 %s %s ||Vysl %s\n",C_Assign,exprRes->key,exprRes->data.value.str,idAssign->key);
 			}
@@ -1585,7 +1713,7 @@ TError init(FILE *input)
 			{
 				fprintf(stderr, "\tParserDoub: CODE:%d|OPE1 %s %f ||Vysl %s\n",C_Assign,exprRes->key,exprRes->data.value.d,idAssign->key);
 			}
-			else //if(exprRes->data.varType == T_Str)
+			else if(exprRes->data.varType == T_Str)
 			{
 				fprintf(stderr, "\tParserStr: CODE:%d|OPE1 %s %s ||Vysl %s\n",C_Assign,exprRes->key,exprRes->data.value.str,idAssign->key);
 			}
@@ -1614,7 +1742,7 @@ TError init(FILE *input)
 		 */
 		if(currType == T_Auto)
 		{
-			print_error(ESEM, token.line);
+			print_error(ESEM_DEF, token.line);
 		}
 		error = EEMPTY;
 	}
@@ -1928,6 +2056,16 @@ TError realtype()
 	// P: UNDEF
 	if(token.type == T_Doub || token.type == T_Str || token.type == T_Integ)
 	{
+		/**
+		 * interpret
+		 */
+		//unie.obsah_s = malloc(sizeof(char)*strlen(strGetStr(&attr)));
+		printf("JSEM TU\n");
+		strcpy(unie.obsah_s, strGetStr(&attr));
+		generateInstruction(I_PRINT, STRING, &unie, STRING, &unie2,  DOUBLE, NULL);
+		/**
+		 * end interpret
+		 */
 		currType = token.type;
 		return ENOP;
 	}

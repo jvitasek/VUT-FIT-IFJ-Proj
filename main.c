@@ -15,7 +15,7 @@
 #include "error.h"
 #include "parser.h"
 
-//#define DEBUG 1
+#define DEBUG 1
 
 int main(int argc, char **argv)
 {
