@@ -90,12 +90,12 @@ typedef struct Tstack {
 	TstackElemPtr top;
 } Tstack;
 
-TError StackInit(); // inicialzace zasobniku
-TError StackDispose();	
-TError StackPop();
-TError StackPush(int tokterm, char *attr);
-TstackElemPtr StackTop();
-TError StackShift(int tokterm, char *attr);
+TError stack_init(); // inicialzace zasobniku
+TError stack_dispose();	
+TError stack_pop();
+TError stack_push(int tokterm, char *attr);
+TstackElemPtr stack_top();
+TError stack_shift(int tokterm, char *attr);
 
 int tok_to_term(int tokenType);
 TError find_rule(ruleType rule);

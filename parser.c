@@ -1511,7 +1511,7 @@ TError init(FILE *input)
 			#ifdef DEBUG_INST
 			fprintf(stderr, "\tCODE:%d|OPE1 %s %d ||Vysl %s\n",C_Assign,exprRes->key,exprRes->data.value.i,idAssign->key);
 			#endif
-			generateInst(C_Assign,exprRes,NULL,idAssign);
+			generate_inst(C_Assign,exprRes,NULL,idAssign);
 		}
 		
 		#ifdef DEBUG
