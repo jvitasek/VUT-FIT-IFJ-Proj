@@ -16,7 +16,7 @@
 #include "expression.h"
 #include "ial.h"
 
-#define DEBUG 1
+//#define DEBUG 1
 
 int *counteerVar;	// sluzi pri tvorbe pomocnych premennych
 Tstack stack;
@@ -512,7 +512,7 @@ int tokToTerm(int tokenType)
 		case T_LeftParenthesis: index = PLeftP; break;	// ( 31
 		case T_RightParenthesis: index = PRightP; break; // ) 32
 		case T_Semicolon: index = PDollar; break;
-		default: index = ESYN; break;
+		default: print_error(ESYN, token.line); break;
 	}
 
 	return index;
@@ -1038,6 +1038,8 @@ TError findRule(ruleType rule)
 			}
 			*expRes = htSearch(*locTable,newVar.str);
 			// TODO vygenerovat odpovedajucu instrukciu
+			
+			//outputSymbolTable(expRes);
 
 			// nejdrive se zbavim: < i (2x pop)
 			StackPop();			
@@ -1360,7 +1362,8 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 						case PRightP: // muze se jednat o funkci nebo o pravidlo zavorek
 							// funkce ////////////////////////////////////// @TODO PARAMETRY
 							if (tempStack->Lptr->Lptr->termType == PIdFun ||
-								tempStack->Lptr->Lptr->Lptr->termType == PIdFun)
+								tempStack->Lptr->Lptr->Lptr->termType == PIdFun || 
+								tempStack->Lptr->Lptr->termType == PComma)
 							{
 								if ((error = findRule(FUNC_RULE)) != ENOP)
 								{
@@ -1662,8 +1665,9 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 						break;
 						case PRightP: // muze se jednat o funkci nebo o pravidlo zavorek
 							// funkce ////////////////////////////////////// @TODO PARAMETRY
-							if (tempStack->Lptr->termType == PLeftP &&
-								tempStack->Lptr->Lptr->termType == PIdFun)
+							if (tempStack->Lptr->Lptr->termType == PIdFun ||
+								tempStack->Lptr->Lptr->Lptr->termType == PIdFun || 
+								tempStack->Lptr->Lptr->termType == PComma)
 							{
 								if ((error = findRule(FUNC_RULE)) != ENOP)
 								{
