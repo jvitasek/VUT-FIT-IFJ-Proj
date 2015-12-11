@@ -9,7 +9,7 @@
  */
 
 //#define DEBUG 1
-#define DEBUG_SEM 1
+//#define DEBUG_SEM 1
 //#define DEBUG_INST 1
 
 #include <stdio.h>
@@ -234,8 +234,6 @@ TError func(FILE *input)
 			// funkce jiz v tabulce je
 			if((tempData = htRead(funcTable, strGetStr(&attr))) != NULL)
 			{
-				printf("tempData->retType: %d\n", tempData->retType);
-				printf("currType: %d, token: %s\n", currType, strGetStr(&attr));
 				if(tempData->retType == currType)
 				{
 					tData data;
