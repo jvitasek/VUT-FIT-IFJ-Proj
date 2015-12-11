@@ -1426,6 +1426,13 @@ TError init(FILE *input)
 		getNextToken(input, &attr);
 		error = expr(input, &attr, 0, &counterVar, &commTable, &exprRes);
 		idAssign->data.value.ptrTS = exprRes;
+		if(exprRes != NULL)
+		{
+			
+			printf("\n \tCODE:%d|OPE1 %s %d ||Vysl %s",C_Assign,exprRes->key,exprRes->data.value.i,idAssign->key);
+			generateInst(C_Assign,exprRes,NULL,idAssign);
+		}
+		
 		#ifdef DEBUG
 		outputSymbolTable(commTable);
 		fprintf(stderr, "init: expr vratilo: %d\n", error);
