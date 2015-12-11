@@ -9,7 +9,7 @@
  */
 
 //#define DEBUG 1
-//#define DEBUG_SEM 1
+#define DEBUG_SEM 1
 //#define DEBUG_INST 1
 
 #include <stdio.h>
@@ -234,11 +234,14 @@ TError func(FILE *input)
 			// funkce jiz v tabulce je
 			if((tempData = htRead(funcTable, strGetStr(&attr))) != NULL)
 			{
-				if((tempData->timesUsed == 0) && (tempData->retType == currType))
+				printf("tempData->retType: %d\n", tempData->retType);
+				printf("currType: %d, token: %s\n", currType, strGetStr(&attr));
+				if(tempData->retType == currType)
 				{
 					tData data;
 					data.type = tempData->type;
-					data.timesUsed = tempData->timesUsed + 1;
+					data.retType = tempData->retType;
+					data.timesUsed = tempData->timesUsed;
 					data.scope = -1;
 					data.isDefined = tempData->isDefined;
 					data.value.ptrTS = NULL;
@@ -250,7 +253,7 @@ TError func(FILE *input)
 				// redefinice/znovudeklarace
 				else
 				{
-					#ifdef DEBUG
+					#ifdef DEBUG_SEM
 					fprintf(stderr, "KONCIM VE FUNC: 11)\n");
 					#endif
 					print_error(ESEM_DEF, token.line);
@@ -416,6 +419,17 @@ TError dec_or_def(FILE *input)
 	#endif
 	if(error == ENOP)
 	{
+		/**
+		 * kontrola, zda funkce nebyla podruhe definovana
+		 */
+		tData *tempData;
+		if((tempData = htRead(funcTable, currFunc)) != NULL)
+		{
+			if(tempData->isDefined == 1 && tempData->timesUsed > 1)
+			{
+				print_error(ESEM_DEF, token.line);
+			}
+		}
 		return error;
 	}
 	else if(error == ESYN)
@@ -456,7 +470,7 @@ TError comm_seq(FILE *input)
 			{
 				tData data;
 				data.type = tempData->type;
-				data.timesUsed = tempData->timesUsed;
+				data.timesUsed = tempData->timesUsed+1;
 				data.scope = tempData->scope;
 				data.orderParams = tempData->orderParams;
 				data.isDefined = 1;
@@ -1493,7 +1507,7 @@ TError var_def(FILE *input)
 			tData *tempData;
 			if((tempData = htRead(commTable, strGetStr(&attr))) != NULL)
 			{
-				#ifdef DEBUG
+				#ifdef DEBUG_SEM
 				fprintf(stderr, "KONCIM VE VAR_DEF: 4)\n");
 				#endif
 
