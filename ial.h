@@ -12,7 +12,6 @@
 
 #include "scanner.h"
 
-
 /**
  * -----------------------------------------------------------------------------
  * Razeni - algoritmus Heap sort
@@ -81,7 +80,7 @@ void htInit (tHTable* ptrht);
 tHTItem* htSearch (tHTable* ptrht, char *key);
 tHTItem* htSearchOrder(tHTable* ptrht, char *key, int order);
 tHTItem* htSearchScope(tHTable* ptrht, char *key, int scope);
-void htInsert (tHTable* ptrht, char *key,tData data);
+void htInsert (tHTable* ptrht, char *key, tData data);
 tData* htRead (tHTable* ptrht, char *key);
 tData* htReadOrder(tHTable* ptrht, char *key, int order);
 tData* htReadScope(tHTable* ptrht, char *key, int scope);
