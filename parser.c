@@ -234,8 +234,6 @@ TError func(FILE *input)
 			// funkce jiz v tabulce je
 			if((tempData = htRead(funcTable, strGetStr(&attr))) != NULL)
 			{
-				fprintf(stderr, "currType: %d\n", currType);
-				fprintf(stderr, "tempData->retType: %d\n", tempData->retType);
 				if((tempData->timesUsed == 0) && (tempData->retType == currType))
 				{
 					tData data;
@@ -290,6 +288,26 @@ TError func(FILE *input)
 			{
 				get_next_token(input, &attr);
 				error = dec_or_def(input);
+
+				/**
+				 * pokud byla deklarovana, zapsat
+				 */
+				if((tempData = htRead(funcTable, strGetStr(&attr))) != NULL)
+				{
+					tData data;
+					data.type = tempData->type;
+					data.retType = tempData->retType;
+					data.timesUsed = tempData->timesUsed;
+					data.scope = tempData->scope;
+					data.isDefined = tempData->isDefined;
+					data.value.ptrTS = tempData->value.ptrTS;
+					data.isDeclared = 1;
+					htInsert(funcTable, strGetStr(&attr), data);
+				}
+				
+
+
+
 				#ifdef DEBUG
 				fprintf(stderr, "func: dec_or_def vratilo: %d\n", error);
 				#endif
@@ -868,22 +886,6 @@ TError call_assign(FILE *input)
 		get_next_token(input, &attr);
 		error = expr(input, &attr, 0, &counterVar, &commTable, &exprRes);
 		idAssign->data.value.ptrTS = exprRes;
-		if(exprRes != NULL)
-		{
-			#ifdef DEBUG_INST
-			if(exprRes->data.varType == T_Integ)
-			{
-				fprintf(stderr, "\tParserInt: CODE:%d|OPE1 %s %d ||Vysl %s\n",C_Assign,exprRes->key,exprRes->data.value.i,idAssign->key);
-			}else if(exprRes->data.varType == T_Doub)
-			{
-				fprintf(stderr, "\tParserDoub: CODE:%d|OPE1 %s %f ||Vysl %s\n",C_Assign,exprRes->key,exprRes->data.value.d,idAssign->key);
-			}else //if(exprRes->data.varType == T_Str)
-			{
-				fprintf(stderr, "\tParserStr: CODE:%d|OPE1 %s %s ||Vysl %s\n",C_Assign,exprRes->key,exprRes->data.value.str,idAssign->key);
-			}
-			#endif
-			generate_inst(C_Assign,exprRes,NULL,idAssign);
-		}
 		#ifdef DEBUG
 		fprintf(stderr, "call_assign: expr vratilo: %d\n", error);
 		#endif
@@ -970,22 +972,32 @@ TError params(FILE *input)
 		get_next_token(input, &attr);
 		if(token.type == T_Id)
 		{
-			// SEMANTICKA ANALYZA
-			tData data;
-			data.type = VAR;
-			data.varType = currType; // ulozeni typu parametru
-			data.timesUsed = 1;
-			data.orderParams = ++currOrder;
-			data.scope = 1; // nejnizsi scope nasledujiciho bloku
-			data.value.ptrTS = NULL;
-			htInsert(funcTable, strGetStr(&attr), data);
-			htInsert(paraTable, currFunc, data); // vkladani do tabulky parametru
-			#ifdef DEBUG_SEM
-			fprintf(stderr, "VKLADAM %s, SCOPE: %d, TYPE: %d, CURRENT SCOPE: %d\n",
-				strGetStr(&attr), data.scope, data.varType, currScope);
-			fprintf(stderr, "VKLADAM PARAMETR %s s maskou %s, SCOPE: %d, TYPE: %d, ORDER: %d\n",
-				strGetStr(&attr), currFunc, data.scope, data.varType, data.orderParams);
-			#endif
+			tData *tempData;
+			if((tempData = htRead(funcTable, currFunc)) != NULL)
+			{
+				if(tempData->isDeclared != 1)
+				{
+					tData data;
+					data.type = VAR;
+					data.varType = currType; // ulozeni typu parametru
+					data.timesUsed = 1;
+					data.orderParams = ++currOrder;
+					data.scope = 1; // nejnizsi scope nasledujiciho bloku
+					data.value.ptrTS = NULL;
+					htInsert(funcTable, strGetStr(&attr), data);
+					htInsert(paraTable, currFunc, data); // vkladani do tabulky parametru
+
+					#ifdef DEBUG_SEM
+					fprintf(stderr, "VKLADAM %s, SCOPE: %d, TYPE: %d, CURRENT SCOPE: %d\n",
+						strGetStr(&attr), data.scope, data.varType, currScope);
+					fprintf(stderr, "VKLADAM PARAMETR %s s maskou %s, SCOPE: %d, TYPE: %d, ORDER: %d\n",
+						strGetStr(&attr), currFunc, data.scope, data.varType, data.orderParams);
+					#endif
+				}
+
+			}
+			
+			
 			// KONEC SEMANTICKE ANALYZY
 			get_next_token(input, &attr);
 			error = params_n(input);
@@ -1048,22 +1060,31 @@ TError params_n(FILE *input)
 			get_next_token(input, &attr);
 			if(token.type == T_Id)
 			{
-				// SEMANTICKA ANALYZA
-				tData data;
-				data.type = VAR;
-				data.varType = currType;
-				data.orderParams = ++currOrder;
-				data.timesUsed = 1;
-				data.scope = 1; // nejnizsi scope nasledujiciho bloku
-				data.value.ptrTS = NULL;
-				htInsert(funcTable, strGetStr(&attr), data);
-				htInsert(paraTable, currFunc, data); // vkladani do tabulky parametru
-				#ifdef DEBUG_SEM
-				fprintf(stderr, "VKLADAM %s, SCOPE: %d, TYPE: %d, CURRENT SCOPE: %d\n",
-					strGetStr(&attr), data.scope, data.varType, currScope);
-				fprintf(stderr, "VKLADAM PARAMETR %s s maskou %s, SCOPE: %d, TYPE: %d, ORDER: %d\n",
-					strGetStr(&attr), currFunc, data.scope, data.varType, data.orderParams);
-				#endif
+				tData *tempData;
+				if((tempData = htRead(funcTable, currFunc)) != NULL)
+				{
+					if(tempData->isDeclared != 1)
+					{
+						tData data;
+						data.type = VAR;
+						data.varType = currType; // ulozeni typu parametru
+						data.timesUsed = 1;
+						data.orderParams = ++currOrder;
+						data.scope = 1; // nejnizsi scope nasledujiciho bloku
+						data.value.ptrTS = NULL;
+						htInsert(funcTable, strGetStr(&attr), data);
+						htInsert(paraTable, currFunc, data); // vkladani do tabulky parametru
+
+						#ifdef DEBUG_SEM
+						fprintf(stderr, "VKLADAM %s, SCOPE: %d, TYPE: %d, CURRENT SCOPE: %d\n",
+							strGetStr(&attr), data.scope, data.varType, currScope);
+						fprintf(stderr, "VKLADAM PARAMETR %s s maskou %s, SCOPE: %d, TYPE: %d, ORDER: %d\n",
+							strGetStr(&attr), currFunc, data.scope, data.varType, data.orderParams);
+						#endif
+					}
+
+				}
+				
 				// /SEMANTICKE ANALYZY
 				get_next_token(input, &attr);
 				error = params_n(input);
@@ -1525,16 +1546,7 @@ TError init(FILE *input)
 		if(exprRes != NULL)
 		{
 			#ifdef DEBUG_INST
-			if(exprRes->data.varType == T_Integ)
-			{
-				fprintf(stderr, "\tParserInt: CODE:%d|OPE1 %s %d ||Vysl %s\n",C_Assign,exprRes->key,exprRes->data.value.i,idAssign->key);
-			}else if(exprRes->data.varType == T_Doub)
-			{
-				fprintf(stderr, "\tParserDoub: CODE:%d|OPE1 %s %f ||Vysl %s\n",C_Assign,exprRes->key,exprRes->data.value.d,idAssign->key);
-			}else //if(exprRes->data.varType == T_Str)
-			{
-				fprintf(stderr, "\tParserStr: CODE:%d|OPE1 %s %s ||Vysl %s\n",C_Assign,exprRes->key,exprRes->data.value.str,idAssign->key);
-			}
+			fprintf(stderr, "\tCODE:%d|OPE1 %s %d ||Vysl %s\n",C_Assign,exprRes->key,exprRes->data.value.i,idAssign->key);
 			#endif
 			generate_inst(C_Assign,exprRes,NULL,idAssign);
 		}
@@ -1665,9 +1677,63 @@ TError terms(FILE *input)
 			return error;
 		}
 	}
+	else if(((error = realtype(input)) == ENOP) || error == ESYN)
+	{
+		#ifdef DEBUG
+		fprintf(stderr, "terms: realtype vratilo: %d\n", error);
+		#endif
+
+		tData *tempData;
+		// kontrola typu parametru
+		if(((tempData = htReadOrder(paraTable, currFunc, ++currOrderTerm)) != NULL))
+		{
+			#ifdef DEBUG_SEM
+			fprintf(stderr, "tempData->varType: %d\n", tempData->varType);
+			fprintf(stderr, "currType: %d\n", currType);
+			#endif
+			if(tempData->varType != currType)
+			{
+				print_error(ESEM_TYP, token.line);
+			}
+		}
+		get_next_token(input, &attr);
+		error = terms_n(input);
+		/**
+		 * kontrola poctu parametru
+		 */
+		#ifdef DEBUG_SEM
+		fprintf(stderr, "volam funkci: %s, vlozeno parametru: %d, deklarovany pocet: %d\n", currFunc, currOrderTerm, currOrder);
+		#endif
+		if(currOrderTerm != currOrder)
+		{
+			print_error(ESEM_TYP, token.line);
+		}
+		currOrderTerm = 0;
+
+		#ifdef DEBUG
+		fprintf(stderr, "terms: terms_n vratilo: %d\n", error);
+		#endif
+		if(error == ENOP || error == EEMPTY)
+		{
+			error = ENOP;
+			return error;
+		}
+		else if(error == ESYN)
+		{
+			return error;
+		}
+	}
 	// 33) <TERMS> -> E
 	else
 	{
+		#ifdef DEBUG_SEM
+		fprintf(stderr, "volam funkci: %s, vlozeno parametru: %d, deklarovany pocet: %d\n", currFunc, currOrderTerm, currOrder);
+		#endif
+		if(currOrderTerm != currOrder)
+		{
+			print_error(ESEM_TYP, token.line);
+		}
+		currOrderTerm = 0;
 		error = EEMPTY;
 	}
 	return error;
@@ -1702,6 +1768,34 @@ TError terms_n(FILE *input)
 				print_error(ESEM_DEF, token.line);
 				exit(ESEM_DEF);
 			}
+			// kontrola typu parametru
+			if((tempData = htReadOrder(paraTable, currFunc, ++currOrderTerm)) != NULL)
+			{
+				if(tempData->varType != currType)
+				{
+					print_error(ESEM_TYP, token.line);
+				}
+			}
+			// KONEC SEMANTICKE ANALYZY
+			get_next_token(input, &attr);
+			error = terms_n(input);
+			#ifdef DEBUG
+			fprintf(stderr, "terms: terms_n vratilo: %d\n", error);
+			#endif
+			if(error == ENOP || error == EEMPTY)
+			{
+				error = ENOP;
+				return error;
+			}
+			else if(error == ESYN)
+			{
+				return error;
+			}	
+		}
+		else if((error = realtype(input)) == ENOP || error == ESYN)
+		{
+			// SEMANTICKA ANALYZA
+			tData *tempData;
 			// kontrola typu parametru
 			if((tempData = htReadOrder(paraTable, currFunc, ++currOrderTerm)) != NULL)
 			{
@@ -1774,6 +1868,18 @@ TError realtype()
 	// P: UNDEF
 	if(token.type == T_Doub || token.type == T_Str || token.type == T_Integ)
 	{
+		if(token.type == T_Doub)
+		{
+			currType = T_Double;
+		}
+		else if(token.type == T_Str)
+		{
+			currType = T_String;
+		}
+		else
+		{
+			currType = T_Int;
+		}
 		return ENOP;
 	}
 	return error;
@@ -1799,6 +1905,7 @@ TError init_table(tHTable **table)
 		item->data.varType = T_EOF;
 		item->data.scope = 0;
 		item->data.isDefined = 0;
+		item->data.isDeclared = 0;
 		item->ptrnext = NULL;
 	}
 	else

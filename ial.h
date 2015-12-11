@@ -52,6 +52,7 @@ union tValue {
  * typ obsahu
  */
 typedef struct tData {
+	char *paramName;
 	symbolType type;
 	T_Type varType;
 	T_Type retType;
@@ -59,6 +60,7 @@ typedef struct tData {
 	int timesUsed;
 	int orderParams;
 	int isDefined;
+	int isDeclared;
 	int scope;
 } tData;
 
