@@ -8,8 +8,9 @@
  * 			xvalec00 – Dusan Valecky
  */
 
-#define DEBUG 1
-//#define DEBUG_SEM 1
+//#define DEBUG 1
+#define DEBUG_SEM 1
+//#define DEBUG_INST 1
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -245,7 +246,7 @@ TError func(FILE *input)
 					data.type = tempData->type;
 					data.timesUsed = tempData->timesUsed + 1;
 					data.scope = -1;
-					data.isDefined = 0;
+					data.isDefined = tempData->isDefined;
 					data.value.ptrTS = NULL;
 					htInsert(funcTable, strGetStr(&attr), data);
 					#ifdef DEBUG_SEM
@@ -436,6 +437,10 @@ TError comm_seq(FILE *input)
 		tData *tempData;
 		if((tempData = htRead(funcTable, currFunc)) != NULL)
 		{
+			if(tempData->isDefined == 1)
+			{
+				print_error(ESEM_DEF, token.line);
+			}
 			tData data;
 			data.type = tempData->type;
 			data.timesUsed = tempData->timesUsed;
@@ -447,6 +452,7 @@ TError comm_seq(FILE *input)
 			fprintf(stderr, "UPRAVUJI %s, DEFINOVANA: %d\n", currFunc, data.isDefined);
 			#endif
 		}
+		currFunc = "";
 
 		// SEMANTICKA ANALYZA
 		if(tableStack.top->table != NULL)
@@ -867,6 +873,7 @@ TError call_assign(FILE *input)
 		getNextToken(input, &attr);
 		error = expr(input, &attr, 0, &counterVar, &commTable, &exprRes);
 		idAssign->data.value.ptrTS = exprRes;
+		currFunc = "";
 		#ifdef DEBUG
 		fprintf(stderr, "call_assign: expr vratilo: %d\n", error);
 		#endif
@@ -889,7 +896,9 @@ TError call_assign(FILE *input)
 		tData *tempData;
 		if((tempData = htRead(funcTable, currFunc)) != NULL)
 		{
+			#ifdef DEBUG_SEM
 			fprintf(stderr, "je %s definovana: %d\n", currFunc, tempData->isDefined);
+			#endif
 			if(tempData->isDefined != 1)
 			{
 				#ifdef DEBUG_SEM
@@ -1502,8 +1511,9 @@ TError init(FILE *input)
 		idAssign->data.value.ptrTS = exprRes;
 		if(exprRes != NULL)
 		{
-			
-			printf("\n \tCODE:%d|OPE1 %s %d ||Vysl %s",C_Assign,exprRes->key,exprRes->data.value.i,idAssign->key);
+			#ifdef DEBUG_INST
+			fprintf(stderr, "\n \tCODE:%d|OPE1 %s %d ||Vysl %s",C_Assign,exprRes->key,exprRes->data.value.i,idAssign->key);
+			#endif
 			generateInst(C_Assign,exprRes,NULL,idAssign);
 		}
 		

@@ -17,6 +17,7 @@
 #include "ial.h"
 
 //#define DEBUG 1
+//#define DEBUG_INST 1
 
 int *counteerVar;	// sluzi pri tvorbe pomocnych premennych
 Tstack stack;
@@ -1025,7 +1026,9 @@ TError findRule(ruleType rule)
 				htInsert(*locTable, newVar.str,data);		// pomocna premenna na vysledok
 				tHTItem *op1 = htSearch(*locTable,tempPtr->data);
 				tHTItem *res = htSearch(*locTable,newVar.str);
-				printf("\n \tCODE:%d|OPE1 %s %d ||Vysl %s",C_Assign,op1->key,op1->data.value.i,res->key);
+				#ifdef DEBUG_INST
+				fprintf(stderr, "\n \tCODE:%d|OPE1 %s %d ||Vysl %s",C_Assign,op1->key,op1->data.value.i,res->key);
+				#endif
 		
 				generateInst(C_Assign,op1,NULL,res);
 
