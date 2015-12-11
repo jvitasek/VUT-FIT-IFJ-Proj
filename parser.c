@@ -1498,6 +1498,7 @@ TError var_def(FILE *input)
 	// 5: <VAR_DEF> -> auto id <INIT>;
 	else if(token.type == T_Auto)
 	{
+		currType = T_Auto;
 		get_next_token(input, &attr);
 		if(token.type == T_Id)
 		{
@@ -1608,6 +1609,13 @@ TError init(FILE *input)
 	// 7: <INIT> ->	E
 	else
 	{
+		/**
+		 * pokud je typ auto a neni tam definice
+		 */
+		if(currType == T_Auto)
+		{
+			print_error(ESEM, token.line);
+		}
 		error = EEMPTY;
 	}
 	return error;
