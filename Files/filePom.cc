@@ -6,6 +6,7 @@ int main()
     // stack->top: localTable
    	double bubo = 6.9;
 	int a = 5;
+	int d = 6;
 	string kokot = "pica";
 
 	a = 6;
