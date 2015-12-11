@@ -16,7 +16,7 @@
 #include "expression.h"
 #include "ial.h"
 
-//#define DEBUG 1
+#define DEBUG 1
 
 int *counteerVar;	// sluzi pri tvorbe pomocnych premennych
 tHTable **locTable;
@@ -43,9 +43,9 @@ int preceden_tab[19][19] = {
 	{great, great, great, great, great, great, great, great, great, great, empty, empty, empty, empty, empty, empty, great, great, great},	// int
 	{great, great, great, great, great, great, great, great, great, great, empty, empty, empty, empty, empty, empty, great, great, great},	// id
 	{empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, equal, empty, empty, empty},	// f
-	{less, less, less, less, less, less, less, less, less, less, less, less, less, less, less, less, equal, equal, empty},				// (
+	{less, less, less, less, less, less, less, less, less, less, less, less, less, less, less, less, equal, equal, empty},					// (
 	{great, great, great, great, great, great, great, great, great, great, empty, empty, empty, empty, empty, empty, great, great, great},	// )
-	{less, less, less, less, less, less, less, less, less, less, less, less, less, less, less, less, equal, equal, empty},	// ,
+	{less, less, less, less, less, less, less, less, less, less, less, less, less, less, less, less, equal, equal, empty},				// ,
 	{less, less, less, less, less, less, less, less, less, less, less, less, less, less, less, less, less, empty, empty}				// $
 };
 
@@ -93,7 +93,7 @@ void generateVariable(string *var, int *counter)
  * @param  stack Zasobnik termu.
  * @return       ENOP v pripade uspechu.
  */
-TError StackInit(Tstack *stack)
+TError StackInit()
 {
 	TError error = ENOP;
 
@@ -109,19 +109,19 @@ TError StackInit(Tstack *stack)
 		return error;
 	}
 
-	stack->top = NULL;
-	stack->first = NULL;
-	if (((stack->top = malloc(sizeof(struct TstackElem))) == NULL) || 
-		((stack->first = malloc(sizeof(struct TstackElem))) == NULL))
+	stack.top = NULL;
+	stack.first = NULL;
+	if (((stack.top = malloc(sizeof(struct TstackElem))) == NULL) || 
+		((stack.first = malloc(sizeof(struct TstackElem))) == NULL))
 	{
-		StackDispose(stack);
+		StackDispose();
 		print_error(EINT, token.line);
 	}
 
 	TstackElemPtr tempPtr = NULL;
 	if ((tempPtr = malloc(sizeof(struct TstackElem))) == NULL)
 	{
-		StackDispose(stack);
+		StackDispose();
 		print_error(EINT, token.line);
 	}
 
@@ -132,8 +132,8 @@ TError StackInit(Tstack *stack)
 		tempPtr->termType = PDollar;
 		tempPtr->idType = Tother;
 		tempPtr->data = "PDollar";
-		stack->first = tempPtr;
-		stack->top = tempPtr;
+		stack.first = tempPtr;
+		stack.top = tempPtr;
 	}
 	else
 	{
@@ -149,7 +149,7 @@ TError StackInit(Tstack *stack)
  * @param stack 	Zasobnik termu.
  * @return error	Navratova hodnota chyby.
  */
-TError StackDispose(Tstack *stack)
+TError StackDispose()
 {
 	TError error = ENOP;
 	#ifdef DEBUG
@@ -160,7 +160,7 @@ TError StackDispose(Tstack *stack)
 
 	if ((tempPtr = malloc(sizeof(struct TstackElem))) == NULL)
 	{
-		StackDispose(stack);
+		StackDispose();
 		print_error(EINT, token.line);
 	}
 
@@ -329,7 +329,7 @@ TstackElemPtr StackTop()
 	TstackElemPtr tempPtr = NULL;
 	if ((tempPtr = malloc(sizeof(struct TstackElem))) == NULL)
 	{
-		//StackDispose(stack);
+		//StackDispose();
 		print_error(EINT, token.line);
 	}
 
@@ -421,7 +421,7 @@ TError StackShift(int tokterm, char *attr)
 
 	// if ((temp->data = malloc(sizeof(char)*strlen(attr))) == NULL)
 	// {
-	// 	StackDispose(stack);
+	// 	StackDispose(;
 	// 	print_error(EINT, token.line);
 	// }
 
@@ -1162,17 +1162,17 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 
 	if ((tempStack = malloc(sizeof(struct TstackElem))) == NULL)
 	{
-		StackDispose(&stack);
+		StackDispose();
 		print_error(EINT, token.line);
 	}
 
 	// inicializace zasobniku 
-	if ((error = StackInit(&stack)) != ENOP)
+	if ((error = StackInit()) != ENOP)
 	{
 		#ifdef DEBUG
 		fprintf(stderr, "Inicializace se nezdarila\n");
 		#endif
-		StackDispose(&stack);
+		StackDispose();
 
 		error = EINT;
 		return error;
@@ -1180,7 +1180,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 
 	if ((myAttr = malloc(sizeof(char)*strGetLength(attr))) == NULL)
 	{
-		StackDispose(&stack);
+		StackDispose();
 		print_error(EINT, token.line);
 	}
 
@@ -1201,7 +1201,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 			if(tempStack == NULL)
 			{
 				error = ESYN;
-				StackDispose(&stack);
+				StackDispose();
 				return error;
 			}
 
@@ -1239,7 +1239,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 								fprintf(stderr, "Nenasel jsem IDENTIFIKATHOOOR!!!\n");
 							#endif
 
-							StackDispose(&stack);
+							StackDispose();
 							print_error(ESEM_DEF, token.line);
 							exit(ESEM_DEF);
 						}
@@ -1251,7 +1251,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 						fprintf(stderr, "Nenasel jsem IDENTIFIKATHOOOR!!!\n");
 					#endif
 
-					StackDispose(&stack);
+					StackDispose();
 					print_error(ESEM_DEF, token.line);
 					exit(ESEM_DEF);
 				}
@@ -1294,7 +1294,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 						#ifdef DEBUG
 						fprintf(stderr, "Chyba pri StackPush.\n");
 						#endif
-						StackDispose(&stack);
+						StackDispose();
 						return error;
 					}
 					getNextToken(input, attr);
@@ -1308,7 +1308,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 						#ifdef DEBUG
 						fprintf(stderr, "Chyba pri StackShift.\n");
 						#endif
-						StackDispose(&stack);
+						StackDispose();
 						return error;
 					}
 					getNextToken(input, attr);
@@ -1323,28 +1323,28 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 						case PPlus:
 							if ((error = findRule(ADD_RULE)) != ENOP)
 							{
-								StackDispose(&stack);
+								StackDispose();
 								return error;
 							}
 						break;
 						case PMinus:
 							if ((error = findRule(SUB_RULE)) != ENOP)
 							{
-								StackDispose(&stack);
+								StackDispose();
 								return error;
 							}
 						break;
 						case PMul:
 							if ((error = findRule(MUL_RULE)) != ENOP)
 							{
-								StackDispose(&stack);
+								StackDispose();
 								return error;
 							}
 						break;
 						case PDiv:
 							if ((error = findRule(DIV_RULE)) != ENOP)
 							{
-								StackDispose(&stack);
+								StackDispose();
 								return error;
 							}
 						break;
@@ -1354,7 +1354,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 						case PGreatEq:
 							if ((error = findRule(LESSGREAT_RULE)) != ENOP)
 							{
-								StackDispose(&stack);
+								StackDispose();
 								return error;
 							}
 						break;
@@ -1362,7 +1362,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 						case PNotEq:
 							if ((error = findRule(EQ_RULE)) != ENOP)
 							{
-								StackDispose(&stack);
+								StackDispose();
 								return error;
 							}
 						break;
@@ -1373,7 +1373,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 							{
 								if ((error = findRule(FUNC_RULE)) != ENOP)
 								{
-									StackDispose(&stack);
+									StackDispose();
 									return error;
 								}
 							}
@@ -1382,7 +1382,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 							{
 								if ((error = findRule(PAR_RULE)) != ENOP)
 								{
-									StackDispose(&stack);
+									StackDispose();
 									return error;
 								}
 							}						
@@ -1393,7 +1393,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 						case PString:
 							if ((error = findRule(ID_E_RULE)) != ENOP)
 							{
-								StackDispose(&stack);
+								StackDispose();
 								return error;
 							}
 						break;
@@ -1414,7 +1414,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 						#ifdef DEBUG
 							printf("---FUNKCEEEEE!!!!! NEDEKLAROVANAAAAA----:\n");
 						#endif	
-						StackDispose(&stack);
+						StackDispose();
 						print_error(ESEM_DEF, token.line);				
 					}
 					// string + - * / musi hodit ESEM_TYP
@@ -1424,7 +1424,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 						#ifdef DEBUG
 							printf("---String + - * /----:\n");
 						#endif	
-						StackDispose(&stack);
+						StackDispose();
 						print_error(ESEM_TYP, token.line);				
 					}
 					else if (tokterm == PString && 
@@ -1433,14 +1433,14 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 						#ifdef DEBUG
 							printf("---String + - * /----:\n");
 						#endif	
-						StackDispose(&stack);
+						StackDispose();
 						print_error(ESEM_TYP, token.line);				
 					}
 
 					#ifdef DEBUG
 					fprintf(stderr, "Chyba vyrazu!\n");
 					#endif
-					StackDispose(&stack);
+					StackDispose();
 					return ESYN;
 				break;
 				default:
@@ -1448,7 +1448,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 					fprintf(stderr, "Chyba vyrazu.\n");
 					#endif
 					error = ESYN;
-					StackDispose(&stack);
+					StackDispose();
 					return error;
 				break;			
 			}
@@ -1456,7 +1456,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 			if(tempStack == NULL)
 			{
 				error = ESYN;
-				StackDispose(&stack);
+				StackDispose();
 				return error;
 			}
 
@@ -1502,7 +1502,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 			if(tempStack == NULL)
 			{
 				error = ESYN;
-				StackDispose(&stack);
+				StackDispose();
 				return error;
 			}
 
@@ -1552,7 +1552,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 							fprintf(stderr, "Nenasel jsem IDENTIFIKATHOOOR!!!\n");
 						#endif
 
-						StackDispose(&stack);
+						StackDispose();
 						print_error(ESEM_DEF, token.line);
 						exit(ESEM_DEF);
 					}
@@ -1595,7 +1595,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 						#ifdef DEBUG
 						fprintf(stderr, "Chyba pri StackPush.\n");
 						#endif
-						StackDispose(&stack);
+						StackDispose();
 						return error;
 					}
 					getNextToken(input, attr);
@@ -1610,7 +1610,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 						#ifdef DEBUG
 						fprintf(stderr, "Chyba pri StackShift.\n");
 						#endif
-						StackDispose(&stack);
+						StackDispose();
 						return error;
 					}
 					getNextToken(input, attr);
@@ -1626,28 +1626,28 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 						case PPlus:
 							if ((error = findRule(ADD_RULE)) != ENOP)
 							{
-								StackDispose(&stack);
+								StackDispose();
 								return error;
 							}
 						break;
 						case PMinus:
 							if ((error = findRule(SUB_RULE)) != ENOP)
 							{
-								StackDispose(&stack);
+								StackDispose();
 								return error;
 							}
 						break;
 						case PMul:
 							if ((error = findRule(MUL_RULE)) != ENOP)
 							{
-								StackDispose(&stack);
+								StackDispose();
 								return error;
 							}
 						break;
 						case PDiv:
 							if ((error = findRule(DIV_RULE)) != ENOP)
 							{
-								StackDispose(&stack);
+								StackDispose();
 								return error;
 							}
 						break;
@@ -1657,7 +1657,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 						case PGreatEq:
 							if ((error = findRule(LESSGREAT_RULE)) != ENOP)
 							{
-								StackDispose(&stack);
+								StackDispose();
 								return error;
 							}
 						break;
@@ -1665,7 +1665,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 						case PNotEq:
 							if ((error = findRule(EQ_RULE)) != ENOP)
 							{
-								StackDispose(&stack);
+								StackDispose();
 								return error;
 							}
 						break;
@@ -1676,7 +1676,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 							{
 								if ((error = findRule(FUNC_RULE)) != ENOP)
 								{
-									StackDispose(&stack);
+									StackDispose();
 									return error;
 								}
 							}
@@ -1685,7 +1685,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 							{
 								if ((error = findRule(PAR_RULE)) != ENOP)
 								{
-									StackDispose(&stack);
+									StackDispose();
 									return error;
 								}
 							}						
@@ -1696,7 +1696,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 						case PString:
 							if ((error = findRule(ID_E_RULE)) != ENOP)
 							{
-								StackDispose(&stack);
+								StackDispose();
 								return error;
 							}
 						break;
@@ -1710,7 +1710,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 						#ifdef DEBUG
 							printf("---FUNKCEEEEE!!!!! NEDEKLAROVANAAAAA----:\n");
 						#endif	
-						StackDispose(&stack);
+						StackDispose();
 						print_error(ESEM_DEF, token.line);				
 					}
 					// string + - * / musi hodit ESEM_TYP
@@ -1720,7 +1720,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 						#ifdef DEBUG
 							printf("---String + - * /----:\n");
 						#endif	
-						StackDispose(&stack);
+						StackDispose();
 						print_error(ESEM_TYP, token.line);				
 					}
 					else if (tokterm == PString && 
@@ -1729,14 +1729,14 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 						#ifdef DEBUG
 							printf("---String + - * /----:\n");
 						#endif	
-						StackDispose(&stack);
+						StackDispose();
 						print_error(ESEM_TYP, token.line);				
 					}
 
 					#ifdef DEBUG
 					fprintf(stderr, "Chyba vyrazu.\n");
 					#endif
-					StackDispose(&stack);
+					StackDispose();
 					return ESYN;
 				break;
 				default:
@@ -1744,7 +1744,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 					fprintf(stderr, "Chyba vyrazu.\n");
 					#endif
 					error = ESYN;
-					StackDispose(&stack);
+					StackDispose();
 					return error;
 				break;			
 			}
@@ -1753,7 +1753,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 			if(tempStack == NULL)
 			{
 				error = ESYN;
-				StackDispose(&stack);
+				StackDispose();
 				return error;
 			}
 
@@ -1761,7 +1761,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 				stack.top->Lptr->termType == PDollar && counter <= 0)
  			{
  				error = ENOP;
- 				StackDispose(&stack);
+ 				StackDispose();
 				return error;				
 			}
 
@@ -1790,7 +1790,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 		} while(!((tempStack->termType == PDollar) && (tokterm == PDollar)));
 	}
 
-	StackDispose(&stack);
+	StackDispose();
 
 	return error;
 }
