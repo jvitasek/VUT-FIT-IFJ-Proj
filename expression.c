@@ -16,12 +16,12 @@
 #include "expression.h"
 #include "ial.h"
 
-//#define DEBUG 1
+#define DEBUG 1
 
 int *counteerVar;	// sluzi pri tvorbe pomocnych premennych
+Tstack stack;
 tHTable **locTable;
 tHTItem **expRes;
-Tstack stack;
 
 /**
  * Precedencni tabulka.
@@ -42,13 +42,12 @@ int preceden_tab[19][19] = {
 	{great, great, great, great, great, great, great, great, great, great, empty, empty, empty, empty, empty, empty, great, great, great},	// double
 	{great, great, great, great, great, great, great, great, great, great, empty, empty, empty, empty, empty, empty, great, great, great},	// int
 	{great, great, great, great, great, great, great, great, great, great, empty, empty, empty, empty, empty, empty, great, great, great},	// id
-	{empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, equal, empty, empty, empty},	// f
+	{empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, less, less, less, empty, empty, equal, empty, empty, empty},	// f
 	{less, less, less, less, less, less, less, less, less, less, less, less, less, less, less, less, equal, equal, empty},				// (
-	{great, great, great, great, great, great, great, great, great, great, empty, empty, empty, empty, empty, empty, great, great, great},	// )
-	{less, less, less, less, less, less, less, less, less, less, less, less, less, less, less, less, equal, equal, empty},	// ,
+	{great, great, great, great, great, great, great, great, great, great, less, less, less, empty, empty, empty, great, empty, great},	// )
+	{empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, less, less, less, less, less, empty, equal, equal, empty},	// ,
 	{less, less, less, less, less, less, less, less, less, less, less, less, less, less, less, less, less, empty, empty}				// $
 };
-
 
 /**
  * Funkcia, ktora nam generuje pomocne premenne $x,
@@ -457,7 +456,7 @@ TError StackShift(int tokterm, char *attr)
 	return error;
 }
 
-//#ifdef DEBUG
+#ifdef DEBUG
 /**
  * Pomocna funkce pro vypis celeho zasobniku.
  * @param stack
@@ -484,13 +483,13 @@ void whatInStacks()
 	while (temp->Lptr != NULL)
 	{
 		temp = temp->Lptr;
-		printf("|--%d.-\t\t-termType- -%d-\t-idType- -%d-\t-data- \"%p\"--|\n", 
+		printf("|--%d.-\t\t-termType- -%d-\t-idType- -%d-\t-data- \"%s\"--|\n", 
 			i, temp->termType, temp->idType, temp->data);
 		i++;
 	}
 
 }
-//#endif
+#endif
 
 /**
 * Funkce vraci index do tabulky
@@ -1048,7 +1047,6 @@ TError findRule(ruleType rule)
 			*expRes = htSearch(*locTable,newVar.str);
 			// TODO vygenerovat odpovedajucu instrukciu
 
-
 			// nejdrive se zbavim: < i (2x pop)
 			StackPop();			
 			StackPop();			
@@ -1135,6 +1133,7 @@ TError findRule(ruleType rule)
 }
 
 
+
 /**
  * Hlavni funkce vyrazu.
  * @param  input Soubor obsahujici vstupni kod.
@@ -1145,7 +1144,7 @@ TError findRule(ruleType rule)
 TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **localTable, tHTItem **exprRes)
 {
 	locTable = localTable;
-	expRes=exprRes;
+	expRes = exprRes;
 	counteerVar = count;
 	TError error = ENOTFOUND;
 	TstackElemPtr tempStack = NULL;

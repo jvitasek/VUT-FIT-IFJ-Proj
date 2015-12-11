@@ -303,7 +303,7 @@ tHTItem* htSearchScope(tHTable* ptrht, char *key, int scope)
  * @param key   [description]
  * @param data  [description]
  */
-void htInsert(tHTable* ptrht, char *key,tData data)
+void htInsert(tHTable* ptrht, char *key, tData data)
 {
 	if(ptrht) // it there is something to work with
 	{
@@ -722,3 +722,4 @@ void outputSymbolTable(tHTable* ptrht)
 	}
 	printf ("------------------------------------\n");
 }
+
