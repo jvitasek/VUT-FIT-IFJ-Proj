@@ -404,8 +404,47 @@ else
 	echo "Test 30: ERROR, EXPECTED 9, GOT $ret" >> test.out
 fi
 
+# vetev else
+echo "31:"
+./main tests/test31.cc
+ret=$?
+
+if [ "$ret" -eq 0 ];
+then
+	succ=$((succ+1))
+	echo "Test 31: SUCCESS" >> test.out
+else
+	echo "Test 31: ERROR, EXPECTED 0, GOT $ret" >> test.out
+fi
+
+# zpracovani vice parametru pri volani fce ve vyrazech (zde chyba)
+echo "32:"
+./main tests/test32.cc
+ret=$?
+
+if [ "$ret" -eq 4 ];
+then
+	succ=$((succ+1))
+	echo "Test 32: SUCCESS" >> test.out
+else
+	echo "Test 32: ERROR, EXPECTED 4, GOT $ret" >> test.out
+fi
+
+# zpracovani vice parametru pri volani fce ve vyrazech
+echo "33:"
+./main tests/test33.cc
+ret=$?
+
+if [ "$ret" -eq 0 ];
+then
+	succ=$((succ+1))
+	echo "Test 33: SUCCESS" >> test.out
+else
+	echo "Test 33: ERROR, EXPECTED 0, GOT $ret" >> test.out
+fi
+
 echo "#################"
-echo "SUCCESS: $succ/30"
+echo "SUCCESS: $succ/33"
 
 
 

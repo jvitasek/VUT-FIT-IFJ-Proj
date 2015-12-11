@@ -16,7 +16,7 @@
 #include "expression.h"
 #include "ial.h"
 
-#define DEBUG 1
+//#define DEBUG 1
 //#define DEBUG_INST 1
 
 int *counteerVar;	// sluzi pri tvorbe pomocnych premennych
@@ -1113,10 +1113,45 @@ TError find_rule(ruleType rule)
 					return error;
 				}
 			}
+			// funkce s vice nez jednim parametrem < f(E, E)
+			else if(stack.top->Lptr->Lptr->termType == PComma &&
+				stack.top->Lptr->termType == PNonTerm)
+			{
+				if ((tempPtr = malloc(sizeof(struct TstackElem))) == NULL)
+				{				
+					print_error(EINT, token.line);
+				}				
+				tempPtr = stack.top;
+				int cnt = 0;
+				
+				while(tempPtr->Lptr->termType != PLeftP)
+				{
+					tempPtr = tempPtr->Lptr;
+					if (tempPtr->termType == PComma)
+					{
+						cnt++;
+					}
+				}
+
+				for (int i = 1; i <= cnt + cnt + 1 + 4; i++)
+				{
+					stack_pop();
+				}
+
+				// pushnu neterminal na zasobnik
+				if ((error = stack_push(PNonTerm, "PNonTerm")) != ENOP)
+				{
+					#ifdef DEBUG
+					fprintf(stderr, "Chyba pri StackPush.\n");
+					#endif
+					
+					return error;
+				}
+			}
 			else
 			{
 				#ifdef DEBUG
-				fprintf(stderr, "Chyba pravidla PAR_RULE.\n");
+				fprintf(stderr, "Chyba pravidla FUNC_RULE.\n");
 				#endif
 				error = ESYN;
 				return error;
@@ -1219,15 +1254,30 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 				#ifdef DEBUG
 					printf("TOKTERM JE ID!!...attr: %s.\n", strGetStr(attr));
 				#endif
-				if((tempItem = htSearch(*localTable, strGetStr(attr))) != NULL)
+				if((tempItem = htSearch(*locTable, strGetStr(attr))) != NULL)
 				{
-					tempData = htRead(*localTable, strGetStr(attr));
+					tempData = htRead(*locTable, strGetStr(attr));
 					if (tempData->type == FUNC)
 					{
 						tokterm = PIdFun;
 						#ifdef DEBUG
 							printf("!!!!ID je FUNKCE!!!!!.\n");
+							//outputSymbolTable(*localTable);
 						#endif
+
+						if((tempData = htRead(*locTable, currFunc)) != NULL)
+						{
+							#ifdef DEBUG_SEM
+							fprintf(stderr, "je %s definovana: %d\n", currFunc, tempData->isDefined);
+							#endif
+							if(tempData->isDefined != 1)
+							{
+								#ifdef DEBUG_SEM
+								fprintf(stderr, "KONCIM V CALL_ASSIGN\n");
+								#endif
+								print_error(ESEM_DEF, token.line);
+							}
+						}
 					}
 					else
 					{
@@ -1236,7 +1286,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 							printf("!!!!!ID je ID!!!!!!!.\n");
 						#endif
 
-						if((tempItem = htSearch(*localTable, strGetStr(attr))) == NULL)
+						if((tempItem = htSearch(*locTable, strGetStr(attr))) == NULL)
 						{
 							#ifdef DEBUG
 								fprintf(stderr, "Nenasel jsem IDENTIFIKATHOOOR!!!\n");
@@ -1522,15 +1572,29 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 					// #ifdef DEBUG
 					// 	printf("TOKTERM JE ID!!...attr: %s.\n", strGetStr(attr));
 					// #endif
-					if((tempItem = htSearch(*localTable, strGetStr(attr))) != NULL)
+					if((tempItem = htSearch(*locTable, strGetStr(attr))) != NULL)
 					{
-						tempData = htRead(*localTable, strGetStr(attr));
+						tempData = htRead(*locTable, strGetStr(attr));
 						if (tempData->type == FUNC)
 						{
 							tokterm = PIdFun;
-							// #ifdef DEBUG
-							// 	printf("!!!!ID je FUNKCE!!!!!.\n");
-							// #endif
+							#ifdef DEBUG
+								printf("!!!!ID je FUNKCE!!!!!.\n");
+							#endif
+							
+							if((tempData = htRead(*locTable, currFunc)) != NULL)
+							{
+								#ifdef DEBUG_SEM
+								fprintf(stderr, "je %s definovana: %d\n", currFunc, tempData->isDefined);
+								#endif
+								if(tempData->isDefined != 1)
+								{
+									#ifdef DEBUG_SEM
+									fprintf(stderr, "KONCIM V CALL_ASSIGN\n");
+									#endif
+									print_error(ESEM_DEF, token.line);
+								}
+							}
 						}
 						else
 						{
@@ -1539,12 +1603,13 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 							// 	printf("!!!!!ID je ID!!!!!!!.\n");
 							// #endif
 
-							if((tempItem = htSearch(*localTable, strGetStr(attr))) == NULL)
+							if((tempItem = htSearch(*locTable, strGetStr(attr))) == NULL)
 							{
 								#ifdef DEBUG
 									fprintf(stderr, "Nenasel jsem IDENTIFIKATHOOOR!!!\n");
 								#endif
 
+								stack_dispose();
 								print_error(ESEM_DEF, token.line);
 								exit(ESEM_DEF);
 							}
