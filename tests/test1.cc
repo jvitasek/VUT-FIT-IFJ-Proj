@@ -22,5 +22,3 @@ int main()
     int scopovaci = 0;
     return 2 + 5; // dusanova zalezitost
 }
-
-int main();

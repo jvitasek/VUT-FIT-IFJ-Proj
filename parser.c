@@ -29,10 +29,7 @@ tHTable *paraTable;
 tHTItem *idAssign = NULL;
 tHTItem *exprRes = NULL;
 stack tableStack;
-int currScope;
-int currOrder;
-int currOrderTerm;
-char *currFunc; // globalni promenna pro nazev momentalni funkce
+
 T_Type currType;
 
 tInstList List;	// zoznam instrukcii
@@ -437,22 +434,20 @@ TError comm_seq(FILE *input)
 		tData *tempData;
 		if((tempData = htRead(funcTable, currFunc)) != NULL)
 		{
-			if(tempData->isDefined == 1)
+			if(tempData->type == FUNC)
 			{
-				print_error(ESEM_DEF, token.line);
+				tData data;
+				data.type = tempData->type;
+				data.timesUsed = tempData->timesUsed;
+				data.scope = tempData->scope;
+				data.orderParams = tempData->orderParams;
+				data.isDefined = 1;
+				htInsert(funcTable, currFunc, data);
+				#ifdef DEBUG_SEM
+				fprintf(stderr, "UPRAVUJI %s, DEFINOVANA: %d\n", currFunc, data.isDefined);
+				#endif
 			}
-			tData data;
-			data.type = tempData->type;
-			data.timesUsed = tempData->timesUsed;
-			data.scope = tempData->scope;
-			data.orderParams = tempData->orderParams;
-			data.isDefined = 1;
-			htInsert(funcTable, currFunc, data);
-			#ifdef DEBUG_SEM
-			fprintf(stderr, "UPRAVUJI %s, DEFINOVANA: %d\n", currFunc, data.isDefined);
-			#endif
 		}
-		currFunc = "";
 
 		// SEMANTICKA ANALYZA
 		if(tableStack.top->table != NULL)
@@ -873,7 +868,6 @@ TError call_assign(FILE *input)
 		getNextToken(input, &attr);
 		error = expr(input, &attr, 0, &counterVar, &commTable, &exprRes);
 		idAssign->data.value.ptrTS = exprRes;
-		currFunc = "";
 		#ifdef DEBUG
 		fprintf(stderr, "call_assign: expr vratilo: %d\n", error);
 		#endif
@@ -894,6 +888,7 @@ TError call_assign(FILE *input)
 		 * kontrola, zda volana funkce byla definovana
 		 */
 		tData *tempData;
+		fprintf(stderr, "currFunc: %s\n", currFunc);
 		if((tempData = htRead(funcTable, currFunc)) != NULL)
 		{
 			#ifdef DEBUG_SEM
