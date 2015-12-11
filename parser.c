@@ -11,6 +11,7 @@
 //#define DEBUG 1
 //#define DEBUG_SEM 1
 //#define DEBUG_INST 1
+//#define JARIS 1
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -20,8 +21,10 @@
 #include "parser.h"
 #include "expression.h"
 #include "istack.h"
+#ifdef JARIS
 #include "ilist.h"
 #include "stack.h"
+#endif
 
 string attr; // vytvorime si string
 int counterVar = 1;	// globalna premenna, ktora sluzi pri tvorbe pomocnych premennych na medzivypocty
@@ -33,9 +36,7 @@ tHTItem *exprRes = NULL;
 stack tableStack;
 tInstList List;	// zoznam instrukcii
 
-/**
- * interpretacky promenny
- */
+#ifdef JARIS
 int currScope;
 tListOfInstr *list;
 union dat_typ_obsah unie;
@@ -53,6 +54,7 @@ extern void *endOfMain = NULL;
 // a - prave se tam nachazim
 // y - uz jsem tam byl
 char *I_am_in= "n";
+#endif
 
 /**
  * seznam vestavenych funkci
@@ -81,6 +83,7 @@ void get_next_token(FILE *input, string *attr)
 	}
 }
 
+#ifdef JARIS
 /**
  * Vlozi novou instrukci do seznamu instrukci
  * @param instType [description]
@@ -109,6 +112,7 @@ void generateInstruction(tInstCode instType, TypeI typ1, union dat_typ_obsah *op
 
    listInsertLast(list, *I);
 }
+#endif
 
 /**
  * Zkontroluje, zda je vlozeny retezec klicove slovo.
@@ -336,9 +340,7 @@ TError func(FILE *input)
 					fprintf(stderr, "VKLADAM %s\n", strGetStr(&attr));
 					#endif
 				}
-				/**
-				 * interpret
-				 */
+				#ifdef JARIS
 				if(strcmp((strGetStr(&attr)),"main") == 0)
 				{
 					generateInstruction(I_START, INT, &unie, STRING, &unie2,  DOUBLE, NULL);
@@ -354,9 +356,7 @@ TError func(FILE *input)
 					printf("end of main: %d\n", endOfMain);
 				}
 				printf("VYPISSSSSSS neni : %s\n",strGetStr(&attr) );
-				/**
-				 * end interpret
-				 */
+				#endif
 			}
 			currFunc = malloc(sizeof(char)*strlen(strGetStr(&attr)));
 			strcpy(currFunc, strGetStr(&attr));
@@ -689,16 +689,12 @@ TError stmt(FILE *input)
 		{
 			get_next_token(input, &attr);
 			error = expr(input, &attr, 1, &counterVar, &commTable, &exprRes);
-			/**
-			 * interpret
-			 */
+			#ifdef JARIS
 			lastI = listGetPointerLast(list);
 			unie.obsah = afterIf;
 			//je-li podminka pravdiva, skacu za if (afterIf)
 			generateInstruction(I_IFGOTO, INT, &unie, STRING, &unie2,  DOUBLE, NULL);
-			/**
-			 * end interpret
-			 */
+			#endif
 			#ifdef DEBUG
 			//outputSymbolTable(commTable);
 			fprintf(stderr, "stmt: expr vratilo: %d\n", error);
@@ -708,17 +704,13 @@ TError stmt(FILE *input)
 			{
 				get_next_token(input, &attr);
 				error = comm_seq(input);
-				/**
-				 * interpret
-				 */
+				#ifdef JARIS
 				SPushP(&stackI, lastI);
 				afterIf = listGetPointerLast(list);
 				SPushP(&stackI, afterIf);
 				unie.obsah=afterIf;
 				//generateInstruction(I_IFGOTO, INT, &unie, STRING, &unie2,  DOUBLE, NULL);
-				/**
-				 * end interpret
-				 */
+				#ifdef
 				#ifdef DEBUG
 				fprintf(stderr, "stmt: comm_seq vratilo: %d\n", error);
 				#endif
@@ -768,15 +760,11 @@ TError stmt(FILE *input)
 			{
 				get_next_token(input, &attr);
 				error = expr(input, &attr, 0, &counterVar, &commTable, &exprRes);
-				/**
-				 * interpret
-				 */
+				#ifdef JARIS
 				unie.obsah=5;
 				unie2.obsah=10;
 				generateInstruction(I_SET_FOR, INT, &unie, STRING, &unie2,  DOUBLE, NULL);
-				/**
-				 * end interpret
-				 */
+				#endif
 				#ifdef DEBUG
 				fprintf(stderr, "stmt: expr vratilo: %d\n", error);
 				#endif
@@ -795,16 +783,12 @@ TError stmt(FILE *input)
 						fprintf(stderr, "ADRESA ADRESA ADRESA: --------> %d\n", beforeFor);
 						#endif
 						error = comm_seq(input);
-						/**
-						 * interpret
-						 */
+						#ifdef JARIS
 						generateInstruction(I_FOR_GOTO, INT, &unie, STRING, &unie2,  DOUBLE, NULL);
 						SPushP(&forstack, beforeFor);
 						behindFor = listGetPointerLast(list);
 						SPushP(&forstack, behindFor);
-						/**
-						 * end interpret
-						 */
+						#endif
 						#ifdef DEBUG
 						fprintf(stderr, "stmt: comm_seq vratilo: %d\n", error);
 						#endif
@@ -2056,16 +2040,12 @@ TError realtype()
 	// P: UNDEF
 	if(token.type == T_Doub || token.type == T_Str || token.type == T_Integ)
 	{
-		/**
-		 * interpret
-		 */
+		#ifdef JARIS
 		//unie.obsah_s = malloc(sizeof(char)*strlen(strGetStr(&attr)));
 		printf("JSEM TU\n");
 		strcpy(unie.obsah_s, strGetStr(&attr));
 		generateInstruction(I_PRINT, STRING, &unie, STRING, &unie2,  DOUBLE, NULL);
-		/**
-		 * end interpret
-		 */
+		#endif
 		currType = token.type;
 		return ENOP;
 	}
