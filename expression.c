@@ -17,12 +17,13 @@
 #include "ial.h"
 
 //#define DEBUG 1
-//#define DEBUG_INST 1
+//define DEBUG_INST 1
 
 int *counteerVar;	// sluzi pri tvorbe pomocnych premennych
 Tstack stack;
 tHTable **locTable;
 tHTItem **expRes;
+char *idName = NULL;
 
 /**
  * Precedencni tabulka.
@@ -1031,8 +1032,7 @@ TError find_rule(ruleType rule)
 				#endif
 		
 				generate_inst(C_Assign,op1,NULL,res);
-
-
+				*expRes = htSearch(*locTable,newVar.str);
 			}
 			else if(tempPtr->idType == 1)	//doub
 			{
@@ -1048,6 +1048,7 @@ TError find_rule(ruleType rule)
 				#endif
 		
 				generate_inst(C_Assign,op1,NULL,res);
+				*expRes = htSearch(*locTable,newVar.str);
 			}
 			else if(tempPtr->idType == 0)	//str
 			{
@@ -1063,8 +1064,11 @@ TError find_rule(ruleType rule)
 				#endif
 		
 				generate_inst(C_Assign,op1,NULL,res);
+				*expRes = htSearch(*locTable,newVar.str);
+			}else if(tempPtr->idType == 3)
+			{
+				*expRes = htSearch(*locTable,idName);
 			}
-			*expRes = htSearch(*locTable,newVar.str);
 			// TODO vygenerovat odpovedajucu instrukciu
 
 			// nejdrive se zbavim: < i (2x pop)
@@ -1198,6 +1202,8 @@ TError find_rule(ruleType rule)
  */
 TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **localTable, tHTItem **exprRes)
 {
+	idName = malloc(sizeof(char)*strlen(attr->str)+1);
+	strcpy(idName,attr->str);
 	locTable = localTable;
 	expRes = exprRes;
 	counteerVar = count;
