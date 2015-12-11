@@ -75,5 +75,5 @@ void listNext(tInstList *L);
 void listGoTo(tInstList *L, void *gotoInstr);
 tInstruct *listGetPointerLast(tInstList *L);
 tInstruct *listGetData(tInstList *L);
-void print_elements_of_list(tInstList L);
+void printElementsOfList(tInstList L);
 #endif

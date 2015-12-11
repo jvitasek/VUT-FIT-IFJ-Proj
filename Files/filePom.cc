@@ -1,18 +1,23 @@
 
 
 // localTable: main, 2, 0 
-in. main()
+int main()
 {
     // stack->top: localTable
-   
+   	double bubo = 6.9;
 	int a = 5;
+	string kokot = "pica";
 
+	a = 6;
 	if(a == 9999)
 	{
 		int g = 29;
+	}else
+	{
+
 	}
 
-	a = 9;
+
 	int b = 3;
 	int c = a + b;
  

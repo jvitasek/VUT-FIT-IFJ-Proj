@@ -10,7 +10,7 @@
 
 //#define DEBUG 1
 //#define DEBUG_SEM 1
-#define DEBUG_INST 1
+//#define DEBUG_INST 1
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -868,6 +868,22 @@ TError call_assign(FILE *input)
 		get_next_token(input, &attr);
 		error = expr(input, &attr, 0, &counterVar, &commTable, &exprRes);
 		idAssign->data.value.ptrTS = exprRes;
+		if(exprRes != NULL)
+		{
+			#ifdef DEBUG_INST
+			if(exprRes->data.varType == T_Integ)
+			{
+				fprintf(stderr, "\tParserInt: CODE:%d|OPE1 %s %d ||Vysl %s\n",C_Assign,exprRes->key,exprRes->data.value.i,idAssign->key);
+			}else if(exprRes->data.varType == T_Doub)
+			{
+				fprintf(stderr, "\tParserDoub: CODE:%d|OPE1 %s %f ||Vysl %s\n",C_Assign,exprRes->key,exprRes->data.value.d,idAssign->key);
+			}else //if(exprRes->data.varType == T_Str)
+			{
+				fprintf(stderr, "\tParserStr: CODE:%d|OPE1 %s %s ||Vysl %s\n",C_Assign,exprRes->key,exprRes->data.value.str,idAssign->key);
+			}
+			#endif
+			generate_inst(C_Assign,exprRes,NULL,idAssign);
+		}
 		#ifdef DEBUG
 		fprintf(stderr, "call_assign: expr vratilo: %d\n", error);
 		#endif
@@ -1509,7 +1525,16 @@ TError init(FILE *input)
 		if(exprRes != NULL)
 		{
 			#ifdef DEBUG_INST
-			fprintf(stderr, "\tCODE:%d|OPE1 %s %d ||Vysl %s\n",C_Assign,exprRes->key,exprRes->data.value.i,idAssign->key);
+			if(exprRes->data.varType == T_Integ)
+			{
+				fprintf(stderr, "\tParserInt: CODE:%d|OPE1 %s %d ||Vysl %s\n",C_Assign,exprRes->key,exprRes->data.value.i,idAssign->key);
+			}else if(exprRes->data.varType == T_Doub)
+			{
+				fprintf(stderr, "\tParserDoub: CODE:%d|OPE1 %s %f ||Vysl %s\n",C_Assign,exprRes->key,exprRes->data.value.d,idAssign->key);
+			}else //if(exprRes->data.varType == T_Str)
+			{
+				fprintf(stderr, "\tParserStr: CODE:%d|OPE1 %s %s ||Vysl %s\n",C_Assign,exprRes->key,exprRes->data.value.str,idAssign->key);
+			}
 			#endif
 			generate_inst(C_Assign,exprRes,NULL,idAssign);
 		}

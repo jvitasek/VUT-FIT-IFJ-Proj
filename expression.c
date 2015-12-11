@@ -1017,7 +1017,7 @@ TError find_rule(ruleType rule)
 			tData data;
 			string newVar;
 			strInit(&newVar);
-			if(tempPtr->idType == 2)
+			if(tempPtr->idType == 2)	//int
 			{
 				generate_variable(&newVar,counteerVar);
 				data.varType = T_Integ;
@@ -1027,26 +1027,42 @@ TError find_rule(ruleType rule)
 				tHTItem *op1 = htSearch(*locTable,tempPtr->data);
 				tHTItem *res = htSearch(*locTable,newVar.str);
 				#ifdef DEBUG_INST
-				fprintf(stderr, "\n \tCODE:%d|OPE1 %s %d ||Vysl %s",C_Assign,op1->key,op1->data.value.i,res->key);
+				fprintf(stderr, "\tExprInt CODE:%d|OPE1 %s %d ||Vysl %s\n",C_Assign,op1->key,op1->data.value.i,res->key);
 				#endif
 		
 				generate_inst(C_Assign,op1,NULL,res);
 
 
 			}
-			else if(tempPtr->idType == 1)
+			else if(tempPtr->idType == 1)	//doub
 			{
 				generate_variable(&newVar,counteerVar);
 				data.varType = T_Doub;
 				data.value.d = atof(tempPtr->data);
+				htInsert(*locTable,tempPtr->data,data);		// vlozim do TS kluc napr 5.5 a hodnota 5.5
 				htInsert(*locTable, newVar.str,data);
+				tHTItem *op1 = htSearch(*locTable,tempPtr->data);
+				tHTItem *res = htSearch(*locTable,newVar.str);
+				#ifdef DEBUG_INST
+				fprintf(stderr, "\tExprDoub CODE:%d|OPE1 %s %f ||Vysl %s\n",C_Assign,op1->key,op1->data.value.d,res->key);
+				#endif
+		
+				generate_inst(C_Assign,op1,NULL,res);
 			}
-			else if(tempPtr->idType == 0)
+			else if(tempPtr->idType == 0)	//str
 			{
 				generate_variable(&newVar,counteerVar);
 				data.varType = T_Str;
 				strcpy(data.value.str,tempPtr->data);
+				htInsert(*locTable,tempPtr->data,data);		// vlozim do TS kluc napr "ahoj" a hodnota "ahoj"
 				htInsert(*locTable, newVar.str,data);
+				tHTItem *op1 = htSearch(*locTable,tempPtr->data);
+				tHTItem *res = htSearch(*locTable,newVar.str);
+				#ifdef DEBUG_INST
+				fprintf(stderr, "\tExprStr CODE:%d|OPE1 %s %s ||Vysl %s\n",C_Assign,op1->key,op1->data.value.str,res->key);
+				#endif
+		
+				generate_inst(C_Assign,op1,NULL,res);
 			}
 			*expRes = htSearch(*locTable,newVar.str);
 			// TODO vygenerovat odpovedajucu instrukciu

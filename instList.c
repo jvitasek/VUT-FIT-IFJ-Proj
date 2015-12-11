@@ -219,7 +219,16 @@ void printElementsOfList(tInstList L)
 		{
 			tHTItem *op1 = TempList.First->instruct.op1;
 			tHTItem *res = TempList.First->instruct.result;
-			fprintf(stderr, "\n \tCODE:%d|OPE1 %s %d ||Vysl %s",C_Assign,op1->key,op1->data.value.i, res->key);
+			if(op1->data.varType == T_Integ)
+			{
+				fprintf(stderr, "\tMainInt CODE:%d|OPE1 %s %d ||Vysl %s\n",C_Assign,op1->key,op1->data.value.i, res->key);
+			}else if(op1->data.varType == T_Doub)
+			{
+				fprintf(stderr, "\tMainDoub CODE:%d|OPE1 %s %f ||Vysl %s\n",C_Assign,op1->key,op1->data.value.d, res->key);
+			}else //if(op1->data.varType == T_Str)
+			{
+				fprintf(stderr, "\tMainStr CODE:%d|OPE1 %s %s ||Vysl %s\n",C_Assign,op1->key,op1->data.value.str, res->key);
+			}
 		}
 		
 		TempList.First=TempList.First->nextItem;
