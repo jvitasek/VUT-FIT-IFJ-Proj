@@ -1614,7 +1614,7 @@ TError init(FILE *input)
 		 */
 		if(currType == T_Auto)
 		{
-			print_error(ESEM, token.line);
+			print_error(ESEM_DEF, token.line);
 		}
 		error = EEMPTY;
 	}
