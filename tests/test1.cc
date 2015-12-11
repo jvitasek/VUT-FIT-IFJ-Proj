@@ -5,6 +5,10 @@ int testicek(int param1, double param2)
 	{
 		param1 = 2;
 	}
+    else
+    {
+        param2 = 3;
+    }
 	return param1 + param2;
 }
 

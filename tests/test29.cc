@@ -6,6 +6,10 @@ int main()
 	{
 		int a = 7;
 	}
+	else
+	{
+		int a = 8;
+	}
 
 	return 4 / 0.000;
 } 

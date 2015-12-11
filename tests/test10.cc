@@ -5,5 +5,9 @@ int main()
 	{
 		int neco = 3;
 	}
+	else
+	{
+		int parada = 3;
+	}
 	return lol;
 }

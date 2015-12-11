@@ -11,6 +11,10 @@ double test(string testing)
 	{
 		int lol = 2;
 	}
+	else
+	{
+		int lol = 3;
+	}
 
 	int dalsi = 22;
 	{
