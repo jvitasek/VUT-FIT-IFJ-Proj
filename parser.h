@@ -10,6 +10,8 @@
  
 #include "ial.h"
 #include <stdbool.h>
+#include "instList.h"
+extern tInstList List;
 #define BUILTIN 5
  
  // HLAVNI FUNKCE

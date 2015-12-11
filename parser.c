@@ -34,6 +34,8 @@ int currOrderTerm;
 char *currFunc; // globalni promenna pro nazev momentalni funkce
 T_Type currType;
 
+tInstList List;	// zoznam instrukcii
+
 const char* builtin[BUILTIN] = {
 	"length", "concat", "substr",
 	"find", "sort"
@@ -530,6 +532,7 @@ TError stmt(FILE *input)
 		{
 			getNextToken(input, &attr);
 			error = expr(input, &attr, 1, &counterVar, &commTable, &exprRes);
+			
 			#ifdef DEBUG
 			outputSymbolTable(commTable);
 			fprintf(stderr, "stmt: expr vratilo: %d\n", error);

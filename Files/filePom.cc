@@ -4,8 +4,7 @@
 int main()
 {
     // stack->top: localTable
-    int q = "kokot";
-    int pica = 5.9;
+   
 	int a = 5;
 
 	if(a == 9999)

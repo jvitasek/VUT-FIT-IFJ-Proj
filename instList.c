@@ -11,6 +11,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "ial.h"
 
 /**
  * Inicializacia zoznamu
@@ -212,28 +213,15 @@ void print_elements_of_list(tInstList L)
 	tInstList TempList;
 	TempList = L;
 	int CurrListLength = 0;
-	printf("-----------------");
+	printf("\n-----------------\n");
 	while ((TempList.First!=NULL) && (CurrListLength<MaxListLength))	{
 		if(TempList.First->instruct.instCode == C_Assign)
-		printf("\n \tCODE:%d|OPE1 %p %d ||Vysl %p %d",TempList.First->instruct.instCode,(void*)TempList.First->instruct.op1,*(int *)TempList.First->instruct.op1,(void*)TempList.First->instruct.result,*(int *)TempList.First->instruct.result);
-		else if((TempList.First->instruct.instCode == C_Read) || (TempList.First->instruct.instCode == C_Write))
-		printf("\n \tCODE:%d|OPE1 %p %d",TempList.First->instruct.instCode,(void*)TempList.First->instruct.op1,*(int *)TempList.First->instruct.op1);
-		else if(TempList.First->instruct.instCode == C_Find)
-		printf("\n \tCODE:%d|OPE1 %p %d || OPE2 %p %d ",TempList.First->instruct.instCode,(void*)TempList.First->instruct.op1,*(int *)TempList.First->instruct.op1,(void*)TempList.First->instruct.op2,*(int *)TempList.First->instruct.op2);
-		else if(TempList.First->instruct.instCode == C_Label)
-		printf("\n \tCODE:%d",TempList.First->instruct.instCode);
-		else if((TempList.First->instruct.instCode == C_Not) || (TempList.First->instruct.instCode == C_Length) || (TempList.First->instruct.instCode == C_Sort))
-		printf("\n \tCODE:%d|OPE1 %p %d || Vysl %p %d ",TempList.First->instruct.instCode,(void*)TempList.First->instruct.op1,*(int *)TempList.First->instruct.op1,(void*)TempList.First->instruct.result,*(int *)TempList.First->instruct.result);
-		else if(TempList.First->instruct.instCode == C_IfGoTo)
-		printf("\n \tCODE:%d|OPE1 %p %d",TempList.First->instruct.instCode,(void*)TempList.First->instruct.op1,*(int *)TempList.First->instruct.op1);
-		else if(TempList.First->instruct.instCode == C_GoTo)
-		printf("\n \tCODE:%d",TempList.First->instruct.instCode);
-		else if(TempList.First->instruct.instCode == C_Ret)
-		printf("\n \tCODE:%d|OPE1 %p %d",TempList.First->instruct.instCode,(void*)TempList.First->instruct.result,*(int *)TempList.First->instruct.result);
-		else
-		printf("\n \tCODE:%d|OPE1 %p %d || OPE2 %p %d ||Vysl %p %d",TempList.First->instruct.instCode,(void*)TempList.First->instruct.op1,*(int *)TempList.First->instruct.op1,(void*)TempList.First->instruct.op2,*(int *)TempList.First->instruct.op2,(void*)TempList.First->instruct.result,*(int *)TempList.First->instruct.result);
-		if ((TempList.First==L.Act) && (L.Act!=NULL))
-			printf("\t <= toto je aktivní prvek ");
+		{
+			tHTItem *op1 = TempList.First->instruct.op1;
+			tHTItem *res = TempList.First->instruct.result;
+			printf("\n \tCODE:%d|OPE1 %s %d ||Vysl %s",C_Assign,op1->key,op1->data.value.i, res->key);
+		}
+		
 		TempList.First=TempList.First->nextItem;
 		CurrListLength++;
 	}
