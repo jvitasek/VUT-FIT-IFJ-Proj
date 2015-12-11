@@ -9,8 +9,8 @@
  */
 
 //#define DEBUG 1
-#define DEBUG_SEM 1
-//#define DEBUG_INST 1
+//#define DEBUG_SEM 1
+#define DEBUG_INST 1
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -888,7 +888,9 @@ TError call_assign(FILE *input)
 		 * kontrola, zda volana funkce byla definovana
 		 */
 		tData *tempData;
+		#ifdef DEBUG_SEM
 		fprintf(stderr, "currFunc: %s\n", currFunc);
+		#endif
 		if((tempData = htRead(funcTable, currFunc)) != NULL)
 		{
 			#ifdef DEBUG_SEM
@@ -1507,7 +1509,7 @@ TError init(FILE *input)
 		if(exprRes != NULL)
 		{
 			#ifdef DEBUG_INST
-			fprintf(stderr, "\n \tCODE:%d|OPE1 %s %d ||Vysl %s",C_Assign,exprRes->key,exprRes->data.value.i,idAssign->key);
+			fprintf(stderr, "\tCODE:%d|OPE1 %s %d ||Vysl %s\n",C_Assign,exprRes->key,exprRes->data.value.i,idAssign->key);
 			#endif
 			generateInst(C_Assign,exprRes,NULL,idAssign);
 		}
