@@ -97,10 +97,10 @@ TError StackPush(int tokterm, char *attr);
 TstackElemPtr StackTop();
 TError StackShift(int tokterm, char *attr);
 
-int tokToTerm(int tokenType);
-TError findRule(ruleType rule);
-void generateVariable(string *var, int *counter);
-void generateInst(tInstCode instType, void *op1, void *op2, void *res);
+int tok_to_term(int tokenType);
+TError find_rule(ruleType rule);
+void generate_variable(string *var, int *counter);
+void generate_inst(tInstCode instType, void *op1, void *op2, void *res);
 TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **localTable, tHTItem **exprRes); // P: @todo
 
 #endif

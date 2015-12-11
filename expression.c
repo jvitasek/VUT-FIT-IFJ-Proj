@@ -57,7 +57,7 @@ int preceden_tab[19][19] = {
  * @param	var	 	String vytvaranej premennej.
  * @param 	counter	Pocitadlo potrebne pri tvorbe pomocnych premennych.
  */
-void generateVariable(string *var, int *counter)
+void generate_variable(string *var, int *counter)
 {
 	strClear(var);
 	strAppend(var,'$');
@@ -78,7 +78,7 @@ void generateVariable(string *var, int *counter)
  * @param  op2		 Operand2 (ukazatel do tabulky sumbolov)
  * @param  res		 Vysledok
  */
-void generateInst(tInstCode instCode, void *op1, void *op2, void *res)
+void generate_inst(tInstCode instCode, void *op1, void *op2, void *res)
 {
 	tInstruct inst;
 	inst.instCode = instCode;
@@ -470,7 +470,7 @@ void whatInStacks()
 	printf("|--akt. token- -%d--|\n"
 		"|--VRCHOL- -top->termType- -%d-\t-top->idType--%d- -top->data-\"%s\"--|\n"
 		"|--VRCHOL- \t-termType- -%d-\t-idType- -%d-\t-data- \"%s\"--|\n", 
-		tokToTerm(token.type), stack.top->termType, stack.top->idType, stack.top->data,
+		tok_to_term(token.type), stack.top->termType, stack.top->idType, stack.top->data,
 		temp->termType, temp->idType, temp->data);
 	
 	while (temp->Lptr != NULL)
@@ -489,7 +489,7 @@ void whatInStacks()
 * @param  tokenType	Typ tokenu.
 * @return index 		PSymbol z tokenu.
 */
-int tokToTerm(int tokenType)
+int tok_to_term(int tokenType)
 {
 	int index = 0;
 
@@ -538,7 +538,7 @@ int getPrecSymbol(int ter1, int ter2)
  * @param  stack 	Zasobnik termu.
  * @return error	Navratova hodnota chyby.
  */
-TError findRule(ruleType rule)
+TError find_rule(ruleType rule)
 {
 	TError error = ENOTFOUND;
 	TstackElemPtr tempPtr = NULL;
@@ -1019,7 +1019,7 @@ TError findRule(ruleType rule)
 			strInit(&newVar);
 			if(tempPtr->idType == 2)
 			{
-				generateVariable(&newVar,counteerVar);
+				generate_variable(&newVar,counteerVar);
 				data.varType = T_Integ;
 				data.value.i = atoi(tempPtr->data);
 				htInsert(*locTable,tempPtr->data,data);		// vlozim do TS kluc napr 5 a hodnota 5
@@ -1030,18 +1030,18 @@ TError findRule(ruleType rule)
 				fprintf(stderr, "\n \tCODE:%d|OPE1 %s %d ||Vysl %s",C_Assign,op1->key,op1->data.value.i,res->key);
 				#endif
 		
-				generateInst(C_Assign,op1,NULL,res);
+				generate_inst(C_Assign,op1,NULL,res);
 
 
 			}else if(tempPtr->idType ==1)
 			{
-				generateVariable(&newVar,counteerVar);
+				generate_variable(&newVar,counteerVar);
 				data.varType = T_Doub;
 				data.value.d = atof(tempPtr->data);
 				htInsert(*locTable, newVar.str,data);
 			}else if(tempPtr->idType ==0)
 			{
-				generateVariable(&newVar,counteerVar);
+				generate_variable(&newVar,counteerVar);
 				data.varType = T_Str;
 				strcpy(data.value.str,tempPtr->data);
 				htInsert(*locTable, newVar.str,data);
@@ -1211,7 +1211,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 			strcpy(myAttr, strGetStr(attr));
 
 			// prevedu si token na term (PSymbols)
-			tokterm = tokToTerm(token.type);
+			tokterm = tok_to_term(token.type);
 
 			// zjistim, jestli id je funkce
 			if (tokterm == PIden)
@@ -1300,7 +1300,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 						StackDispose();
 						return error;
 					}
-					getNextToken(input, attr);
+					get_next_token(input, attr);
 				break;
 				case less:
 					#ifdef DEBUG
@@ -1314,7 +1314,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 						StackDispose();
 						return error;
 					}
-					getNextToken(input, attr);
+					get_next_token(input, attr);
 				break;
 				case great:
 					#ifdef DEBUG
@@ -1324,28 +1324,28 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 					switch(tempStack->termType)
 					{
 						case PPlus:
-							if ((error = findRule(ADD_RULE)) != ENOP)
+							if ((error = find_rule(ADD_RULE)) != ENOP)
 							{
 								StackDispose();
 								return error;
 							}
 						break;
 						case PMinus:
-							if ((error = findRule(SUB_RULE)) != ENOP)
+							if ((error = find_rule(SUB_RULE)) != ENOP)
 							{
 								StackDispose();
 								return error;
 							}
 						break;
 						case PMul:
-							if ((error = findRule(MUL_RULE)) != ENOP)
+							if ((error = find_rule(MUL_RULE)) != ENOP)
 							{
 								StackDispose();
 								return error;
 							}
 						break;
 						case PDiv:
-							if ((error = findRule(DIV_RULE)) != ENOP)
+							if ((error = find_rule(DIV_RULE)) != ENOP)
 							{
 								StackDispose();
 								return error;
@@ -1355,7 +1355,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 						case PGreat:
 						case PLessEq:
 						case PGreatEq:
-							if ((error = findRule(LESSGREAT_RULE)) != ENOP)
+							if ((error = find_rule(LESSGREAT_RULE)) != ENOP)
 							{
 								StackDispose();
 								return error;
@@ -1363,7 +1363,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 						break;
 						case PEqual:
 						case PNotEq:
-							if ((error = findRule(EQ_RULE)) != ENOP)
+							if ((error = find_rule(EQ_RULE)) != ENOP)
 							{
 								StackDispose();
 								return error;
@@ -1375,7 +1375,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 								tempStack->Lptr->Lptr->Lptr->termType == PIdFun || 
 								tempStack->Lptr->Lptr->termType == PComma)
 							{
-								if ((error = findRule(FUNC_RULE)) != ENOP)
+								if ((error = find_rule(FUNC_RULE)) != ENOP)
 								{
 									StackDispose();
 									return error;
@@ -1384,7 +1384,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 							// zavorky
 							else
 							{
-								if ((error = findRule(PAR_RULE)) != ENOP)
+								if ((error = find_rule(PAR_RULE)) != ENOP)
 								{
 									StackDispose();
 									return error;
@@ -1395,7 +1395,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 						case PInt:
 						case PDouble:
 						case PString:
-							if ((error = findRule(ID_E_RULE)) != ENOP)
+							if ((error = find_rule(ID_E_RULE)) != ENOP)
 							{
 								StackDispose();
 								return error;
@@ -1470,21 +1470,21 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 			
 			#ifdef DEBUG
 				printf("----- ---- --%d.-- ?? KONEC WHILE DO ?? -- ---- -----\n", index);
-				if ((tempStack->termType == PDollar) && (tokToTerm(token.type) == PDollar))
+				if ((tempStack->termType == PDollar) && (tok_to_term(token.type) == PDollar))
 				{
 					printf("-KONCIM!!!! Stack top == DOLAR a akt. token == DOLAR -.\n");
 				}
 				else
 				{
 					printf("-NE-KONCIM!! protoze stack.top->term: %d a akt. token: %d\n", 
-						tempStack->termType, tokToTerm(token.type));
+						tempStack->termType, tok_to_term(token.type));
 				}
 				printf("-------------------------------------------------------\n");
 			#endif
 
 			prevTok = tokterm;
 
-		} while(!((tempStack->termType == PDollar) && (tokToTerm(token.type) == PDollar)));
+		} while(!((tempStack->termType == PDollar) && (tok_to_term(token.type) == PDollar)));
 	}
 	/**
 	 * Zpracovavani vyrazu ukonceneho pravou zavorkou.
@@ -1499,7 +1499,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 		int index = 0;
 
 		// prevedu si token na term (PSymbols)
-		tokterm = tokToTerm(token.type);	
+		tokterm = tok_to_term(token.type);	
 
 		do {
 			tempStack = StackTop(); // nejvrchnejsi terminal na zasobniku
@@ -1514,7 +1514,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 
 			if (tokterm != PDollar)
 			{
-				tokterm = tokToTerm(token.type);
+				tokterm = tok_to_term(token.type);
 
 				// zjistim, jestli id je funkce
 				if (tokterm == PIden)
@@ -1602,7 +1602,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 						StackDispose();
 						return error;
 					}
-					getNextToken(input, attr);
+					get_next_token(input, attr);
 				break;
 				case less:
 					#ifdef DEBUG
@@ -1617,7 +1617,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 						StackDispose();
 						return error;
 					}
-					getNextToken(input, attr);
+					get_next_token(input, attr);
 				break;
 				case great:
 					#ifdef DEBUG
@@ -1628,28 +1628,28 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 					switch(tempStack->termType)
 					{
 						case PPlus:
-							if ((error = findRule(ADD_RULE)) != ENOP)
+							if ((error = find_rule(ADD_RULE)) != ENOP)
 							{
 								StackDispose();
 								return error;
 							}
 						break;
 						case PMinus:
-							if ((error = findRule(SUB_RULE)) != ENOP)
+							if ((error = find_rule(SUB_RULE)) != ENOP)
 							{
 								StackDispose();
 								return error;
 							}
 						break;
 						case PMul:
-							if ((error = findRule(MUL_RULE)) != ENOP)
+							if ((error = find_rule(MUL_RULE)) != ENOP)
 							{
 								StackDispose();
 								return error;
 							}
 						break;
 						case PDiv:
-							if ((error = findRule(DIV_RULE)) != ENOP)
+							if ((error = find_rule(DIV_RULE)) != ENOP)
 							{
 								StackDispose();
 								return error;
@@ -1659,7 +1659,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 						case PGreat:
 						case PLessEq:
 						case PGreatEq:
-							if ((error = findRule(LESSGREAT_RULE)) != ENOP)
+							if ((error = find_rule(LESSGREAT_RULE)) != ENOP)
 							{
 								StackDispose();
 								return error;
@@ -1667,7 +1667,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 						break;
 						case PEqual:
 						case PNotEq:
-							if ((error = findRule(EQ_RULE)) != ENOP)
+							if ((error = find_rule(EQ_RULE)) != ENOP)
 							{
 								StackDispose();
 								return error;
@@ -1679,7 +1679,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 								tempStack->Lptr->Lptr->Lptr->termType == PIdFun || 
 								tempStack->Lptr->Lptr->termType == PComma)
 							{
-								if ((error = findRule(FUNC_RULE)) != ENOP)
+								if ((error = find_rule(FUNC_RULE)) != ENOP)
 								{
 									StackDispose();
 									return error;
@@ -1688,7 +1688,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 							// zavorky
 							else
 							{
-								if ((error = findRule(PAR_RULE)) != ENOP)
+								if ((error = find_rule(PAR_RULE)) != ENOP)
 								{
 									StackDispose();
 									return error;
@@ -1699,7 +1699,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 						case PInt:
 						case PDouble:
 						case PString:
-							if ((error = findRule(ID_E_RULE)) != ENOP)
+							if ((error = find_rule(ID_E_RULE)) != ENOP)
 							{
 								StackDispose();
 								return error;
