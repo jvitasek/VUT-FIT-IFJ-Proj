@@ -90,8 +90,8 @@ typedef struct Tstack {
 	TstackElemPtr top;
 } Tstack;
 
-TError StackInit(Tstack *stack); // inicialzace zasobniku
-TError StackDispose(Tstack *stack);	
+TError StackInit(); // inicialzace zasobniku
+TError StackDispose();	
 TError StackPop();
 TError StackPush(int tokterm, char *attr);
 TstackElemPtr StackTop();

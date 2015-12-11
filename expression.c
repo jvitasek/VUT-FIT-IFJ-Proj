@@ -99,14 +99,6 @@ TError StackInit()
 	#ifdef DEBUG
 		printf("StackInit in progress.\n");
 	#endif
-	if (stack == NULL)
-	{
-		#ifdef DEBUG
-			printf("StackInit stack == NULL.\n");
-		#endif
-		error = EINT;
-		return error;
-	}
 
 	stack.top = NULL;
 	stack.first = NULL;
@@ -164,19 +156,19 @@ TError StackDispose()
 	}
 
 	// postupne rusim vsechny prvky na zasobniku
-	while (stack->top != NULL)
+	while (stack.top != NULL)
 	{
 		// if (stack->top->data != NULL)
 		// {
 		// 	free(stack->top->data);
 		// }
-		tempPtr = stack->top;
-		stack->top = stack->top->Lptr;
+		tempPtr = stack.top;
+		stack.top = stack.top->Lptr;
 		free(tempPtr);
 	}
 
-	stack->first = NULL;
-	stack->top = NULL;
+	stack.first = NULL;
+	stack.top = NULL;
 
 	return error;
 }
