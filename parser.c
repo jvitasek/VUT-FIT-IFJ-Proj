@@ -1037,7 +1037,7 @@ TError call_assign(FILE *input)
 			{
 				fprintf(stderr, "\tParserDoub: CODE:%d|OPE1 %s %f ||Vysl %s\n",C_Assign,exprRes->key,exprRes->data.value.d,idAssign->key);
 			}
-			else //if(exprRes->data.varType == T_Str)
+			else if(exprRes->data.varType == T_Str)
 			{
 				fprintf(stderr, "\tParserStr: CODE:%d|OPE1 %s %s ||Vysl %s\n",C_Assign,exprRes->key,exprRes->data.value.str,idAssign->key);
 			}
@@ -1713,7 +1713,7 @@ TError init(FILE *input)
 			{
 				fprintf(stderr, "\tParserDoub: CODE:%d|OPE1 %s %f ||Vysl %s\n",C_Assign,exprRes->key,exprRes->data.value.d,idAssign->key);
 			}
-			else //if(exprRes->data.varType == T_Str)
+			else if(exprRes->data.varType == T_Str)
 			{
 				fprintf(stderr, "\tParserStr: CODE:%d|OPE1 %s %s ||Vysl %s\n",C_Assign,exprRes->key,exprRes->data.value.str,idAssign->key);
 			}
