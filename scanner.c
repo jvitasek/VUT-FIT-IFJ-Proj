@@ -11,6 +11,7 @@
 #include <ctype.h>
 #include <string.h>
 #include "scanner.h"
+#include "error.h"
 
 /*
  * Funkcia, ktora nam kontroluje ci bola zadana platna escape sekvencia.
@@ -60,8 +61,10 @@ T_Token getToken(FILE *input, string *attr, int *line)
 			go = 0;		// koniec subora => ukoncenie cyklu
 			if(state != S_Start)// kontrolujem ci sme neni v nejakom stave => stav nebol ukonceny
 			{
-				token.type = T_Error;
-				return token;
+				//token.type = T_Error;
+				//return token;
+				print_error(ELEX, token.line);
+				exit(ELEX);
 			}else
 			{
 				token.type = T_EOF;		// koniec subora
@@ -145,8 +148,10 @@ T_Token getToken(FILE *input, string *attr, int *line)
 						return token;
 					}else
 					{
-						token.type =  T_Error;	// inak bol zly lexem a vraciam error
-						return token;
+						//token.type =  T_Error;	// inak bol zly lexem a vraciam error
+						//return token;
+						print_error(ELEX, token.line);
+						exit(ELEX);
 					}
 					break;
 				case S_Id:
@@ -233,8 +238,10 @@ T_Token getToken(FILE *input, string *attr, int *line)
 						state = S_Des2;
 					}else
 					{
-						token.type =  T_Error;	// inak vracia error, lebo tam bolo nieco, co tam byt nema
-						return token;
+						//token.type =  T_Error;	// inak vracia error, lebo tam bolo nieco, co tam byt nema
+						//return token;
+						print_error(ELEX, token.line);
+						exit(ELEX);
 					}
 					break;
 				case S_Des2:		// kontrola ci je obyc. desat.cislo alebo aj s exponentom
@@ -268,8 +275,10 @@ T_Token getToken(FILE *input, string *attr, int *line)
 						state = S_Doub;			// preto nastavim stav, ktory uz len docita cisla po koniec
 					}else
 					{
-						token.type =  T_Error;	// inak vracia error, lebo tam bolo nieco, co tam byt nema
-						return token;
+						//token.type =  T_Error;	// inak vracia error, lebo tam bolo nieco, co tam byt nema
+						//return token;
+						print_error(ELEX, token.line);
+						exit(ELEX);
 					}
 					break;
 				case S_Expo2: 	// kontroluje ci za +/- je cislo
@@ -279,8 +288,10 @@ T_Token getToken(FILE *input, string *attr, int *line)
 						state = S_Doub;			// preto nastavim stav, ktory uz len docita cisla po koniec
 					}else
 					{
-						token.type =  T_Error;	// inak vracia error, lebo tam bolo nieco, co tam byt nema
-						return token;
+						//token.type =  T_Error;	// inak vracia error, lebo tam bolo nieco, co tam byt nema
+						//return token;
+						print_error(ELEX, token.line);
+						exit(ELEX);
 					}
 					break;
 				case S_Doub:
@@ -398,8 +409,10 @@ T_Token getToken(FILE *input, string *attr, int *line)
 						return token;
 					}else
 					{
-						token.type =  T_Error;		// inak ide o chybu
-						return token;
+						//token.type =  T_Error;		// inak ide o chybu
+						//return token;
+						print_error(ELEX, token.line);
+						exit(ELEX);
 					}
 					break;
 				case S_EscSeq:		// escape sekvencia
@@ -425,8 +438,10 @@ T_Token getToken(FILE *input, string *attr, int *line)
 						int esc = escapeSeq(input);		// volam funkciu, ktora mi vypocita int hodnotu danej sekvencie
 						if(esc == -1)
 						{
-							token.type =  T_Error;	// bola zadana neplatna escape sekvence
-							return token;
+							//token.type =  T_Error;	// bola zadana neplatna escape sekvence
+							//return token;
+							print_error(ELEX, token.line);
+							exit(ELEX);
 						}else
 						{
 							strAppend(attr,esc);	// pridam uz vysledok escape sekvence do retazca
@@ -434,8 +449,10 @@ T_Token getToken(FILE *input, string *attr, int *line)
 						}
 					}else
 					{
-						token.type =  T_Error;	// inak error
-						return token;
+						//token.type =  T_Error;	// inak error
+						//return token;
+						print_error(ELEX, token.line);
+						exit(ELEX);
 					}
 					break;
 				default:

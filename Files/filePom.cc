@@ -1,7 +1,7 @@
 
 
 // localTable: main, 2, 0 
-int main()
+in. main()
 {
     // stack->top: localTable
    
