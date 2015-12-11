@@ -320,6 +320,7 @@ void htInsert(tHTable* ptrht, char *key, tData data)
 				{
 					ntemp->data.timesUsed = data.timesUsed; // insert the data
 					ntemp->data.type = data.type;
+					ntemp->data.retType = data.retType;
 					ntemp->data.value = data.value;
 					ntemp->data.varType = data.varType;
 					ntemp->data.orderParams = data.orderParams;
@@ -339,6 +340,7 @@ void htInsert(tHTable* ptrht, char *key, tData data)
 					return; // end here
 				temp->data.timesUsed = data.timesUsed;
 				temp->data.type = data.type;
+				temp->data.retType = data.retType;
 				temp->data.value = data.value;
 				temp->data.varType = data.varType;
 				temp->data.orderParams = data.orderParams;
@@ -358,6 +360,7 @@ void htInsert(tHTable* ptrht, char *key, tData data)
 				
 				(*ptrht)[rkey]->data.timesUsed = data.timesUsed; // passing the data specified
 				(*ptrht)[rkey]->data.type = data.type;
+				(*ptrht)[rkey]->data.retType = data.retType;
 				(*ptrht)[rkey]->data.value = data.value;
 				(*ptrht)[rkey]->data.varType = data.varType;
 				(*ptrht)[rkey]->data.orderParams = data.orderParams;

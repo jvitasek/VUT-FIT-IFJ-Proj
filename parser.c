@@ -29,9 +29,6 @@ tHTable *paraTable;
 tHTItem *idAssign = NULL;
 tHTItem *exprRes = NULL;
 stack tableStack;
-
-T_Type currType;
-
 tInstList List;	// zoznam instrukcii
 
 /**
@@ -237,7 +234,9 @@ TError func(FILE *input)
 			// funkce jiz v tabulce je
 			if((tempData = htRead(funcTable, strGetStr(&attr))) != NULL)
 			{
-				if(tempData->timesUsed == 0)
+				fprintf(stderr, "currType: %d\n", currType);
+				fprintf(stderr, "tempData->retType: %d\n", tempData->retType);
+				if((tempData->timesUsed == 0) && (tempData->retType == currType))
 				{
 					tData data;
 					data.type = tempData->type;
@@ -256,7 +255,7 @@ TError func(FILE *input)
 					#ifdef DEBUG
 					fprintf(stderr, "KONCIM VE FUNC: 11)\n");
 					#endif
-					return ESEM_DEF;
+					print_error(ESEM_DEF, token.line);
 				}
 			}
 			// funkce jeste v tabulce neni
@@ -266,6 +265,7 @@ TError func(FILE *input)
 				{
 					tData data;
 					data.type = FUNC;
+					data.retType = currType;
 					data.timesUsed = 0;
 					data.scope = -1;
 					data.isDefined = 0;
@@ -1766,6 +1766,7 @@ TError initSTable(tHTable **table)
 	{
 		item->key = "*UNDEF*";
 		item->data.type = 0;
+		item->data.retType = T_EOF;
 		item->data.timesUsed = 0;
 		item->data.orderParams = 0;
 		item->data.varType = T_EOF;

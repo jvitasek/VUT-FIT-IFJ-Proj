@@ -54,6 +54,7 @@ union tValue {
 typedef struct tData {
 	symbolType type;
 	T_Type varType;
+	T_Type retType;
 	union tValue value;
 	int timesUsed;
 	int orderParams;

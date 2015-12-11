@@ -47,6 +47,7 @@ TError cin_id_n(FILE *input); // P: 37
 TError ret(FILE *input); // P: 42
 
 T_Token token;
+T_Type currType;
 int currScope;
 int currOrder;
 int currOrderTerm;
