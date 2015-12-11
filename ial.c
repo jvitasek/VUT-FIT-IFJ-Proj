@@ -325,6 +325,7 @@ void htInsert(tHTable* ptrht, char *key, tData data)
 					ntemp->data.varType = data.varType;
 					ntemp->data.orderParams = data.orderParams;
 					ntemp->data.isDefined = data.isDefined;
+					ntemp->data.isDeclared = data.isDeclared;
 					ntemp->data.scope = data.scope;
 					return; // end here
 				}
@@ -345,7 +346,9 @@ void htInsert(tHTable* ptrht, char *key, tData data)
 				temp->data.varType = data.varType;
 				temp->data.orderParams = data.orderParams;
 				temp->data.isDefined = data.isDefined;
+				temp->data.isDeclared = data.isDeclared;
 				temp->data.scope = data.scope;
+
 				temp->key = malloc(sizeof(char)*strlen(key)+1);
 				strcpy(temp->key, key);
 
@@ -365,7 +368,10 @@ void htInsert(tHTable* ptrht, char *key, tData data)
 				(*ptrht)[rkey]->data.varType = data.varType;
 				(*ptrht)[rkey]->data.orderParams = data.orderParams;
 				(*ptrht)[rkey]->data.isDefined = data.isDefined;
+				(*ptrht)[rkey]->data.isDeclared = data.isDeclared;
 				(*ptrht)[rkey]->data.scope = data.scope;
+
+
 				(*ptrht)[rkey]->key = malloc(sizeof(char)*strlen(key)+1);
 				strcpy((*ptrht)[rkey]->key, key);
 				(*ptrht)[rkey]->ptrnext = NULL; // nowhere else to go
