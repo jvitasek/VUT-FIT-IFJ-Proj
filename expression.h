@@ -13,7 +13,7 @@
 
 #include <stdlib.h>
 #include "ial.h"
-#include "ilist.h"
+
 
 /**
  * Mozne symboly ve vyrazech.

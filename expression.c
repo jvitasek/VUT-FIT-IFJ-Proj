@@ -16,7 +16,7 @@
 #include "expression.h"
 #include "ial.h"
 
-#define DEBUG 1
+//#define DEBUG 1
 
 int *counteerVar;	// sluzi pri tvorbe pomocnych premennych
 Tstack stack;
@@ -77,15 +77,15 @@ void generateVariable(string *var, int *counter)
  * @param  op2		 Operand2 (ukazatel do tabulky sumbolov)
  * @param  res		 Vysledok
  */
-/*void generateInst(tInstCode instType, void *op1, void *op2, void *res)
+void generateInst(tInstCode instCode, void *op1, void *op2, void *res)
 {
-	tInst inst;
-	inst.instType = instType;
+	tInstruct inst;
+	inst.instCode = instCode;
 	inst.op1 = op1;
 	inst.op2 = op2;
-	inst.res = res;
-	listInsertLast(list,inst);	// list instrukci trba vytvorit v parsru
-}*/
+	inst.result = res;
+	listInsertLast(&List,inst);	// list instrukci trba vytvorit v parsru
+}
 
 /**
  * Inicializace zasobniku.
@@ -1021,7 +1021,14 @@ TError findRule(ruleType rule)
 				generateVariable(&newVar,counteerVar);
 				data.varType = T_Integ;
 				data.value.i = atoi(tempPtr->data);
-				htInsert(*locTable, newVar.str,data);
+				htInsert(*locTable,tempPtr->data,data);		// vlozim do TS kluc napr 5 a hodnota 5
+				htInsert(*locTable, newVar.str,data);		// pomocna premenna na vysledok
+				tHTItem *op1 = htSearch(*locTable,tempPtr->data);
+				tHTItem *res = htSearch(*locTable,newVar.str);
+				printf("\n \tCODE:%d|OPE1 %s %d ||Vysl %s",C_Assign,op1->key,op1->data.value.i,res->key);
+		
+				generateInst(C_Assign,op1,NULL,res);
+
 
 			}else if(tempPtr->idType ==1)
 			{
