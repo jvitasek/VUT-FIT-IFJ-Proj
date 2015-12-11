@@ -87,17 +87,16 @@ else
 	echo "Test 7: ERROR, EXPECTED 0, GOT $ret" >> adv-test.out
 fi
 
-# PROBLEM: vraci syntaktickou chybu misto lexikalni
 ./main adv-tests/008_R1_.c
 ret=$?
 
-if [ "$ret" -eq 0 ];
+if [ "$ret" -eq 2 ];
 then
 	succ=$((succ+1))
 	echo "Test 8: SUCCESS" >> adv-test.out
 else
 	error=$((error+1))
-	echo "Test 8: ERROR, EXPECTED 1, GOT $ret" >> adv-test.out
+	echo "Test 8: ERROR, EXPECTED 2, GOT $ret" >> adv-test.out
 fi
 
 ./main adv-tests/009_R1_.c

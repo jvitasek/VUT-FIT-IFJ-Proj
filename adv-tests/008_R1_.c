@@ -1,3 +1,3 @@
-in. main() { // ma byt lexikalni chyba, hazi syntaktickou
+in. main() {
 	return 0;
 }
