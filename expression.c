@@ -1030,13 +1030,15 @@ TError findRule(ruleType rule)
 				generateInst(C_Assign,op1,NULL,res);
 
 
-			}else if(tempPtr->idType ==1)
+			}
+			else if(tempPtr->idType == 1)
 			{
 				generateVariable(&newVar,counteerVar);
 				data.varType = T_Doub;
 				data.value.d = atof(tempPtr->data);
 				htInsert(*locTable, newVar.str,data);
-			}else if(tempPtr->idType ==0)
+			}
+			else if(tempPtr->idType == 0)
 			{
 				generateVariable(&newVar,counteerVar);
 				data.varType = T_Str;
@@ -1045,8 +1047,6 @@ TError findRule(ruleType rule)
 			}
 			*expRes = htSearch(*locTable,newVar.str);
 			// TODO vygenerovat odpovedajucu instrukciu
-			
-			//outputSymbolTable(expRes);
 
 			// nejdrive se zbavim: < i (2x pop)
 			StackPop();			
