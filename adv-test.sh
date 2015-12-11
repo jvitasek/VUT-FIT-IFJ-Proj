@@ -198,7 +198,6 @@ else
 	echo "Test 16: ERROR, EXPECTED 2, GOT $ret" >> adv-test.out
 fi
 
-# PROBLEM: vraci syntaktickou chybu, protoze PSA neumi volani fce
 ./main adv-tests/017_R3_.c
 ret=$?
 
@@ -211,7 +210,7 @@ else
 	echo "Test 17: ERROR, EXPECTED 3, GOT $ret" >> adv-test.out
 fi
 
-# PROBLEM: vraci syntaktickou chybu, protoze PSA neumi volani fce
+# PROBLEM: jinak pojmenovany parametr @todo!
 ./main adv-tests/018_R3_.c
 ret=$?
 
@@ -224,7 +223,7 @@ else
 	echo "Test 18: ERROR, EXPECTED 3, GOT $ret" >> adv-test.out
 fi
 
-# PROBLEM: vraci syntaktickou chybu, protoze PSA neumi volani fce
+# PROBLEM: jina navratova hodnota funkce @todo!
 ./main adv-tests/019_R3_.c
 ret=$?
 
@@ -237,7 +236,6 @@ else
 	echo "Test 19: ERROR, EXPECTED 3, GOT $ret" >> adv-test.out
 fi
 
-# PROBLEM: nerozlisujeme mezi deklaraci a definici
 ./main adv-tests/020_R3_.c
 ret=$?
 

@@ -5,6 +5,7 @@
  * 
  * Autori:
  * 			xvidaj00 - Juraj Vida
+ * 			xvitas02 - Jakub Vitasek
  */
 
 #include <stdio.h>
@@ -14,6 +15,7 @@
 #include "error.h"
 #include "parser.h"
 
+//#define DEBUG 1
 
 int main(int argc, char **argv)
 {
@@ -59,7 +61,9 @@ int main(int argc, char **argv)
 	 * @todo uvolneni tabulky symbolu
 	 * @todo uvolneni instruction listu
 	 */
-	print_elements_of_list(List);
+	#ifdef DEBUG
+	printElementsOfList(List);
+	#endif
 	listDispose(&List);
 	fclose(input);		// zavre vstupny subor
 	//strFree(&attr);		// uvolni string z pamete

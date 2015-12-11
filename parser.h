@@ -18,9 +18,9 @@ extern tInstList List;
 TError parse(FILE *input); // P: 1
 
 // POM. FUNKCE
-void getNextToken(FILE *input, string *attr);
-int checkBuiltin(char *test);
-TError initSTable(tHTable **table);
+void get_next_token(FILE *input, string *attr);
+int check_builtin(char *test);
+TError init_table(tHTable **table);
 
 // PRAVIDLA
 TError type(); // P: 8, 9, 10
@@ -47,3 +47,8 @@ TError cin_id_n(FILE *input); // P: 37
 TError ret(FILE *input); // P: 42
 
 T_Token token;
+T_Type currType;
+int currScope;
+int currOrder;
+int currOrderTerm;
+char *currFunc;

@@ -207,25 +207,25 @@ tInstruct *listGetData(tInstList *L)
 
 
 /** PRE TESTOVANIE */
-void print_elements_of_list(tInstList L)
+void printElementsOfList(tInstList L)
 {
     int MaxListLength = 100;
 	tInstList TempList;
 	TempList = L;
 	int CurrListLength = 0;
-	printf("\n-----------------\n");
+	fprintf(stderr,"\n-----------------\n");
 	while ((TempList.First!=NULL) && (CurrListLength<MaxListLength))	{
 		if(TempList.First->instruct.instCode == C_Assign)
 		{
 			tHTItem *op1 = TempList.First->instruct.op1;
 			tHTItem *res = TempList.First->instruct.result;
-			printf("\n \tCODE:%d|OPE1 %s %d ||Vysl %s",C_Assign,op1->key,op1->data.value.i, res->key);
+			fprintf(stderr, "\n \tCODE:%d|OPE1 %s %d ||Vysl %s",C_Assign,op1->key,op1->data.value.i, res->key);
 		}
 		
 		TempList.First=TempList.First->nextItem;
 		CurrListLength++;
 	}
     if (CurrListLength>=MaxListLength)
-        printf("\nList exceeded maximum length!");
-	printf("\n-----------------\n");
+        fprintf(stderr, "\nList exceeded maximum length!");
+	fprintf(stderr, "\n-----------------\n");
 }
