@@ -6,7 +6,7 @@
 * Soubor       : ilist.h
 * Popis        : Seznam instrukci
 * Datum        : Listopad 2015
-* Autori       : xvyrou05 - Marek Vyroubal
+* Autori       : xvysta02 - Jaroslav Vystavel
 *              
 * -----------------------------------------------------------------------------
 **/
@@ -17,42 +17,48 @@
 /**
  * Typy instrukci
  */
-typedef enum {
+typedef enum tInstCode {
  	// aritmeticke operace 
-	I_ADD, // (dest, addr, addr) +
-	I_SUB, // (dest, addr, addr) -
-	I_MUL, // (dest, addr, addr) *
-	I_DIV, // (dest, addr, addr) /
+	I_ADD=0, // (dest, addr, addr) + 
+	I_SUB=1, // (dest, addr, addr) -  
+	I_MUL=2, // (dest, addr, addr) *
+	I_DIV=3, // (dest, addr, addr) /
+
 
 	// relacni operace
-	I_EQ, // (dest, addr, addr) ==
-	I_NEQ, // (dest, addr, addr) !=
-	I_LE, // (dest, addr, addr) <
-	I_LEQ, // (dest, addr, addr) <=
-	I_GE, // (dest, addr, addr) >
-	I_GEQ, // (dest, addr, addr) >=
-	I_NEG, // (dest, addr, - ) 
+	I_EQ=4, // (dest, addr, addr) ==
+	I_NEQ=5, // (dest, addr, addr) !=
+	I_LE=6, // (dest, addr, addr) <
+	I_LEQ=7, // (dest, addr, addr) <=
+	I_GE=8, // (dest, addr, addr) >
+	I_GEQ=9, // (dest, addr, addr) >=
+	I_NEG=10, // (dest, addr, - ) 
+
+	I_LABEL=11,
 
 	// prirazeni
-	I_ASSIGN, // (dest, addr, - )
+	I_ASSIGN=12, // (dest, addr, - )
 
 	// instrukce skoku
-	I_GOTO, // (adr, - , - ) skoci na adresu adr 
-	I_IFGOTO, // (adr, cond, - ) skoci na adresu adr, pokud plati podminka cond
-
+	I_GOTO=13, // (adr, - , - ) skoci na adresu adr 
+	I_IFGOTO=14, // (adr, cond, - ) skoci na adresu adr, pokud plati podminka cond
+	I_FOR_GOTO=15,
+	I_SET_FOR=16,
+	I_FOR_IFGOTO=17,
 	// zasobnik parametru
-	I_PUSH, // pushne na zasobnik
-	I_POP, // odstrani a vrati hodnotu z vrcholu zasobniku
-	I_NOP,  // prazdna operace
+	I_PUSH=18, // pushne na zasobnik
+	I_POP=19, // odstrani a vrati hodnotu z vrcholu zasobniku
+	I_NOP=20,  // prazdna operace
 
-	I_STOP, //konec programu
-
+	I_STOP=21, //konec programu
+	I_PRINT=22,
 	// return
-	I_RETURN, // (-, -, -)
+	I_RETURN=23, // (-, -, -)
 
 	// preda rizeni volane funkci
-	I_CALL, // (id_funkce, addr, - )
-
+	I_CALL=24, // (id_funkce, addr, - )
+	I_MAIN_END=25,
+	I_START,
 	// vestavene funkce
 	I_LENGTH,
 	I_SUBSTR,
@@ -65,27 +71,38 @@ typedef enum {
 /**
  * Datovy typ
  */
-typedef enum
-{
-	INT, 	
+
+typedef enum TypeI{
+	INT=0, 	
 	DOUBLE, 
 	STRING
 } TypeI;
 
 /**
+ * obsah
+ */
+
+ union dat_typ_obsah{
+ 	int obsah;
+ 	double obsah_d;
+ 	char obsah_s[255];
+ }dat_typ_obsah;
+/**
  * Struktura operandu
  */
-typedef struct operand
+
+typedef struct iOperand
 {
 	TypeI type; // typ operandu
-	void *obsah; // obsah promenne/operandu
+	union dat_typ_obsah obsah; // obsah promenne/operandu
 } iOperand;
 
 
 /**
  * Struktura reprezentujici 3AC instrukci
  */
-typedef struct Inst 
+
+typedef struct tInst 
 {
 	tInstCode instType; // typ instrukce
 	iOperand *op1; // operand 1
@@ -96,6 +113,7 @@ typedef struct Inst
 /**
  * Polozka seznamu, ktera obsahuje konkretni instrukci
  */
+
 typedef struct ListItem 
 {
 	tInst Instruction;
@@ -105,6 +123,7 @@ typedef struct ListItem
 /**
  * Struktura reprezentujici seznam instrukci, aktivni prvek predstavuje aktualni instrukci
  */
+
 typedef struct ListOfInstr 
 {
 	struct ListItem *First;
@@ -119,6 +138,7 @@ void listFirst(tListOfInstr *L);
 void listNext(tListOfInstr *L);
 void listGoto(tListOfInstr *L, void *gotoInstr);
 void *listGetPointerLast(tListOfInstr *L);
+void *listGetPointerAct(tListOfInstr *L);
 tInst *listGetData(tListOfInstr *L);
 
 #endif

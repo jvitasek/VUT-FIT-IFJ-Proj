@@ -72,6 +72,7 @@ void listGoto(tListOfInstr *L, void *gotoInstr) {
 // POZOR, z hlediska predmetu IAL tato funkce narusuje strukturu
 // abstraktniho datoveho typu
   L->Act = (tListItem*) gotoInstr;
+  
 }
 
 void *listGetPointerLast(tListOfInstr *L) {
@@ -80,6 +81,14 @@ void *listGetPointerLast(tListOfInstr *L) {
 // abstraktniho datoveho typu
   return (void*) L->Last;
 }
+
+
+void *listGetPointerAct(tListOfInstr *L) {
+
+  return (void*) L->Act;
+}
+
+
 
 tInst *listGetData(tListOfInstr *L) {
 // vrati aktivni instrukci

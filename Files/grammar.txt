@@ -28,7 +28,7 @@ LL gramatika
 27)	<STMT>			->	cout << <COUT_TERM>;
 28)	<STMT>			->	<RETURN>
 29) <STMT>			->  id <CALL_ASSIGN>
-30) <CALL_ASSIGN>	->	= <EXPR>
+30) <CALL_ASSIGN>	->	= <EXPR>;
 31) <CALL_ASSIGN>	->  (<terms>);
 32)	<TERMS>			-> 	id <TERMS_N>
 33)	<TERMS>			-> 	E

@@ -15,6 +15,7 @@
 #include "parser.h"
 #include "expression.h"
 #include "ial.h"
+#include "ilist.h"
 
 //#define DEBUG 1
 #define DEBUG_INST 1
@@ -24,6 +25,12 @@ Tstack stack;
 tHTable **locTable;
 tHTItem **expRes;
 char *idName = NULL;
+
+// JARIS
+// Tstack call;
+// tListOfInstr *list;
+// union dat_typ_obsah unie;
+// union dat_typ_obsah unie2;
 
 /**
  * Precedencni tabulka.
@@ -560,6 +567,12 @@ TError find_rule(ruleType rule)
 			/**
 			 * @todo 3AC, Ilist
 			 */
+			//JARIS
+			// printf("%s\n","SCITAM_SCITAM_SCITAM_SCITAM_SCITAM_SCITAM_SCITAM_SCITAM_SCITAM_\n" );
+			 
+			// unie.obsah=5;
+			// unie2.obsah=10;
+			// generateInstruction(I_ADD, INT, &unie, INT,&unie2, INT, NULL);
 			
 			/**
 			 * kontrola typove kompatibility
@@ -628,6 +641,9 @@ TError find_rule(ruleType rule)
 			/**
 			 * @todo 3AC, Ilist
 			 */	
+			// unie.obsah=3;
+			// unie2.obsah=5;
+			// generateInstruction(I_SUB, INT, &unie, INT,&unie2, INT, NULL);
 			
 			/**
 			 * kontrola typove kompatibility
@@ -694,7 +710,12 @@ TError find_rule(ruleType rule)
 
 			/**
 			 * @todo 3AC, Ilist
-			 */		
+			 */	
+			//JARIS
+			// printf("%s\n","NASOBIM_NASOBIM_NASOBIM_NASOBIM_NASOBIM_NASOBIM_NASOBIM_NASOBIM_NASOBIM_NASOBIM_NASOBIM_\n" );
+			// unie.obsah=4;
+			// unie2.obsah=2;
+			// generateInstruction(I_MUL, INT, &unie, INT,&unie2, INT, NULL);
 			
 			/**
 			 * kontrola typove kompatibility
@@ -780,6 +801,10 @@ TError find_rule(ruleType rule)
 				print_error(ERUN_DIV, token.line);
 			}
 
+			// JARIS
+			// unie.obsah=3;
+			// unie2.obsah=5;
+			// generateInstruction(I_DIV, INT, &unie, INT,&unie2, INT, NULL);
 			
 			/**
 			 * kontrola typove kompatibility
@@ -848,6 +873,10 @@ TError find_rule(ruleType rule)
 			 * @todo 3AC, Ilist
 			 */
 			
+			// unie.obsah = 1;
+			// unie2.obsah = 10;
+			// generateInstruction(I_LE, INT, &unie, INT, &unie2, INT, NULL);
+			
 			/**
 			 * kontrola typove kompatibility @TODO - pro porovnavani toho bude vic !!!!!!!!!
 			 */
@@ -914,6 +943,15 @@ TError find_rule(ruleType rule)
 			/**
 			 * @todo 3AC, Ilist
 			 */
+			
+			// //false
+			// unie.obsah=4;
+			// unie2.obsah=5;
+			// generateInstruction(I_LE, INT, &unie, INT,&unie2, INT, NULL);
+			// //true
+			// unie.obsah=4;
+			// unie2.obsah=5;
+			// generateInstruction(I_GE, INT, &unie, INT,&unie2, INT, NULL);
 			
 			/**
 			 * kontrola typove kompatibility @TODO - pro porovnavani toho bude vic !!!!!!!!!
