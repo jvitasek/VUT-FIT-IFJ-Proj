@@ -694,7 +694,7 @@ void outputSymbolTable(tHTable* ptrht)
 			{
 				printf (" (%s, dT: %d, tU: %d, vT: %d, oP: %d, isD: %d, sc: %d, value: %s)", 
 					ptr->key, ptr->data.type, ptr->data.timesUsed, ptr->data.varType, ptr->data.orderParams, 
-					ptr->data.isDefined, ptr->data.scope,ptr->data.value.str);
+					ptr->data.isDefined, ptr->data.scope,(char*)ptr->data.value.ptrTS);
 			}else
 			{
 				tHTItem *pom = ptr->data.value.ptrTS;

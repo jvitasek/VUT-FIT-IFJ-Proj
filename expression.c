@@ -1067,8 +1067,10 @@ TError find_rule(ruleType rule)
 				*expRes = htSearch(*locTable,newVar.str);
 			}else if(tempPtr->idType == 3)
 			{
-				*expRes = htSearch(*locTable,idName);
-			}
+				tHTItem *pom = htSearch(*locTable,idName);
+				tHTItem *pom1 = pom->data.value.ptrTS;
+				*expRes = pom1;
+			}else *expRes = NULL;
 			// TODO vygenerovat odpovedajucu instrukciu
 
 			// nejdrive se zbavim: < i (2x pop)

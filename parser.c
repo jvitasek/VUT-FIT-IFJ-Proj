@@ -10,7 +10,7 @@
 
 //#define DEBUG 1
 //#define DEBUG_SEM 1
-//#define DEBUG_INST 1
+#define DEBUG_INST 1
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -360,6 +360,7 @@ TError par_def_list(FILE *input)
 			data.timesUsed = tempData->timesUsed;
 			data.scope = tempData->scope;
 			data.orderParams = currOrder;
+			data.value.ptrTS = NULL;
 			htInsert(funcTable, strGetStr(&attr), data);
 			#ifdef DEBUG_SEM
 			//fprintf(stderr, "UPRAVUJI %s, POCET PARAMS: %d\n", currFunc, currOrder);
@@ -472,6 +473,7 @@ TError comm_seq(FILE *input)
 				data.scope = tempData->scope;
 				data.orderParams = tempData->orderParams;
 				data.isDefined = 1;
+				data.value.ptrTS = NULL;
 				htInsert(funcTable, currFunc, data);
 				#ifdef DEBUG_SEM
 				fprintf(stderr, "UPRAVUJI %s, DEFINOVANA: %d\n", currFunc, data.isDefined);
@@ -604,7 +606,6 @@ TError stmt(FILE *input)
 		{
 			get_next_token(input, &attr);
 			error = expr(input, &attr, 1, &counterVar, &commTable, &exprRes);
-			
 			#ifdef DEBUG
 			//outputSymbolTable(commTable);
 			fprintf(stderr, "stmt: expr vratilo: %d\n", error);
@@ -903,7 +904,8 @@ TError call_assign(FILE *input)
 			#ifdef DEBUG_INST
 			if(exprRes->data.varType == T_Integ)
 			{
-				fprintf(stderr, "\tParserInt: CODE:%d|OPE1 %s %d ||Vysl %s\n",C_Assign,exprRes->key,exprRes->data.value.i,idAssign->key);
+				tHTItem *pom = idAssign->data.value.ptrTS;
+				fprintf(stderr, "\tParserInt: CODE:%d|OPE1 %s %d ||Vysl %s\n",C_Assign,pom->key,pom->data.value.i,idAssign->key);
 			}
 			else if(exprRes->data.varType == T_Doub)
 			{
@@ -1579,7 +1581,8 @@ TError init(FILE *input)
 			#ifdef DEBUG_INST
 			if(exprRes->data.varType == T_Integ)
 			{
-				fprintf(stderr, "\tParserInt: CODE:%d|OPE1 %s %d ||Vysl %s\n",C_Assign,exprRes->key,exprRes->data.value.i,idAssign->key);
+				tHTItem *pom = idAssign->data.value.ptrTS;
+				fprintf(stderr, "\tParserInt: CODE:%d|OPE1 %s %d ||Vysl %s\n",C_Assign,pom->key,pom->data.value.i,idAssign->key);
 			}
 			else if(exprRes->data.varType == T_Doub)
 			{
@@ -1592,7 +1595,6 @@ TError init(FILE *input)
 			#endif
 			generate_inst(C_Assign,exprRes,NULL,idAssign);
 		}
-		
 		#ifdef DEBUG
 		//outputSymbolTable(commTable);
 		fprintf(stderr, "init: expr vratilo: %d\n", error);
