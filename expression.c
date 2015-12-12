@@ -19,7 +19,7 @@
 
 //#define DEBUG 1
 //#define DEBUG_INST 1
-#define DEBUG_KL 1
+//#define DEBUG_KL 1
 
 int *counteerVar;	// sluzi pri tvorbe pomocnych premennych
 Tstack stack;
@@ -1421,8 +1421,8 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 								print_error(ESEM_DEF, token.line);
 							}
 							tData *tmpData;
-							outputSymbolTable(funcTable);
-							printf("--%s: %d\n", currentFunc, tempData->retType);
+							//outputSymbolTable(funcTable);
+							//printf("--%s: %d\n", currentFunc, tempData->retType);
 							if((tmpData = htRead(funcTable, currFunc)) != NULL)
 							{
 								printf("--TempData->retType: %d, tmpData->retType: %d\n", tempData->retType, tmpData->retType);

@@ -35,6 +35,7 @@ tHTItem *idAssign = NULL;
 tHTItem *exprRes = NULL;
 stack tableStack;
 tInstList List;	// zoznam instrukcii
+char *tempFunc;
 
 //JARDA
 /*#ifdef JARIS
@@ -997,8 +998,9 @@ TError stmt(FILE *input)
 			print_error(ESEM_DEF, token.line);
 		}
 		idAssign = htSearch(commTable,strGetStr(&attr));
-		currFunc = malloc(sizeof(char)*strlen(strGetStr(&attr)));
-		strcpy(currFunc, strGetStr(&attr));
+		tempFunc = malloc(sizeof(char)*strlen(strGetStr(&attr)));
+		strcpy(tempFunc, strGetStr(&attr));
+		printf("tempFunc: %s\n", tempFunc);
 		// /SEMANTICKA ANALYZA
 
 		get_next_token(input, &attr);
@@ -1070,6 +1072,9 @@ TError call_assign(FILE *input)
 	// xx: <CALL_ASSIGN> -> (<terms>);
 	else if(token.type == T_LeftParenthesis)
 	{
+		currFunc = malloc(sizeof(char)*strlen(tempFunc));
+		strcpy(currFunc, tempFunc);
+
 		// SEMANTICKA ANALYZA
 		/**
 		 * kontrola, zda volana funkce byla definovana
