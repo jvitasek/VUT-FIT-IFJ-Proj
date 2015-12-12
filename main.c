@@ -54,7 +54,6 @@ int main(int argc, char **argv)
 			return result;
 		break;
 	}
-	
 	int interRes = interpret(&List);
 	if(interRes != 0) printf("!!!! nastala chyba v interprete !!!!\n");
 	/**
@@ -65,6 +64,7 @@ int main(int argc, char **argv)
 	 * @todo uvolneni tabulky symbolu
 	 * @todo uvolneni instruction listu
 	 */
+
 	#ifdef DEBUG
 	printElementsOfList(List);
 	#endif

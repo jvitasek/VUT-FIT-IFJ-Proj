@@ -82,6 +82,7 @@ typedef struct TstackElem {
 	PSymbols termType;
 	hashType idType;
 	char *data;
+	tHTItem *tsItem;
 } *TstackElemPtr;
 
 
@@ -92,7 +93,7 @@ typedef struct Tstack {
 
 TError stack_init(); // inicialzace zasobniku
 TError stack_dispose();	
-TError stack_pop();
+TError stack_pop(tHTItem **item, int ptrAss);
 TError stack_push(int tokterm, char *attr);
 TstackElemPtr stack_top();
 TError stack_shift(int tokterm, char *attr);

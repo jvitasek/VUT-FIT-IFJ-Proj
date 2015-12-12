@@ -189,7 +189,7 @@ TError stack_dispose()
  * @param stack 	Zasobnik termu.
  * @return error	Navratova hodnota chyby.
  */
-TError stack_pop()
+TError stack_pop(tHTItem **item, int ptrAss)
 {
 	TError error = ENOP;
 	#ifdef DEBUG
@@ -208,6 +208,7 @@ TError stack_pop()
 			// #ifdef DEBUG
 			// 	printf("StackPop mazu vrchol zasobniku.\n");
 			// #endif
+			if(ptrAss == 1) *item = stack.top->tsItem;	// chceme aj ziskat ukazatel na hodnotu do TS
 			stack.top = stack.top->Lptr;
 			stack.top->Rptr = NULL;
 			free(tempPtr);
@@ -646,9 +647,35 @@ TError find_rule(ruleType rule)
 				// temp2 = htSearch();
 
 				// generate_inst(C_Add, temp1, temp2, newVar);
-
+				
 				#ifdef DEBUG
-				printf("--Op1 == double, op2 == int.--\n");
+				printf("--Op1 == int, op2 == int.--\n");
+				#endif
+			}
+			// double + double
+			else if (stack.top->idType == Tdouble && stack.top->Lptr->Lptr->idType == Tdouble)
+			{
+				tHTItem *op2;	//operand 2
+				stack_pop(&op2,1);	
+	
+				stack_pop(NULL,0);	//znamienko
+				
+				tHTItem *op1;	//operand 1			
+				stack_pop(&op1,1);
+
+				stack_pop(NULL,0);	//znamienko
+				
+				tData data;
+				string newVar;
+				strInit(&newVar);
+				generate_variable(&newVar,counteerVar);
+				htInsert(*locTable, newVar.str,data);		// pomocna premenna na vysledok
+				tHTItem *res = htSearch(*locTable,newVar.str);
+				
+				generate_inst(C_Add,op1,op2,res);
+				*expRes = res;
+				#ifdef DEBUG
+				printf("--Op1 == double, op2 == double.--\n");
 				#endif
 			}
 			else 
@@ -658,10 +685,10 @@ TError find_rule(ruleType rule)
 			}
 			
 			// nejdrive se zbavim: < E + E (4x pop)
-			stack_pop();			
-			stack_pop();			
-			stack_pop();			
-			stack_pop();
+			/*stack_pop(NULL,0);			
+			stack_pop(NULL,0);			
+			stack_pop(NULL,0);			
+			stack_pop(NULL,0);*/
 			
 
 			// pushnu neterminal na zasobnik
@@ -729,10 +756,10 @@ TError find_rule(ruleType rule)
 			}		
 			
 			// nejdrive se zbavim: < E - E (4x pop)
-			stack_pop();
-			stack_pop();
-			stack_pop();
-			stack_pop();
+			stack_pop(NULL,0);
+			stack_pop(NULL,0);
+			stack_pop(NULL,0);
+			stack_pop(NULL,0);
 
 			// pushnu neterminal na zasobnik
 			if ((error = stack_push(PNonTerm, "PNonTerm")) != ENOP)
@@ -801,10 +828,10 @@ TError find_rule(ruleType rule)
 			}	
 			
 			// nejdrive se zbavim: < E * E (4x pop)
-			stack_pop();
-			stack_pop();
-			stack_pop();
-			stack_pop();
+			stack_pop(NULL,0);
+			stack_pop(NULL,0);
+			stack_pop(NULL,0);
+			stack_pop(NULL,0);
 
 			// pushnu neterminal na zasobnik
 			if ((error = stack_push(PNonTerm, "PNonTerm")) != ENOP)
@@ -890,10 +917,10 @@ TError find_rule(ruleType rule)
 			}
 			
 			// nejdrive se zbavim: < E / E (4x pop)
-			stack_pop();
-			stack_pop();
-			stack_pop();
-			stack_pop();
+			stack_pop(NULL,0);
+			stack_pop(NULL,0);
+			stack_pop(NULL,0);
+			stack_pop(NULL,0);
 
 			// pushnu neterminal na zasobnik
 			if ((error = stack_push(PNonTerm, "PNonTerm")) != ENOP)
@@ -961,10 +988,10 @@ TError find_rule(ruleType rule)
 			// }	
 			
 			// nejdrive se zbavim: < E (<, >, <=, >=) E (4x pop)
-			stack_pop();
-			stack_pop();
-			stack_pop();
-			stack_pop();
+			stack_pop(NULL,0);
+			stack_pop(NULL,0);
+			stack_pop(NULL,0);
+			stack_pop(NULL,0);
 
 			// pushnu neterminal na zasobnik
 			if ((error = stack_push(PNonTerm, "PNonTerm")) != ENOP)
@@ -1037,10 +1064,10 @@ TError find_rule(ruleType rule)
 			// }
 			
 			// nejdrive se zbavim: < E (==, !=) E (4x pop)
-			stack_pop();
-			stack_pop();
-			stack_pop();
-			stack_pop();
+			stack_pop(NULL,0);
+			stack_pop(NULL,0);
+			stack_pop(NULL,0);
+			stack_pop(NULL,0);
 
 			// pushnu neterminal na zasobnik
 			if ((error = stack_push(PNonTerm, "PNonTerm")) != ENOP)
@@ -1075,10 +1102,10 @@ TError find_rule(ruleType rule)
 			 */
 			
 			// nejdrive se zbavim: ), E, (, < (4x pop)
-			stack_pop();
-			stack_pop();
-			stack_pop();
-			stack_pop();
+			stack_pop(NULL,0);
+			stack_pop(NULL,0);
+			stack_pop(NULL,0);
+			stack_pop(NULL,0);
 
 			// pushnu neterminal na zasobnik
 			if ((error = stack_push(PNonTerm, "PNonTerm")) != ENOP)
@@ -1105,6 +1132,7 @@ TError find_rule(ruleType rule)
 			tempPtr->termType = PNonTerm;
 			tempPtr->idType = stack.top->idType;
 			tempPtr->data = stack.top->data;
+			tempPtr->tsItem = stack.top->tsItem;
 			
 			//tu musim vygenerovat prvu instrukciu a zaroven vlozit do TS tu pomocnu premennu
 			tData data;
@@ -1166,10 +1194,11 @@ TError find_rule(ruleType rule)
 			// TODO vygenerovat odpovedajucu instrukciu
 
 			// nejdrive se zbavim: < i (2x pop)
-			stack_pop();			
-			stack_pop();			
+			stack_pop(NULL,0);			
+			stack_pop(NULL,0);			
 
 			// nastavim vrchol zasobniku
+			tempPtr->tsItem = *expRes;
 			tempPtr->Rptr = NULL;
 			tempPtr->Lptr = stack.top;
 			stack.top->Rptr = tempPtr;
@@ -1191,10 +1220,10 @@ TError find_rule(ruleType rule)
 			if (stack.top->Lptr->termType == PLeftP &&	stack.top->Lptr->Lptr->termType == PIdFun)
 			{
 				// nejdrive se zbavim: ), (, f, < (4x pop)
-				stack_pop();
-				stack_pop();
-				stack_pop();
-				stack_pop();
+				stack_pop(NULL,0);
+				stack_pop(NULL,0);
+				stack_pop(NULL,0);
+				stack_pop(NULL,0);
 
 				// pushnu neterminal na zasobnik
 				if ((error = stack_push(PNonTerm, "PNonTerm")) != ENOP)
@@ -1211,11 +1240,11 @@ TError find_rule(ruleType rule)
 				&&	stack.top->Lptr->Lptr->Lptr->termType == PIdFun)
 			{
 				// nejdrive se zbavim: ), E, (, f, < (5x pop)
-				stack_pop();
-				stack_pop();
-				stack_pop();
-				stack_pop();
-				stack_pop();
+				stack_pop(NULL,0);
+				stack_pop(NULL,0);
+				stack_pop(NULL,0);
+				stack_pop(NULL,0);
+				stack_pop(NULL,0);
 
 				// pushnu neterminal na zasobnik
 				if ((error = stack_push(PNonTerm, "PNonTerm")) != ENOP)
@@ -1249,7 +1278,7 @@ TError find_rule(ruleType rule)
 
 				for (int i = 1; i <= cnt + cnt + 1 + 4; i++)
 				{
-					stack_pop();
+					stack_pop(NULL,0);
 				}
 
 				

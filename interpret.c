@@ -717,14 +717,14 @@ case I_NEQ:
 #include <stdlib.h>
 #include "ial.h"
 
-//#define DEBUG 1
+#define DEBUG 1
 
 TError interpret(tInstList *L)
 {
   #ifdef DEBUG
 	fprintf(stderr, "Interpret\n");
-  #endif
 	printElementsOfList(*L);
+  #endif
 	listFirst(L);
 	tInstruct *ins;
 	tHTItem *op1;
@@ -737,7 +737,13 @@ TError interpret(tInstList *L)
 		op1 = (tHTItem*)ins->op1;
 		op2 = (tHTItem*)ins->op2;
 		res = (tHTItem*)ins->result;
-		res->data.value.d = op1->data.value.d;
+		if(ins->instCode == C_Assign)
+		{
+			res->data.value.d = op1->data.value.d;
+		}else if(ins->instCode == C_Add)
+		{
+			res->data.value.d = op1->data.value.d + op2->data.value.d;
+		}
 		
 		listNext(L);
 	}

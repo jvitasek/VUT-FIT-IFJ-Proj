@@ -1,19 +1,18 @@
 
 
 // localTable: main, 2, 0 
-/*int main()
+int main()
 {
     // stack->top: localTable
-   	double bubo = 6.9;
-   	bubo = 5.6;
-	
+   	double bubo = 6.9 + 4.1;
+
  
     return bubo;
-}*/
+}
 
 
 
-int ahoj(int jedna, double dva, int tri, double pet);
+/*int ahoj(int jedna, double dva, int tri, double pet);
 
 int ahoj(int jedna, double dva, int tri, double pet)
 {
@@ -29,9 +28,10 @@ int ahoj(int jedna, double dva, int tri, double pet)
 	return test;
 }
 
+
 int main()
 {
 	//int x = ahoj(5,5.5,5,5.5);
 	int x = 5;
 	return x;
-}
+}*/

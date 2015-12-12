@@ -211,7 +211,6 @@ tInstruct *listGetData(tInstList *L)
 /** PRE TESTOVANIE */
 void printElementsOfList(tInstList L)
 {
-	#ifdef DEBUG
     int MaxListLength = 100;
 	tInstList TempList;
 	TempList = L;
@@ -232,6 +231,15 @@ void printElementsOfList(tInstList L)
 			{
 				fprintf(stderr, "\tMainStr CODE:%d|OPE1 %s %s ||Vysl %s\n",C_Assign,op1->key,op1->data.value.str, res->key);
 			}
+		}else if(TempList.First->instruct.instCode == C_Add)
+		{
+			tHTItem *op1 = TempList.First->instruct.op1;
+			tHTItem *op2 = TempList.First->instruct.op2;
+			tHTItem *res = TempList.First->instruct.result;
+			if(op1->data.varType == T_Doub)
+			{
+				fprintf(stderr, "\tMainInt CODE:%d|OPE1 %s %f | |OPE2 %s %f | |Vysl %s\n",C_Add,op1->key,op1->data.value.d,op2->key,op2->data.value.d, res->key);
+			}
 		}
 		
 		TempList.First=TempList.First->nextItem;
@@ -240,5 +248,4 @@ void printElementsOfList(tInstList L)
     if (CurrListLength>=MaxListLength)
         fprintf(stderr, "\nList exceeded maximum length!");
 	fprintf(stderr, "\n-----------------\n");
-	#endif
 }
