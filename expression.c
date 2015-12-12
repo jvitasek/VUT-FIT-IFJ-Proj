@@ -609,17 +609,9 @@ TError find_rule(ruleType rule)
 				error = ESYN;
 				return error;
 			}
+			tData *temp1;
+			tData *temp2;
 
-			/**
-			 * @todo 3AC, Ilist
-			 */
-			//JARIS
-			// printf("%s\n","SCITAM_SCITAM_SCITAM_SCITAM_SCITAM_SCITAM_SCITAM_SCITAM_SCITAM_\n" );
-			 
-			// unie.obsah=5;
-			// unie2.obsah=10;
-			// generateInstruction(I_ADD, INT, &unie, INT,&unie2, INT, NULL);
-			
 			/**
 			 * kontrola typove kompatibility
 			 */
@@ -639,6 +631,22 @@ TError find_rule(ruleType rule)
 			// double + int
 			else if (stack.top->idType == Tdouble && stack.top->Lptr->Lptr->idType == Tint)
 			{
+				#ifdef DEBUG
+				printf("--Op1 == double, op2 == int.--\n");
+				#endif
+			}
+			// int + int
+			else if (stack.top->idType == Tint && stack.top->Lptr->Lptr->idType == Tint)
+			{
+				outputSymbolTable(*localTable);
+				// string newVar;
+				// strInit(&newVar);
+				// generate_variable(&newVar,counteerVar);
+				// temp1 = htSearch(locTable, );
+				// temp2 = htSearch();
+
+				// generate_inst(C_Add, temp1, temp2, newVar);
+
 				#ifdef DEBUG
 				printf("--Op1 == double, op2 == int.--\n");
 				#endif
@@ -1343,8 +1351,6 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 		#ifdef DEBUG
 			printf("################## Resim vyraz ukonceny strednikem. ###################\n");
 		#endif
-
-		//outputSymbolTable(*localTable);
 		
 		int index = 0;
 		do {

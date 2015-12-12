@@ -10,5 +10,5 @@ int main()
 		int b = 2;
 	}
 
-	return c;
+	return 3+2;
 }
