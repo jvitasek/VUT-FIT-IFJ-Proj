@@ -17,13 +17,15 @@
 #include "ial.h"
 
 //#define DEBUG 1
-#define DEBUG_INST 1
+//#define DEBUG_INST 1
 
 int *counteerVar;	// sluzi pri tvorbe pomocnych premennych
 Tstack stack;
 tHTable **locTable;
 tHTItem **expRes;
 char *idName = NULL;
+int parCount;
+char *currentFunc;
 
 /**
  * Precedencni tabulka.
@@ -244,6 +246,7 @@ TError stack_push(int tokterm, char *attr)
 	#endif
 
 	TstackElemPtr tempPtr = NULL;
+	tData *tempData;
 	
 	if ((tempPtr = malloc(sizeof(struct TstackElem))) == NULL)
 	{
@@ -260,20 +263,63 @@ TError stack_push(int tokterm, char *attr)
 	if (tokterm == PInt)
 	{ // jedna se o integer
 		tempPtr->idType = Tint;
-		//tempPtr->data = attr;
 		strcpy(tempPtr->data, attr);
+		++parCount;
+
+		//outputSymbolTable(paraTable);
+		#ifdef DEBUG
+		printf("INT----CUrrFunc...%s...ParCount...%d....\n", currentFunc, parCount);
+		#endif
+		if ((tempData = htReadOrder(paraTable, currentFunc, parCount)) != NULL)
+		{
+			#ifdef DEBUG
+			printf("##tempData->varType: %d\n", tempData->varType);
+			#endif
+			if (tempData->varType != T_Integ)
+			{
+				print_error(ESEM_TYP, token.line);
+			}
+		}
 	}
 	else if (tokterm == PDouble)
 	{ // jedna se o double
 		tempPtr->idType = Tdouble;
-		//tempPtr->data = attr;
 		strcpy(tempPtr->data, attr);
+		++parCount;
+
+		#ifdef DEBUG
+		printf("DOUBLE -- CUrrFunc...%s...ParCount...%d....\n", currentFunc, parCount);
+		#endif
+		if ((tempData = htReadOrder(paraTable, currentFunc, parCount)) != NULL)
+		{
+			#ifdef DEBUG
+			printf("##tempData->varType: %d\n", tempData->varType);
+			#endif
+			if (tempData->varType != T_Doub)
+			{
+				print_error(ESEM_TYP, token.line);
+			}
+		}
 	}
 	else if (tokterm == PString)
 	{ // jedna se o string
 		tempPtr->idType = Tstring;
-		//tempPtr->data = attr;
 		strcpy(tempPtr->data, attr);
+		++parCount;
+
+		#ifdef DEBUG
+		printf("STRING -- CUrrFunc...%s...ParCount...%d....\n", currentFunc, parCount);
+		#endif
+		if ((tempData = htReadOrder(paraTable, currentFunc, parCount)) != NULL)
+		{
+			#ifdef DEBUG
+			printf("##tempData->varType: %d\n", tempData->varType);
+			#endif
+			if (tempData->varType != T_Str)
+			{
+				print_error(ESEM_TYP, token.line);
+			}
+		}
 	}
 	else if (tokterm == PIden)
 	{ // jedna se o identifikator
@@ -1158,6 +1204,8 @@ TError find_rule(ruleType rule)
 					stack_pop();
 				}
 
+				
+
 				// pushnu neterminal na zasobnik
 				if ((error = stack_push(PNonTerm, "PNonTerm")) != ENOP)
 				{
@@ -1215,6 +1263,9 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 	int tokterm = 0; // pro ukladani terminalu z tokenu
 	tHTItem *tempItem = NULL;
 	char *myAttr = "*UNDEF*";
+
+	parCount = 0;
+	currentFunc = "";
 	
 	#ifdef DEBUG
 		printf("expr\n");
@@ -1287,10 +1338,14 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 							//outputSymbolTable(*localTable);
 						#endif
 
-						if((tempData = htRead(*locTable, currFunc)) != NULL)
+						currentFunc = malloc(sizeof(char)*strlen(strGetStr(attr)));
+						strcpy(currentFunc, strGetStr(attr));
+						//printf("PARCOUNT v FUNC %d, currentFunc: %s\n", parCount, currentFunc);
+
+						if((tempData = htRead(funcTable, currentFunc)) != NULL)
 						{
 							#ifdef DEBUG_SEM
-							fprintf(stderr, "je %s definovana: %d\n", currFunc, tempData->isDefined);
+							fprintf(stderr, "je %s definovana: %d\n", currentFunc, tempData->isDefined);
 							#endif
 							if(tempData->isDefined != 1)
 							{
@@ -1604,10 +1659,10 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 								printf("!!!!ID je FUNKCE!!!!!.\n");
 							#endif
 							
-							if((tempData = htRead(*locTable, currFunc)) != NULL)
+							if((tempData = htRead(*locTable, currentFunc)) != NULL)
 							{
 								#ifdef DEBUG_SEM
-								fprintf(stderr, "je %s definovana: %d\n", currFunc, tempData->isDefined);
+								fprintf(stderr, "je %s definovana: %d\n", currentFunc, tempData->isDefined);
 								#endif
 								if(tempData->isDefined != 1)
 								{
@@ -1881,6 +1936,7 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 
 		} while(!((tempStack->termType == PDollar) && (tokterm == PDollar)));
 	}
+	//printf("PARCOUNT NA KONCIIIIIIIIIIII: %d\n", parCount);
 
 	stack_dispose();
 
