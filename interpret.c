@@ -715,11 +715,29 @@ case I_NEQ:
 #include "interpret.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include "ial.h"
 
 TError interpret(tInstList *L)
 {
 	printf("Interpret\n");
 	printElementsOfList(*L);
+	listFirst(L);
+	tInstruct *ins;
+	tHTItem *op1;
+	tHTItem *op2;
+	tHTItem *res;
+	while(1)
+	{
+		ins = listGetData(L);
+		if(ins == NULL) break;
+		op1 = (tHTItem*)ins->op1;
+		op2 = (tHTItem*)ins->op2;
+		res = (tHTItem*)ins->result;
+		res->data.value.d = op1->data.value.d;
+		
+		listNext(L);
+	}
+	printf("%s %f\n",res->key,res->data.value.d);
 	return ENOP;
 }
 
