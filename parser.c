@@ -151,8 +151,11 @@ TError parse(FILE *input)
 	currScope = 0;
 	currOrder = 0;
 	currOrderTerm = 0;
+	//JARDA
+	/*#ifdef JARIS
 	SInitP(&stackI);
 	SInitP(&forstack);
+	#endif*/
 
 	/**
 	 * inicializace stringu s nazvem tokenu
@@ -213,9 +216,12 @@ TError parse(FILE *input)
 	{
 		return ESYN;
 	}
+	//JARDA
+	/*#ifdef JARIS
 	unie.obsah=4;
 	unie2.obsah=5;
 	generateInstruction(I_STOP, INT, &unie, INT, &unie2,  DOUBLE, NULL);
+	#endif*/
 	return error;
 }
 
@@ -298,9 +304,10 @@ TError func(FILE *input)
 			}
 			tData *tempData;
 			// funkce jiz v tabulce je
-			#ifdef DEBUG_INST
+			//JARDA
+			/*#ifdef JARIS
 			fprintf(stderr, "VYPISSSSSSS ? : %s\n",strGetStr(&attr) );
-			#endif
+			#endif*/
 			if((tempData = htRead(funcTable, strGetStr(&attr))) != NULL)
 			{
 				if(tempData->retType == currType)
@@ -796,10 +803,13 @@ TError stmt(FILE *input)
 					if(error == ENOP)
 					{
 						get_next_token(input, &attr);
+						//JARDA
+						/*#ifdef JARIS
 						beforeFor = listGetPointerLast(list);
-						#ifdef DEBUG_INST
+						#endif*/
+						/*#ifdef JARIS
 						fprintf(stderr, "ADRESA ADRESA ADRESA: --------> %d\n", beforeFor);
-						#endif
+						#endif*/
 						error = comm_seq(input);
 						//JARDA
 						/*#ifdef JARIS
