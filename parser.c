@@ -518,7 +518,7 @@ TError dec_or_def(FILE *input)
 		tData *tempData;
 		if((tempData = htRead(funcTable, currFunc)) != NULL)
 		{
-			if(tempData->isDefined == 1 && tempData->timesUsed > 1)
+			if((tempData->isDefined == 1) && (tempData->timesUsed > 1) && (strcmp(currFunc, "main") != 0))
 			{
 				print_error(ESEM_DEF, token.line);
 			}
