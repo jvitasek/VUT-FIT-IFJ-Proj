@@ -1810,7 +1810,25 @@ TError terms(FILE *input)
 	{
 		// SEMANTICKA ANALYZA
 		tData *tempData;
-		if((tempData = htRead(commTable, strGetStr(&attr))) == NULL)
+		// najdeme vlozenou promennou v tabulce symbolu
+		if((tempData = htRead(commTable, strGetStr(&attr))) != NULL)
+		{
+			// kontrola typu parametru, ID
+			tData *parData;
+			if(((parData = htReadOrder(paraTable, currFunc, ++currOrderTerm)) != NULL))
+			{
+				#ifdef DEBUG_SEM
+				fprintf(stderr, "parData->varType: %d\n", parData->varType);
+				fprintf(stderr, "tempData->varType: %d\n", tempData->varType);
+				#endif
+				if(parData->varType != tempData->varType)
+				{
+					print_error(ESEM_TYP, token.line);
+				}
+			}
+		}
+		// nenasli jsme
+		else
 		{
 			#ifdef DEBUG
 			fprintf(stderr, "KONCIM V TERMS: 32)\n");
@@ -1819,18 +1837,7 @@ TError terms(FILE *input)
 			print_error(ESEM_DEF, token.line);
 			exit(ESEM_DEF);
 		}
-		// kontrola typu parametru, ID
-		if(((tempData = htReadOrder(paraTable, currFunc, ++currOrderTerm)) != NULL))
-		{
-			#ifdef DEBUG_SEM
-			fprintf(stderr, "tempData->varType: %d\n", tempData->varType);
-			fprintf(stderr, "currType: %d\n", currType);
-			#endif
-			if(tempData->varType != currType)
-			{
-				print_error(ESEM_TYP, token.line);
-			}
-		}
+		
 		// KONEC SEMANTICKE ANALYZY
 		get_next_token(input, &attr);
 		error = terms_n(input);
@@ -1941,22 +1948,32 @@ TError terms_n(FILE *input)
 		{
 			// SEMANTICKA ANALYZA
 			tData *tempData;
-			if((tempData = htRead(commTable, strGetStr(&attr))) == NULL)
+			// najdeme vlozenou promennou v tabulce symbolu
+			if((tempData = htRead(commTable, strGetStr(&attr))) != NULL)
 			{
-				#ifdef DEBUG
-				fprintf(stderr, "KONCIM V TERMS_N: 34)\n");
+				// kontrola typu parametru, ID
+				tData *parData;
+				if(((parData = htReadOrder(paraTable, currFunc, ++currOrderTerm)) != NULL))
+				{
+					#ifdef DEBUG_SEM
+					fprintf(stderr, "parData->varType: %d\n", parData->varType);
+					fprintf(stderr, "tempData->varType: %d\n", tempData->varType);
+					#endif
+					if(parData->varType != tempData->varType)
+					{
+						print_error(ESEM_TYP, token.line);
+					}
+				}
+			}
+			// nenasli jsme
+			else
+			{
+				#ifdef DEBUG_SEM
+				fprintf(stderr, "KONCIM V TERMS: 32)\n");
 				#endif
 
 				print_error(ESEM_DEF, token.line);
 				exit(ESEM_DEF);
-			}
-			// kontrola typu parametru
-			if((tempData = htReadOrder(paraTable, currFunc, ++currOrderTerm)) != NULL)
-			{
-				if(tempData->varType != currType)
-				{
-					print_error(ESEM_TYP, token.line);
-				}
 			}
 			// KONEC SEMANTICKE ANALYZY
 			get_next_token(input, &attr);
