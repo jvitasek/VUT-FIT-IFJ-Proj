@@ -185,8 +185,11 @@ TError parse(FILE *input)
 	// SEMANTICKA KONTROLA
 	tData *tempData;
 	// byla funkce main?
-	if((tempData = htRead(funcTable, "main")) == NULL)
+	if(((tempData = htRead(funcTable, "main")) == NULL) && (error == ENOP))
 	{
+		#ifdef DEBUG_SEM
+		fprintf(stderr, "Chyba: v kodu neni main()\n");
+		#endif
 		print_error(ESEM_DEF, 0);
 	}
 	// /SEMANTICKA KONTROLA
@@ -298,6 +301,9 @@ TError func(FILE *input)
 			// builtin funkce
 			if(check_builtin(strGetStr(&attr)) == 1)
 			{
+				#ifdef DEBUG_SEM
+				fprintf(stderr, "Chyba: funkce %s ma stejny nazev jako vestavena funkce\n", strGetStr(&attr));
+				#endif
 				print_error(ESEM_DEF, token.line);
 			}
 			tData *tempData;
@@ -456,6 +462,9 @@ TError par_def_list(FILE *input)
 		// pokud ma main parametry, chyba
 		if((error == ENOP) && (strcmp(currFunc, "main") == 0))
 		{
+			#ifdef DEBUG_SEM
+			fprintf(stderr, "Chyba: main nesmi mit parametry\n");
+			#endif
 			print_error(ESEM_DEF, token.line);
 		}
 		// /SEMANTICKA ANALYZA
@@ -512,6 +521,9 @@ TError dec_or_def(FILE *input)
 		{
 			if((tempData->isDefined == 1) && (tempData->timesUsed > 1) && (strcmp(currFunc, "main") != 0))
 			{
+				#ifdef DEBUG_SEM
+				fprintf(stderr, "Chyba: funkce %s byla vicekrat definovana\n", strGetStr(&attr));
+				#endif
 				print_error(ESEM_DEF, token.line);
 			}
 		}
@@ -870,8 +882,8 @@ TError stmt(FILE *input)
 				tData *tempData;
 				if((tempData = htRead(commTable, strGetStr(&attr))) == NULL)
 				{
-					#ifdef DEBUG
-					fprintf(stderr, "KONCIM V STMT: 26)\n");
+					#ifdef DEBUG_SEM
+					fprintf(stderr, "Chyba: promenna %s vypisovana na cout nebyla nalezena\n", strGetStr(&attr));
 					#endif
 					print_error(ESEM_DEF, token.line);
 				}
@@ -983,8 +995,8 @@ TError stmt(FILE *input)
 		tData *tempData;
 		if((tempData = htRead(commTable, strGetStr(&attr))) == NULL)
 		{
-			#ifdef DEBUG
-			fprintf(stderr, "KONCIM V STMT: 29)\n");
+			#ifdef DEBUG_SEM
+			fprintf(stderr, "Chyba: promenna %s v leve casti prirazeni nebyla nalezena\n", strGetStr(&attr));
 			#endif
 			print_error(ESEM_DEF, token.line);
 		}
@@ -1078,7 +1090,7 @@ TError call_assign(FILE *input)
 			if(tempData->isDefined != 1)
 			{
 				#ifdef DEBUG_SEM
-				fprintf(stderr, "KONCIM V CALL_ASSIGN\n");
+				fprintf(stderr, "Chyba: volana funkce %s nebyla definovana\n", currFunc);
 				#endif
 				print_error(ESEM_DEF, token.line);
 			}
@@ -1334,8 +1346,8 @@ TError cout_term(FILE *input)
 		tData *tempData;
 		if((tempData = htRead(commTable, strGetStr(&attr))) == NULL)
 		{
-			#ifdef DEBUG
-			fprintf(stderr, "KONCIM V COUT_TERM: 39)\n");
+			#ifdef DEBUG_SEM
+			fprintf(stderr, "Chyba: promenna %s vypisovana na cout nebyla nalezena\n", strGetStr(&attr));
 			#endif
 			print_error(ESEM_DEF, token.line);
 		}
@@ -1443,8 +1455,8 @@ TError cin_id_n(FILE *input)
 			tData *tempData;
 			if((tempData = htRead(commTable, strGetStr(&attr))) == NULL)
 			{
-				#ifdef DEBUG
-				fprintf(stderr, "KONCIM V CIN_ID_N: 37)\n");
+				#ifdef DEBUG_SEM
+				fprintf(stderr, "Chyba: promenna %s z cin nebyla nalezena\n", strGetStr(&attr));
 				#endif
 				print_error(ESEM_DEF, token.line);
 			}
@@ -1518,8 +1530,8 @@ TError assign(FILE *input)
 		tData *tempData;
 		if((tempData = htRead(commTable, strGetStr(&attr))) == NULL)
 		{
-			#ifdef DEBUG
-			fprintf(stderr, "KONCIM V ASSIGN: 36)\n");
+			#ifdef DEBUG_SEM
+			fprintf(stderr, "Chyba: promenna %s z leve casti prirazeni nebyla nalezena\n", strGetStr(&attr));
 			#endif
 			print_error(ESEM_DEF, token.line);
 		}
@@ -1586,6 +1598,9 @@ TError var_def(FILE *input)
 				#ifdef DEBUG
 				fprintf(stderr, "KONCIM – TOKEN: %s, SCOPE: %d, CURRENT: %d\n", strGetStr(&attr), tempData->scope, currScope);
 				#endif
+				#ifdef DEBUG_SEM
+				fprintf(stderr, "Chyba: promenna %s byla redefinovana v ramci cislo %d\n", strGetStr(&attr), currScope);
+				#endif
 				print_error(ESEM_DEF, token.line);
 			}
 			// probehne zastineni
@@ -1636,9 +1651,8 @@ TError var_def(FILE *input)
 			if((tempData = htRead(commTable, strGetStr(&attr))) != NULL)
 			{
 				#ifdef DEBUG_SEM
-				fprintf(stderr, "KONCIM VE VAR_DEF: 4)\n");
+				fprintf(stderr, "Chyba: redefinice promenne %s\n", strGetStr(&attr));
 				#endif
-
 				print_error(ESEM_DEF, token.line);
 			}
 			// promenna jeste neni v tabulce
@@ -1742,6 +1756,9 @@ TError init(FILE *input)
 		 */
 		if(currType == T_Auto)
 		{
+			#ifdef DEBUG_SEM
+			fprintf(stderr, "Chyba: promenna typu auto musi byt rovnou definovana\n");
+			#endif
 			print_error(ESEM_DEF, token.line);
 		}
 		error = EEMPTY;
@@ -1818,6 +1835,9 @@ TError terms(FILE *input)
 				#endif
 				if(parData->varType != tempData->varType)
 				{
+					#ifdef DEBUG_SEM
+					fprintf(stderr, "Chyba: promenna %s ma typ %d, pozadovany typ: %d\n", strGetStr(&attr), tempData->varType, parData->varType);
+					#endif
 					print_error(ESEM_TYP, token.line);
 				}
 			}
@@ -1825,8 +1845,8 @@ TError terms(FILE *input)
 		// nenasli jsme
 		else
 		{
-			#ifdef DEBUG
-			fprintf(stderr, "KONCIM V TERMS: 32)\n");
+			#ifdef DEBUG_SEM
+			fprintf(stderr, "Chyba: promenna %s vlozena jako parametr funkce %s nebyla nalezena\n", strGetStr(&attr), currFunc);
 			#endif
 
 			print_error(ESEM_DEF, token.line);
@@ -1843,6 +1863,9 @@ TError terms(FILE *input)
 		#endif
 		if(currOrderTerm != currOrder)
 		{
+			#ifdef DEBUG_SEM
+			fprintf(stderr, "Chyba: pocet parametru zadany pro volani funkce %s neodpovida\n", currFunc);
+			#endif
 			print_error(ESEM_TYP, token.line);
 		}
 		currOrderTerm = 0;
@@ -1876,6 +1899,9 @@ TError terms(FILE *input)
 			#endif
 			if(tempData->varType != currType)
 			{
+				#ifdef DEBUG_SEM
+				fprintf(stderr, "Chyba: pri volani funkce %s vlozena konstanta typu %d, pozadovany typ: %d\n", currFunc, currType, tempData->varType);
+				#endif
 				print_error(ESEM_TYP, token.line);
 			}
 		}
@@ -1889,6 +1915,9 @@ TError terms(FILE *input)
 		#endif
 		if(currOrderTerm != currOrder)
 		{
+			#ifdef DEBUG_SEM
+			fprintf(stderr, "Chyba: pocet parametru zadany pro volani funkce %s neodpovida\n", currFunc);
+			#endif
 			print_error(ESEM_TYP, token.line);
 		}
 		currOrderTerm = 0;
@@ -1914,6 +1943,9 @@ TError terms(FILE *input)
 		#endif
 		if(currOrderTerm != currOrder)
 		{
+			#ifdef DEBUG_SEM
+			fprintf(stderr, "Chyba: pocet parametru zadany pro volani funkce %s neodpovida\n", currFunc);
+			#endif
 			print_error(ESEM_TYP, token.line);
 		}
 		currOrderTerm = 0;
@@ -1955,6 +1987,9 @@ TError terms_n(FILE *input)
 					#endif
 					if(parData->varType != tempData->varType)
 					{
+						#ifdef DEBUG_SEM
+						fprintf(stderr, "Chyba: promenna %s ma typ %d, pozadovany typ: %d\n", strGetStr(&attr), tempData->varType, parData->varType);
+						#endif
 						print_error(ESEM_TYP, token.line);
 					}
 				}
@@ -1963,9 +1998,8 @@ TError terms_n(FILE *input)
 			else
 			{
 				#ifdef DEBUG_SEM
-				fprintf(stderr, "KONCIM V TERMS: 32)\n");
+				fprintf(stderr, "Chyba: promenna %s vlozena jako parametr funkce %s nebyla nalezena\n", strGetStr(&attr), currFunc);
 				#endif
-
 				print_error(ESEM_DEF, token.line);
 			}
 			// KONEC SEMANTICKE ANALYZY
@@ -1993,6 +2027,9 @@ TError terms_n(FILE *input)
 			{
 				if(tempData->varType != currType)
 				{
+					#ifdef DEBUG_SEM
+					fprintf(stderr, "Chyba: pri volani funkce %s vlozena konstanta typu %d, pozadovany typ: %d\n", currFunc, currType, tempData->varType);
+					#endif
 					print_error(ESEM_TYP, token.line);
 				}
 			}
@@ -2108,7 +2145,6 @@ TError init_table(tHTable **table)
 	else
 	{
 		print_error(EINT, token.line);
-		exit(error);
 	}
 
 	*table = NULL;
@@ -2121,7 +2157,6 @@ TError init_table(tHTable **table)
 	else
 	{
 		print_error(EINT, token.line);
-		exit(error);
 	}
 	return error;
 }
