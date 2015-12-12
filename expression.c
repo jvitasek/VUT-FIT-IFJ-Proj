@@ -19,6 +19,7 @@
 
 //#define DEBUG 1
 //#define DEBUG_INST 1
+//#define DEBUG_KL 1
 
 int *counteerVar;	// sluzi pri tvorbe pomocnych premennych
 Tstack stack;
@@ -275,14 +276,14 @@ TError stack_push(int tokterm, char *attr)
 		++parCount;
 
 		//outputSymbolTable(paraTable);
-		#ifdef DEBUG
-		printf("INT----CUrrFunc...%s...ParCount...%d....\n", currentFunc, parCount);
-		#endif
+		// #ifdef DEBUG_KL
+		// printf("INT----CUrrFunc...%s...ParCount...%d....\n", currentFunc, parCount);
+		// #endif
 		if ((tempData = htReadOrder(paraTable, currentFunc, parCount)) != NULL)
 		{
-			#ifdef DEBUG
-			printf("##tempData->varType: %d\n", tempData->varType);
-			#endif
+			// #ifdef DEBUG_KL
+			// printf("##tempData->varType: %d\n", tempData->varType);
+			// #endif
 			if (tempData->varType != T_Integ)
 			{
 				print_error(ESEM_TYP, token.line);
@@ -295,12 +296,12 @@ TError stack_push(int tokterm, char *attr)
 		strcpy(tempPtr->data, attr);
 		++parCount;
 
-		#ifdef DEBUG
-		printf("DOUBLE -- CUrrFunc...%s...ParCount...%d....\n", currentFunc, parCount);
-		#endif
+		// #ifdef DEBUG_KL
+		// printf("DOUBLE -- CUrrFunc...%s...ParCount...%d....\n", currentFunc, parCount);
+		// #endif
 		if ((tempData = htReadOrder(paraTable, currentFunc, parCount)) != NULL)
 		{
-			#ifdef DEBUG
+			#ifdef DEBUG_KL
 			printf("##tempData->varType: %d\n", tempData->varType);
 			#endif
 			if (tempData->varType != T_Doub)
@@ -315,14 +316,14 @@ TError stack_push(int tokterm, char *attr)
 		strcpy(tempPtr->data, attr);
 		++parCount;
 
-		#ifdef DEBUG
-		printf("STRING -- CUrrFunc...%s...ParCount...%d....\n", currentFunc, parCount);
-		#endif
+		// #ifdef DEBUG_KL
+		// printf("STRING -- CUrrFunc...%s...ParCount...%d....\n", currentFunc, parCount);
+		// #endif
 		if ((tempData = htReadOrder(paraTable, currentFunc, parCount)) != NULL)
 		{
-			#ifdef DEBUG
-			printf("##tempData->varType: %d\n", tempData->varType);
-			#endif
+			// #ifdef DEBUG_KL
+			// printf("##tempData->varType: %d\n", tempData->varType);
+			// #endif
 			if (tempData->varType != T_Str)
 			{
 				print_error(ESEM_TYP, token.line);
@@ -333,6 +334,25 @@ TError stack_push(int tokterm, char *attr)
 	{ // jedna se o identifikator
 		tempPtr->idType = Tid;
 		tempPtr->data = "Tid";
+		++parCount;
+		if ((tempData = htRead(commTable, attr)) != NULL)
+		{
+			// #ifdef DEBUG_KL
+			// printf("##tempData->varType: %d\n", tempData->varType);
+			// #endif
+			tData *tmpData;
+			if ((tmpData = htReadOrder(paraTable, currentFunc, parCount)) != NULL)
+			{
+				// #ifdef DEBUG_KL
+				// printf("##tempData->varType: %d, tmpData->varType: %d\n", tempData->varType, tmpData->varType);
+				// #endif
+				if (tmpData->varType != tempData->varType)
+				{
+					print_error(ESEM_TYP, token.line);
+				}
+			}
+			
+		}
 	}
 	else
 	{ // jine
@@ -1424,10 +1444,18 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 							#endif
 							if(tempData->isDefined != 1)
 							{
-								#ifdef DEBUG_SEM
-								fprintf(stderr, "KONCIM V CALL_ASSIGN\n");
-								#endif
 								print_error(ESEM_DEF, token.line);
+							}
+							tData *tmpData;
+							//outputSymbolTable(funcTable);
+							printf("currFunc: %s\n", currentFunc);
+							if((tmpData = htRead(funcTable, currFunc)) != NULL)
+							{
+								printf("--TempData->retType: %d, tmpData->retType: %d\n", tempData->retType, tmpData->retType);
+								if (tempData->retType != tmpData->retType)
+								{
+									print_error(ESEM_TYP, token.line);
+								}
 							}
 						}
 					}

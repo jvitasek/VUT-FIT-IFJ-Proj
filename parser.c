@@ -9,7 +9,7 @@
  */
 
 //#define DEBUG 1
-#define DEBUG_SEM 1
+//#define DEBUG_SEM 1
 //#define DEBUG_INST 1
 
 
@@ -35,6 +35,7 @@ tHTItem *idAssign = NULL;
 tHTItem *exprRes = NULL;
 stack tableStack;
 tInstList List;	// zoznam instrukcii
+char *tempFunc;
 
 //JARDA
 /*#ifdef JARIS
@@ -149,6 +150,7 @@ TError parse(FILE *input)
 	currScope = 0;
 	currOrder = 0;
 	currOrderTerm = 0;
+	isReturn = 0;
 	//JARDA
 	/*#ifdef JARIS
 	SInitP(&stackI);
@@ -395,11 +397,6 @@ TError func(FILE *input)
 					//printf("400 %s\n",strGetStr(&attr));
 				}
 
-
-				
-
-
-
 				#ifdef DEBUG
 				fprintf(stderr, "func: dec_or_def vratilo: %d\n", error);
 				#endif
@@ -570,6 +567,7 @@ TError comm_seq(FILE *input)
 				data.timesUsed = tempData->timesUsed+1;
 				data.scope = tempData->scope;
 				data.orderParams = tempData->orderParams;
+				data.retType = tempData->retType;
 				data.isDefined = 1;
 				data.value.ptrTS = NULL;
 				htInsertData(funcTable, currFunc, data);
@@ -1001,8 +999,8 @@ TError stmt(FILE *input)
 			print_error(ESEM_DEF, token.line);
 		}
 		idAssign = htSearch(commTable,strGetStr(&attr));
-		currFunc = malloc(sizeof(char)*strlen(strGetStr(&attr)));
-		strcpy(currFunc, strGetStr(&attr));
+		tempFunc = malloc(sizeof(char)*strlen(strGetStr(&attr)));
+		strcpy(tempFunc, strGetStr(&attr));
 		// /SEMANTICKA ANALYZA
 
 		get_next_token(input, &attr);
@@ -1074,6 +1072,9 @@ TError call_assign(FILE *input)
 	// xx: <CALL_ASSIGN> -> (<terms>);
 	else if(token.type == T_LeftParenthesis)
 	{
+		currFunc = malloc(sizeof(char)*strlen(tempFunc));
+		strcpy(currFunc, tempFunc);
+
 		// SEMANTICKA ANALYZA
 		/**
 		 * kontrola, zda volana funkce byla definovana
@@ -1158,6 +1159,7 @@ TError params(FILE *input)
 					data.orderParams = ++currOrder;
 					data.scope = 1; // nejnizsi scope nasledujiciho bloku
 					data.value.ptrTS = NULL;
+					data.retType = tempData->retType;
 					htInsert(funcTable, strGetStr(&attr), data);
 					htInsert(paraTable, currFunc, data); // vkladani do tabulky parametru
 
@@ -1246,6 +1248,7 @@ TError params_n(FILE *input)
 						data.orderParams = ++currOrder;
 						data.scope = 1; // nejnizsi scope nasledujiciho bloku
 						data.value.ptrTS = NULL;
+						data.retType = tempData->retType;
 						htInsert(funcTable, strGetStr(&attr), data);
 						htInsert(paraTable, currFunc, data); // vkladani do tabulky parametru
 
@@ -1310,8 +1313,10 @@ TError ret(FILE *input)
 	// 42: <RETURN> -> return <EXPR>;
 	if(token.type == T_Return)
 	{
+		isReturn = 1;
 		get_next_token(input, &attr);
 		error = expr(input, &attr, 0, &counterVar, &commTable, &exprRes);
+		isReturn = 0;
 		#ifdef DEBUG
 		fprintf(stderr, "ret: expr vratilo: %d\n", error);
 		#endif
