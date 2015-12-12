@@ -1819,7 +1819,7 @@ TError terms(FILE *input)
 			print_error(ESEM_DEF, token.line);
 			exit(ESEM_DEF);
 		}
-		// kontrola typu parametru
+		// kontrola typu parametru, ID
 		if(((tempData = htReadOrder(paraTable, currFunc, ++currOrderTerm)) != NULL))
 		{
 			#ifdef DEBUG_SEM
@@ -1866,7 +1866,7 @@ TError terms(FILE *input)
 		#endif
 
 		tData *tempData;
-		// kontrola typu parametru
+		// kontrola typu parametru, KONSTANTA
 		if(((tempData = htReadOrder(paraTable, currFunc, ++currOrderTerm)) != NULL))
 		{
 			#ifdef DEBUG_SEM
