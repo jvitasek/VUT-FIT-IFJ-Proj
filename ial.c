@@ -743,26 +743,26 @@ void outputSymbolTable(tHTable* ptrht)
 		while ( ptr != NULL ) {
 			if(ptr->data.varType == T_Integ)
 			{
-				printf (" (%s, dT: %d, tU: %d, vT: %d, oP: %d, isDef: %d, isDec: %d, sc: %d, value: %d)", 
-					ptr->key, ptr->data.type, ptr->data.timesUsed, ptr->data.varType, ptr->data.orderParams, 
+				printf (" (%s, dT: %d, tU: %d, vT: %d, rT: %d, oP: %d, isDef: %d, isDec: %d, sc: %d, value: %d)", 
+					ptr->key, ptr->data.type, ptr->data.timesUsed, ptr->data.varType, ptr->data.retType, ptr->data.orderParams, 
 					ptr->data.isDefined, ptr->data.isDeclared, ptr->data.scope,ptr->data.value.i);
 			}
 			else if(ptr->data.varType == T_Doub)
 			{
-				printf (" (%s, dT: %d, tU: %d, vT: %d, oP: %d, isDef: %d, isDec: %d, sc: %d, value: %f)", 
-					ptr->key, ptr->data.type, ptr->data.timesUsed, ptr->data.varType, ptr->data.orderParams, 
+				printf (" (%s, dT: %d, tU: %d, vT: %d, rT: %d, oP: %d, isDef: %d, isDec: %d, sc: %d, value: %f)", 
+					ptr->key, ptr->data.type, ptr->data.timesUsed, ptr->data.varType, ptr->data.retType, ptr->data.orderParams, 
 					ptr->data.isDefined, ptr->data.isDeclared, ptr->data.scope,ptr->data.value.d);
 			}
 			else if(ptr->data.varType == T_Str)
 			{
-				printf (" (%s, dT: %d, tU: %d, vT: %d, oP: %d, isDef: %d, isDec: %d, sc: %d)", 
-					ptr->key, ptr->data.type, ptr->data.timesUsed, ptr->data.varType, ptr->data.orderParams, 
+				printf (" (%s, dT: %d, tU: %d, vT: %d, rT: %d, oP: %d, isDef: %d, isDec: %d, sc: %d)", 
+					ptr->key, ptr->data.type, ptr->data.timesUsed, ptr->data.varType, ptr->data.retType, ptr->data.orderParams, 
 					ptr->data.isDefined, ptr->data.isDeclared, ptr->data.scope);
 				/**
 				 * zakomentovany kod nize haze segfault kvuli ptr->data.value.ptrTS
 				 */
-				// printf (" (%s, dT: %d, tU: %d, vT: %d, oP: %d, isDef: %d, isDec: %d, sc: %d, value: %s)", 
-				// 		ptr->key, ptr->data.type, ptr->data.timesUsed, ptr->data.varType, ptr->data.orderParams, 
+				// printf (" (%s, dT: %d, tU: %d, vT: %d, rT: %d, oP: %d, isDef: %d, isDec: %d, sc: %d, value: %s)", 
+				// 		ptr->key, ptr->data.type, ptr->data.timesUsed, ptr->data.varType, ptr->data.retType, ptr->data.orderParams, 
 				// 		ptr->data.isDefined, ptr->data.isDeclared, ptr->data.scope,(char*)ptr->data.value.ptrTS);
 				
 			}
@@ -773,24 +773,24 @@ void outputSymbolTable(tHTable* ptrht)
 				{
 					if(pom->data.varType == T_Integ)
 					{
-						printf (" (%s, dT: %d, tU: %d, vT: %d, oP: %d, isDef: %d, isDec: %d, sc: %d, ptrTS: %p, ptrTSvalue: %d)", 
-							ptr->key, ptr->data.type, ptr->data.timesUsed, ptr->data.varType, ptr->data.orderParams, 
+						printf (" (%s, dT: %d, tU: %d, vT: %d, rT: %d, oP: %d, isDef: %d, isDec: %d, sc: %d, ptrTS: %p, ptrTSvalue: %d)", 
+							ptr->key, ptr->data.type, ptr->data.timesUsed, ptr->data.varType, ptr->data.retType, ptr->data.orderParams, 
 							ptr->data.isDefined, ptr->data.isDeclared, ptr->data.scope,ptr->data.value.ptrTS, pom->data.value.i);
 					}else if(pom->data.varType == T_Doub)
 					{
-						printf (" (%s, dT: %d, tU: %d, vT: %d, oP: %d, isDef: %d, isDec: %d, sc: %d, ptrTS: %p, ptrTSvalue: %f)", 
-							ptr->key, ptr->data.type, ptr->data.timesUsed, ptr->data.varType, ptr->data.orderParams, 
+						printf (" (%s, dT: %d, tU: %d, vT: %d, rT: %d, oP: %d, isDef: %d, isDec: %d, sc: %d, ptrTS: %p, ptrTSvalue: %f)", 
+							ptr->key, ptr->data.type, ptr->data.timesUsed, ptr->data.varType, ptr->data.retType, ptr->data.orderParams, 
 							ptr->data.isDefined, ptr->data.isDeclared, ptr->data.scope,ptr->data.value.ptrTS, pom->data.value.d);
 					}else if(pom->data.varType == T_Str)
 					{
-						printf (" (%s, dT: %d, tU: %d, vT: %d, oP: %d, isDef: %d, isDec: %d, sc: %d, ptrTS: %p, ptrTSvalue: %s)", 
-							ptr->key, ptr->data.type, ptr->data.timesUsed, ptr->data.varType, ptr->data.orderParams, 
+						printf (" (%s, dT: %d, tU: %d, vT: %d, rT: %d, oP: %d, isDef: %d, isDec: %d, sc: %d, ptrTS: %p, ptrTSvalue: %s)", 
+							ptr->key, ptr->data.type, ptr->data.timesUsed, ptr->data.varType, ptr->data.retType, ptr->data.orderParams, 
 							ptr->data.isDefined, ptr->data.isDeclared, ptr->data.scope,ptr->data.value.ptrTS, pom->data.value.str);
 					}
 				}else
 				{
-					printf (" (%s, dT: %d, tU: %d, vT: %d, oP: %d, isDef: %d, isDec: %d, sc: %d, ptrTS: %p, ptrTSvalue: %p)", 
-						ptr->key, ptr->data.type, ptr->data.timesUsed, ptr->data.varType, ptr->data.orderParams, 
+					printf (" (%s, dT: %d, tU: %d, vT: %d, rT: %d, oP: %d, isDef: %d, isDec: %d, sc: %d, ptrTS: %p, ptrTSvalue: %p)", 
+						ptr->key, ptr->data.type, ptr->data.timesUsed, ptr->data.varType, ptr->data.retType, ptr->data.orderParams, 
 						ptr->data.isDefined, ptr->data.isDeclared, ptr->data.scope,ptr->data.value.ptrTS,pom);
 				}
 			}
