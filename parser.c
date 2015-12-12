@@ -11,7 +11,7 @@
 //#define DEBUG 1
 //#define DEBUG_SEM 1
 #define DEBUG_INST 1
-//#define JARIS 1
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -30,9 +30,7 @@
 
 string attr; // vytvorime si string
 int counterVar = 1;	// globalna premenna, ktora sluzi pri tvorbe pomocnych premennych na medzivypocty
-tHTable *commTable;
-tHTable *funcTable;
-tHTable *paraTable;
+
 tHTItem *idAssign = NULL;
 tHTItem *exprRes = NULL;
 stack tableStack;

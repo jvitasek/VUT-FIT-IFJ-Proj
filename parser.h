@@ -53,3 +53,6 @@ int currScope;
 int currOrder;
 int currOrderTerm;
 char *currFunc;
+tHTable *commTable;
+tHTable *funcTable;
+tHTable *paraTable;
