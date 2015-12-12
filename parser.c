@@ -9,7 +9,7 @@
  */
 
 //#define DEBUG 1
-#define DEBUG_SEM 1
+//#define DEBUG_SEM 1
 //#define DEBUG_INST 1
 
 
@@ -197,6 +197,8 @@ TError parse(FILE *input)
 	fprintf(stderr, "parse: func_n vratilo: %d\n", error);
 	#endif
 
+	outputSymbolTable(funcTable);
+
 	/**
 	 * smazani tabulky symbolu
 	 */
@@ -383,6 +385,7 @@ TError func(FILE *input)
 					tData data;
 					data.type = tempData->type;
 					data.retType = tempData->retType;
+					printf("vkladam retType: %d\n", tempData->retType);
 					data.timesUsed = tempData->timesUsed;
 					data.scope = tempData->scope;
 					data.isDefined = tempData->isDefined;
@@ -394,11 +397,6 @@ TError func(FILE *input)
 					#endif
 					//printf("400 %s\n",strGetStr(&attr));
 				}
-
-
-				
-
-
 
 				#ifdef DEBUG
 				fprintf(stderr, "func: dec_or_def vratilo: %d\n", error);
@@ -1159,6 +1157,7 @@ TError params(FILE *input)
 					data.scope = 1; // nejnizsi scope nasledujiciho bloku
 					data.value.ptrTS = NULL;
 					data.retType = tempData->retType;
+					printf("vkladam retType: %d\n", tempData->retType);
 					htInsert(funcTable, strGetStr(&attr), data);
 					htInsert(paraTable, currFunc, data); // vkladani do tabulky parametru
 
@@ -1248,6 +1247,7 @@ TError params_n(FILE *input)
 						data.scope = 1; // nejnizsi scope nasledujiciho bloku
 						data.value.ptrTS = NULL;
 						data.retType = tempData->retType;
+						printf("vkladam retType: %d\n", tempData->retType);
 						htInsert(funcTable, strGetStr(&attr), data);
 						htInsert(paraTable, currFunc, data); // vkladani do tabulky parametru
 
