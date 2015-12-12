@@ -617,6 +617,11 @@ TError find_rule(ruleType rule)
 {
 	TError error = ENOTFOUND;
 	TstackElemPtr tempPtr = NULL;
+	tHTItem *op1;	//operand 1
+	tHTItem *op2;	//operand 2
+	string newVar;
+	tHTItem *res;
+	tData data;
 
 	switch(rule)
 	{
@@ -630,71 +635,49 @@ TError find_rule(ruleType rule)
 				error = ESYN;
 				return error;
 			}
-			tData *temp1;
-			tData *temp2;
 
 			/**
 			 * kontrola typove kompatibility
 			 */
-			// string + cokoli jineho
+			// string + cokoli jineho CHYBA
 			if ((stack.top->idType == Tstring && stack.top->Lptr->Lptr->idType != Tstring) || 
 				(stack.top->idType != Tstring && stack.top->Lptr->Lptr->idType == Tstring))
 			{
 				print_error(ESEM_TYP, token.line);
 			}
-			// int + double
-			else if (stack.top->idType == Tint && stack.top->Lptr->Lptr->idType == Tdouble)
-			{
-				#ifdef DEBUG
-				printf("--Op1 == int, op2 == double.--\n");
-				#endif
-			}
+
+			/**
+			 * 3AC
+			 */
+			//tHTItem *op2;	//operand 2
+			stack_pop(&op2,1);	
+			stack_pop(NULL,0);	//znamienko
+			
+			//tHTItem *op1;	//operand 1			
+			stack_pop(&op1,1);
+			stack_pop(NULL,0);	//znamienko
 			// double + int
-			else if (stack.top->idType == Tdouble && stack.top->Lptr->Lptr->idType == Tint)
+			if ((stack.top->idType == Tdouble && stack.top->Lptr->Lptr->idType == Tint) ||
+				(stack.top->idType == Tint && stack.top->Lptr->Lptr->idType == Tdouble))
 			{
-				#ifdef DEBUG
+				data.varType = T_Doub;				
+				#ifdef DEBUG_INST
 				printf("--Op1 == double, op2 == int.--\n");
 				#endif
 			}
 			// int + int
 			else if (stack.top->idType == Tint && stack.top->Lptr->Lptr->idType == Tint)
 			{
-				//outputSymbolTable(*localTable);
-				// string newVar;
-				// strInit(&newVar);
-				// generate_variable(&newVar,counteerVar);
-				// temp1 = htSearch(locTable, );
-				// temp2 = htSearch();
-
-				// generate_inst(C_Add, temp1, temp2, newVar);
-				
-				#ifdef DEBUG
+				data.varType = T_Integ;
+				#ifdef DEBUG_INST
 				printf("--Op1 == int, op2 == int.--\n");
 				#endif
 			}
 			// double + double
 			else if (stack.top->idType == Tdouble && stack.top->Lptr->Lptr->idType == Tdouble)
 			{
-				tHTItem *op2;	//operand 2
-				stack_pop(&op2,1);	
-	
-				stack_pop(NULL,0);	//znamienko
-				
-				tHTItem *op1;	//operand 1			
-				stack_pop(&op1,1);
-
-				stack_pop(NULL,0);	//znamienko
-				
-				tData data;
-				string newVar;
-				strInit(&newVar);
-				generate_variable(&newVar,counteerVar);
-				htInsert(*locTable, newVar.str,data);		// pomocna premenna na vysledok
-				tHTItem *res = htSearch(*locTable,newVar.str);
-				
-				generate_inst(C_Add,op1,op2,res);
-				*expRes = res;
-				#ifdef DEBUG
+				data.varType = T_Doub;
+				#ifdef DEBUG_INST
 				printf("--Op1 == double, op2 == double.--\n");
 				#endif
 			}
@@ -703,6 +686,14 @@ TError find_rule(ruleType rule)
 			//	printf("###############Chyba Nonterminalu - kompatibilita?.\n"); @TODO vyresit pro ID
 			//	print_error(ESEM_TYP, token.line);
 			}
+			
+			strInit(&newVar);
+			generate_variable(&newVar,counteerVar);
+			htInsert(*locTable, newVar.str,data);		// pomocna premenna na vysledok
+			res = htSearch(*locTable,newVar.str);
+			
+			generate_inst(C_Add,op1,op2,res);
+			*expRes = res;
 			
 			// nejdrive se zbavim: < E + E (4x pop)
 			/*stack_pop(NULL,0);			
@@ -739,9 +730,6 @@ TError find_rule(ruleType rule)
 				return error;
 			}
 
-			/**
-			 * @todo 3AC, Ilist
-			 */	
 			// unie.obsah=3;
 			// unie2.obsah=5;
 			// generateInstruction(I_SUB, INT, &unie, INT,&unie2, INT, NULL);
@@ -755,31 +743,61 @@ TError find_rule(ruleType rule)
 			{
 				print_error(ESEM_TYP, token.line);
 			}
-			// int - double
-			else if (stack.top->idType == Tint && stack.top->Lptr->Lptr->idType == Tdouble)
-			{
-				#ifdef DEBUG
-				printf("--Op1 == int, op2 == double.--\n");
-				#endif
-			}
+
+			/**
+			 * 3AC
+			 */
+			//tHTItem *op2;	//operand 2
+			stack_pop(&op2,1);	
+			stack_pop(NULL,0);	//znamienko
+			
+			//tHTItem *op1;	//operand 1			
+			stack_pop(&op1,1);
+			stack_pop(NULL,0);	//znamienko
 			// double - int
-			else if (stack.top->idType == Tdouble && stack.top->Lptr->Lptr->idType == Tint)
+			if ((stack.top->idType == Tdouble && stack.top->Lptr->Lptr->idType == Tint) ||
+				(stack.top->idType == Tint && stack.top->Lptr->Lptr->idType == Tdouble))
 			{
+				data.varType = T_Doub;				
 				#ifdef DEBUG
 				printf("--Op1 == double, op2 == int.--\n");
 				#endif
 			}
-			else 
+			// int - int
+			else if (stack.top->idType == Tint && stack.top->Lptr->Lptr->idType == Tint)
+			{			
+				data.varType = T_Integ;
+				#ifdef DEBUG
+				printf("--Op1 == int, op2 == int.--\n");
+				#endif
+			}
+			// double - double
+			else if (stack.top->idType == Tdouble && stack.top->Lptr->Lptr->idType == Tdouble)
+			{			
+				data.varType = T_Doub;
+				#ifdef DEBUG
+				printf("--Op1 == double, op2 == double.--\n");
+				#endif
+			}
+			else
 			{
 			//	printf("###############Chyba Nonterminalu - kompatibilita?.\n"); @TODO vyresit pro ID
 			//	print_error(ESEM_TYP, token.line);
-			}		
+			}	
+			
+			strInit(&newVar);
+			generate_variable(&newVar,counteerVar);
+			htInsert(*locTable, newVar.str,data);		// pomocna premenna na vysledok
+			res = htSearch(*locTable,newVar.str);
+			
+			generate_inst(C_Sub,op1,op2,res);
+			*expRes = res;	
 			
 			// nejdrive se zbavim: < E - E (4x pop)
-			stack_pop(NULL,0);
-			stack_pop(NULL,0);
-			stack_pop(NULL,0);
-			stack_pop(NULL,0);
+			// stack_pop(NULL,0);
+			// stack_pop(NULL,0);
+			// stack_pop(NULL,0);
+			// stack_pop(NULL,0);
 
 			// pushnu neterminal na zasobnik
 			if ((error = stack_push(PNonTerm, "PNonTerm")) != ENOP)
@@ -809,9 +827,6 @@ TError find_rule(ruleType rule)
 				return error;
 			}
 
-			/**
-			 * @todo 3AC, Ilist
-			 */	
 			//JARIS
 			// printf("%s\n","NASOBIM_NASOBIM_NASOBIM_NASOBIM_NASOBIM_NASOBIM_NASOBIM_NASOBIM_NASOBIM_NASOBIM_NASOBIM_\n" );
 			// unie.obsah=4;
@@ -827,31 +842,61 @@ TError find_rule(ruleType rule)
 			{
 				print_error(ESEM_TYP, token.line);
 			}
+
+			/**
+			 * 3AC
+			 */
+			//tHTItem *op2;	//operand 2
+			stack_pop(&op2,1);	
+			stack_pop(NULL,0);	//znamienko
+			
+			//tHTItem *op1;	//operand 1			
+			stack_pop(&op1,1);
+			stack_pop(NULL,0);	//znamienko
 			// int * double
-			else if (stack.top->idType == Tint && stack.top->Lptr->Lptr->idType == Tdouble)
+			if ((stack.top->idType == Tdouble && stack.top->Lptr->Lptr->idType == Tint) ||
+				(stack.top->idType == Tint && stack.top->Lptr->Lptr->idType == Tdouble))
 			{
-				#ifdef DEBUG
-				printf("--Op1 == int, op2 == double.--\n");
-				#endif
-			}
-			// double * int
-			else if (stack.top->idType == Tdouble && stack.top->Lptr->Lptr->idType == Tint)
-			{
+				data.varType = T_Doub;
 				#ifdef DEBUG
 				printf("--Op1 == double, op2 == int.--\n");
 				#endif
 			}
-			else 
+			// int * int
+			else if (stack.top->idType == Tint && stack.top->Lptr->Lptr->idType == Tint)
+			{			
+				data.varType = T_Integ;
+				#ifdef DEBUG
+				printf("--Op1 == int, op2 == int.--\n");
+				#endif
+			}
+			// double * double
+			else if (stack.top->idType == Tdouble && stack.top->Lptr->Lptr->idType == Tdouble)
+			{			
+				data.varType = T_Doub;
+				#ifdef DEBUG
+				printf("--Op1 == double, op2 == double.--\n");
+				#endif
+			}
+			else
 			{
 			//	printf("###############Chyba Nonterminalu - kompatibilita?.\n"); @TODO vyresit pro ID
 			//	print_error(ESEM_TYP, token.line);
 			}	
 			
+			strInit(&newVar);
+			generate_variable(&newVar,counteerVar);
+			htInsert(*locTable, newVar.str,data);		// pomocna premenna na vysledok
+			res = htSearch(*locTable,newVar.str);
+			
+			generate_inst(C_Mul,op1,op2,res);
+			*expRes = res;
+
 			// nejdrive se zbavim: < E * E (4x pop)
-			stack_pop(NULL,0);
-			stack_pop(NULL,0);
-			stack_pop(NULL,0);
-			stack_pop(NULL,0);
+			// stack_pop(NULL,0);
+			// stack_pop(NULL,0);
+			// stack_pop(NULL,0);
+			// stack_pop(NULL,0);
 
 			// pushnu neterminal na zasobnik
 			if ((error = stack_push(PNonTerm, "PNonTerm")) != ENOP)
@@ -880,10 +925,6 @@ TError find_rule(ruleType rule)
 				error = ESYN;
 				return error;
 			}
-
-			/**
-			 * @todo 3AC, Ilist
-			 */
 			
 			// kontrola deleni 0
 			int nula = 1;
@@ -916,31 +957,60 @@ TError find_rule(ruleType rule)
 			{
 				print_error(ESEM_TYP, token.line);
 			}
+
+			/**
+			 * 3AC
+			 */
+			//tHTItem *op2;	//operand 2
+			stack_pop(&op2,1);	
+			stack_pop(NULL,0);	//znamienko
+			
+			//tHTItem *op1;	//operand 1			
+			stack_pop(&op1,1);
+			stack_pop(NULL,0);	//znamienko
 			// int / double
-			else if (stack.top->idType == Tint && stack.top->Lptr->Lptr->idType == Tdouble)
-			{
-				#ifdef DEBUG
-				printf("--Op1 == int, op2 == double.--\n");
-				#endif
-			}
-			// double / int
-			else if (stack.top->idType == Tdouble && stack.top->Lptr->Lptr->idType == Tint)
+			if ((stack.top->idType == Tdouble && stack.top->Lptr->Lptr->idType == Tint) ||
+				(stack.top->idType == Tint && stack.top->Lptr->Lptr->idType == Tdouble))
 			{
 				#ifdef DEBUG
 				printf("--Op1 == double, op2 == int.--\n");
 				#endif
 			}
-			else 
+			// int / int
+			else if (stack.top->idType == Tint && stack.top->Lptr->Lptr->idType == Tint)
+			{			
+				data.varType = T_Integ;
+				#ifdef DEBUG
+				printf("--Op1 == int, op2 == int.--\n");
+				#endif
+			}
+			// double / double
+			else if (stack.top->idType == Tdouble && stack.top->Lptr->Lptr->idType == Tdouble)
+			{			
+				data.varType = T_Doub;
+				#ifdef DEBUG
+				printf("--Op1 == double, op2 == double.--\n");
+				#endif
+			}
+			else
 			{
 			//	printf("###############Chyba Nonterminalu - kompatibilita?.\n"); @TODO vyresit pro ID
 			//	print_error(ESEM_TYP, token.line);
 			}
+
+			strInit(&newVar);
+			generate_variable(&newVar,counteerVar);
+			htInsert(*locTable, newVar.str,data);		// pomocna premenna na vysledok
+			res = htSearch(*locTable,newVar.str);
+			
+			generate_inst(C_Div,op1,op2,res);
+			*expRes = res;
 			
 			// nejdrive se zbavim: < E / E (4x pop)
-			stack_pop(NULL,0);
-			stack_pop(NULL,0);
-			stack_pop(NULL,0);
-			stack_pop(NULL,0);
+			// stack_pop(NULL,0);
+			// stack_pop(NULL,0);
+			// stack_pop(NULL,0);
+			// stack_pop(NULL,0);
 
 			// pushnu neterminal na zasobnik
 			if ((error = stack_push(PNonTerm, "PNonTerm")) != ENOP)
@@ -969,10 +1039,6 @@ TError find_rule(ruleType rule)
 				error = ESYN;
 				return error;
 			}
-
-			/**
-			 * @todo 3AC, Ilist
-			 */
 			
 			// unie.obsah = 1;
 			// unie2.obsah = 10;
