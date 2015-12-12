@@ -10,7 +10,7 @@
 
 //#define DEBUG 1
 //#define DEBUG_SEM 1
-//#define DEBUG_INST 1
+#define DEBUG_INST 1
 
 #include <stdio.h>
 #include <stdlib.h>
