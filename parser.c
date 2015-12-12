@@ -1158,6 +1158,7 @@ TError params(FILE *input)
 					data.orderParams = ++currOrder;
 					data.scope = 1; // nejnizsi scope nasledujiciho bloku
 					data.value.ptrTS = NULL;
+					data.retType = tempData->retType;
 					htInsert(funcTable, strGetStr(&attr), data);
 					htInsert(paraTable, currFunc, data); // vkladani do tabulky parametru
 
@@ -1246,6 +1247,7 @@ TError params_n(FILE *input)
 						data.orderParams = ++currOrder;
 						data.scope = 1; // nejnizsi scope nasledujiciho bloku
 						data.value.ptrTS = NULL;
+						data.retType = tempData->retType;
 						htInsert(funcTable, strGetStr(&attr), data);
 						htInsert(paraTable, currFunc, data); // vkladani do tabulky parametru
 
