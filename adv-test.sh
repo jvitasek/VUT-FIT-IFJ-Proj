@@ -196,16 +196,16 @@ else
 fi
 
 # PROBLEM: jinak pojmenovany parametr @todo!
-./main adv-tests/018_R3_.c
+./main adv-tests/018_R0_.c
 ret=$?
 
-if [ "$ret" -eq 3 ];
+if [ "$ret" -eq 0 ];
 then
 	succ=$((succ+1))
 	echo "Test 18: SUCCESS" >> adv-test.out
 else
 	error=$((error+1))
-	echo "Test 18: ERROR, EXPECTED 3, GOT $ret" >> adv-test.out
+	echo "Test 18: ERROR, EXPECTED 0, GOT $ret" >> adv-test.out
 fi
 
 # PROBLEM: jina navratova hodnota funkce @todo!
