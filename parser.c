@@ -150,6 +150,7 @@ TError parse(FILE *input)
 	currScope = 0;
 	currOrder = 0;
 	currOrderTerm = 0;
+	isReturn = 0;
 	//JARDA
 	/*#ifdef JARIS
 	SInitP(&stackI);
@@ -1313,8 +1314,10 @@ TError ret(FILE *input)
 	// 42: <RETURN> -> return <EXPR>;
 	if(token.type == T_Return)
 	{
+		isReturn = 1;
 		get_next_token(input, &attr);
 		error = expr(input, &attr, 0, &counterVar, &commTable, &exprRes);
+		isReturn = 0;
 		#ifdef DEBUG
 		fprintf(stderr, "ret: expr vratilo: %d\n", error);
 		#endif
