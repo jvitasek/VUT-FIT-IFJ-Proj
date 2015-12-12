@@ -35,6 +35,7 @@ tHTItem *idAssign = NULL;
 tHTItem *exprRes = NULL;
 stack tableStack;
 tInstList List;	// zoznam instrukcii
+char *tempFunc;
 
 //JARDA
 /*#ifdef JARIS
@@ -149,6 +150,7 @@ TError parse(FILE *input)
 	currScope = 0;
 	currOrder = 0;
 	currOrderTerm = 0;
+	isReturn = 0;
 	//JARDA
 	/*#ifdef JARIS
 	SInitP(&stackI);
@@ -997,8 +999,9 @@ TError stmt(FILE *input)
 			print_error(ESEM_DEF, token.line);
 		}
 		idAssign = htSearch(commTable,strGetStr(&attr));
-		currFunc = malloc(sizeof(char)*strlen(strGetStr(&attr)));
-		strcpy(currFunc, strGetStr(&attr));
+		tempFunc = malloc(sizeof(char)*strlen(strGetStr(&attr)));
+		strcpy(tempFunc, strGetStr(&attr));
+		printf("tempFunc: %s\n", tempFunc);
 		// /SEMANTICKA ANALYZA
 
 		get_next_token(input, &attr);
@@ -1070,6 +1073,9 @@ TError call_assign(FILE *input)
 	// xx: <CALL_ASSIGN> -> (<terms>);
 	else if(token.type == T_LeftParenthesis)
 	{
+		currFunc = malloc(sizeof(char)*strlen(tempFunc));
+		strcpy(currFunc, tempFunc);
+
 		// SEMANTICKA ANALYZA
 		/**
 		 * kontrola, zda volana funkce byla definovana
@@ -1308,8 +1314,10 @@ TError ret(FILE *input)
 	// 42: <RETURN> -> return <EXPR>;
 	if(token.type == T_Return)
 	{
+		isReturn = 1;
 		get_next_token(input, &attr);
 		error = expr(input, &attr, 0, &counterVar, &commTable, &exprRes);
+		isReturn = 0;
 		#ifdef DEBUG
 		fprintf(stderr, "ret: expr vratilo: %d\n", error);
 		#endif

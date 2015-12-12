@@ -52,6 +52,7 @@ T_Type currType;
 int currScope;
 int currOrder;
 int currOrderTerm;
+int isReturn;
 char *currFunc;
 tHTable *commTable;
 tHTable *funcTable;
