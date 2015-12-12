@@ -304,8 +304,69 @@ tHTItem* htSearchScope(tHTable* ptrht, char *key, int scope)
  * @param data  [description]
  */
 void htInsert(tHTable* ptrht, char *key, tData data)
+{		
+	if(ptrht != NULL)
+	{
+		tHTItem *tmp;
+		tHTItem *new;
+		tmp = htSearch(ptrht,key);
+		if(tmp != NULL)	// nasli sme hladany prvok, tak prepisem jeho obsah
+		{
+			new = malloc(sizeof(tHTItem));	// alokujeme miesto pre novu polozku
+			if(new != NULL)
+			{
+				new->data.timesUsed = data.timesUsed; // passing the data specified
+				new->data.type = data.type;
+				new->data.retType = data.retType;
+				new->data.value = data.value;
+				new->data.varType = data.varType;
+				new->data.orderParams = data.orderParams;
+				new->data.isDefined = data.isDefined;
+				new->data.isDeclared = data.isDeclared;
+				new->data.scope = data.scope;
+
+				//new->key = key;
+				new->key = malloc(sizeof(char)*strlen(key)+1);
+				strcpy(new->key, key);
+				
+				new->ptrnext = tmp->ptrnext;
+				tmp->ptrnext = new;
+			}
+		}
+		else // nenasli sme
+		{
+			new = malloc(sizeof(tHTItem));	// alokujeme miesto pre novu polozku
+			if(new != NULL)
+			{
+				int index;
+				index = hashCode(key);		// zistime index do tabulky
+				new->data.timesUsed = data.timesUsed; // passing the data specified
+				new->data.type = data.type;
+				new->data.retType = data.retType;
+				new->data.value = data.value;
+				new->data.varType = data.varType;
+				new->data.orderParams = data.orderParams;
+				new->data.isDefined = data.isDefined;
+				new->data.isDeclared = data.isDeclared;
+				new->data.scope = data.scope;
+				new->key = malloc(sizeof(char)*strlen(key)+1);
+				strcpy(new->key, key);
+				new->ptrnext = (*ptrht)[index];	// nastavim ptrnext na dalsiu polozku v retazenych synonymach
+				(*ptrht)[index] = new;	// nastavim (*ptrht)[index] na novu polozku
+			}
+		}
+	}
+}
+
+/**
+ * Prepise data na zadanem klici
+ * @param ptrht [description]
+ * @param key   [description]
+ * @param data  [description]
+ */
+void htInsertData(tHTable *ptrht, char *key, tData data)
 {
-	/*if(ptrht) // it there is something to work with
+	if(ptrht) // it there is something to work with
 	{
 		tHTItem *temp = NULL; // our helper placeholder
 		int rkey = hashCode(key); // decode the key specified
@@ -381,59 +442,6 @@ void htInsert(tHTable* ptrht, char *key, tData data)
 	}
 	else // nothing to work with
 		return; // end here
-		* */
-		
-	if(ptrht != NULL)
-	{
-		tHTItem *tmp;
-		tHTItem *new;
-		tmp = htSearch(ptrht,key);
-		if(tmp != NULL)		// nasli sme hladany prvok, tak prepisem jeho obsah
-		{
-			new = malloc(sizeof(tHTItem));	// alokujeme miesto pre novu polozku
-			if(new != NULL)
-			{
-				new->data.timesUsed = data.timesUsed; // passing the data specified
-				new->data.type = data.type;
-				new->data.retType = data.retType;
-				new->data.value = data.value;
-				new->data.varType = data.varType;
-				new->data.orderParams = data.orderParams;
-				new->data.isDefined = data.isDefined;
-				new->data.isDeclared = data.isDeclared;
-				new->data.scope = data.scope;
-
-				//new->key = key;
-				new->key = malloc(sizeof(char)*strlen(key)+1);
-				strcpy(new->key, key);
-				
-				new->ptrnext = tmp->ptrnext;
-				tmp->ptrnext = new;
-			}
-		}else 				// nenasli sme
-		{
-			new = malloc(sizeof(tHTItem));	// alokujeme miesto pre novu polozku
-			if(new != NULL)
-			{
-				int index;
-				index = hashCode(key);		// zistime index do tabulky
-				new->data.timesUsed = data.timesUsed; // passing the data specified
-				new->data.type = data.type;
-				new->data.retType = data.retType;
-				new->data.value = data.value;
-				new->data.varType = data.varType;
-				new->data.orderParams = data.orderParams;
-				new->data.isDefined = data.isDefined;
-				new->data.isDeclared = data.isDeclared;
-				new->data.scope = data.scope;
-				new->key = malloc(sizeof(char)*strlen(key)+1);
-				strcpy(new->key, key);
-				new->ptrnext = (*ptrht)[index];	// nastavim ptrnext na dalsiu polozku v retazenych synonymach
-				(*ptrht)[index] = new;	// nastavim (*ptrht)[index] na novu polozku
-			}
-		}
-			
-	}
 }
 
 /**
@@ -735,45 +743,55 @@ void outputSymbolTable(tHTable* ptrht)
 		while ( ptr != NULL ) {
 			if(ptr->data.varType == T_Integ)
 			{
-				printf (" (%s, dT: %d, tU: %d, vT: %d, oP: %d, isD: %d, sc: %d, value: %d)", 
+				printf (" (%s, dT: %d, tU: %d, vT: %d, oP: %d, isDef: %d, isDec: %d, sc: %d, value: %d)", 
 					ptr->key, ptr->data.type, ptr->data.timesUsed, ptr->data.varType, ptr->data.orderParams, 
-					ptr->data.isDefined, ptr->data.scope,ptr->data.value.i);
-			}else if(ptr->data.varType == T_Doub)
+					ptr->data.isDefined, ptr->data.isDeclared, ptr->data.scope,ptr->data.value.i);
+			}
+			else if(ptr->data.varType == T_Doub)
 			{
-				printf (" (%s, dT: %d, tU: %d, vT: %d, oP: %d, isD: %d, sc: %d, value: %f)", 
+				printf (" (%s, dT: %d, tU: %d, vT: %d, oP: %d, isDef: %d, isDec: %d, sc: %d, value: %f)", 
 					ptr->key, ptr->data.type, ptr->data.timesUsed, ptr->data.varType, ptr->data.orderParams, 
-					ptr->data.isDefined, ptr->data.scope,ptr->data.value.d);
-			}else if(ptr->data.varType == T_Str)
+					ptr->data.isDefined, ptr->data.isDeclared, ptr->data.scope,ptr->data.value.d);
+			}
+			else if(ptr->data.varType == T_Str)
 			{
-				printf (" (%s, dT: %d, tU: %d, vT: %d, oP: %d, isD: %d, sc: %d, value: %s)", 
+				printf (" (%s, dT: %d, tU: %d, vT: %d, oP: %d, isDef: %d, isDec: %d, sc: %d)", 
 					ptr->key, ptr->data.type, ptr->data.timesUsed, ptr->data.varType, ptr->data.orderParams, 
-					ptr->data.isDefined, ptr->data.scope,(char*)ptr->data.value.ptrTS);
-			}else
+					ptr->data.isDefined, ptr->data.isDeclared, ptr->data.scope);
+				/**
+				 * zakomentovany kod nize haze segfault kvuli ptr->data.value.ptrTS
+				 */
+				// printf (" (%s, dT: %d, tU: %d, vT: %d, oP: %d, isDef: %d, isDec: %d, sc: %d, value: %s)", 
+				// 		ptr->key, ptr->data.type, ptr->data.timesUsed, ptr->data.varType, ptr->data.orderParams, 
+				// 		ptr->data.isDefined, ptr->data.isDeclared, ptr->data.scope,(char*)ptr->data.value.ptrTS);
+				
+			}
+			else
 			{
 				tHTItem *pom = ptr->data.value.ptrTS;
 				if(pom != NULL)
 				{
 					if(pom->data.varType == T_Integ)
 					{
-						printf (" (%s, dT: %d, tU: %d, vT: %d, oP: %d, isD: %d, sc: %d, ptrTS: %p, ptrTSvalue: %d)", 
+						printf (" (%s, dT: %d, tU: %d, vT: %d, oP: %d, isDef: %d, isDec: %d, sc: %d, ptrTS: %p, ptrTSvalue: %d)", 
 							ptr->key, ptr->data.type, ptr->data.timesUsed, ptr->data.varType, ptr->data.orderParams, 
-							ptr->data.isDefined, ptr->data.scope,ptr->data.value.ptrTS, pom->data.value.i);
+							ptr->data.isDefined, ptr->data.isDeclared, ptr->data.scope,ptr->data.value.ptrTS, pom->data.value.i);
 					}else if(pom->data.varType == T_Doub)
 					{
-						printf (" (%s, dT: %d, tU: %d, vT: %d, oP: %d, isD: %d, sc: %d, ptrTS: %p, ptrTSvalue: %f)", 
+						printf (" (%s, dT: %d, tU: %d, vT: %d, oP: %d, isDef: %d, isDec: %d, sc: %d, ptrTS: %p, ptrTSvalue: %f)", 
 							ptr->key, ptr->data.type, ptr->data.timesUsed, ptr->data.varType, ptr->data.orderParams, 
-							ptr->data.isDefined, ptr->data.scope,ptr->data.value.ptrTS, pom->data.value.d);
+							ptr->data.isDefined, ptr->data.isDeclared, ptr->data.scope,ptr->data.value.ptrTS, pom->data.value.d);
 					}else if(pom->data.varType == T_Str)
 					{
-						printf (" (%s, dT: %d, tU: %d, vT: %d, oP: %d, isD: %d, sc: %d, ptrTS: %p, ptrTSvalue: %s)", 
+						printf (" (%s, dT: %d, tU: %d, vT: %d, oP: %d, isDef: %d, isDec: %d, sc: %d, ptrTS: %p, ptrTSvalue: %s)", 
 							ptr->key, ptr->data.type, ptr->data.timesUsed, ptr->data.varType, ptr->data.orderParams, 
-							ptr->data.isDefined, ptr->data.scope,ptr->data.value.ptrTS, pom->data.value.str);
+							ptr->data.isDefined, ptr->data.isDeclared, ptr->data.scope,ptr->data.value.ptrTS, pom->data.value.str);
 					}
 				}else
 				{
-					printf (" (%s, dT: %d, tU: %d, vT: %d, oP: %d, isD: %d, sc: %d, ptrTS: %p, ptrTSvalue: %p)", 
+					printf (" (%s, dT: %d, tU: %d, vT: %d, oP: %d, isDef: %d, isDec: %d, sc: %d, ptrTS: %p, ptrTSvalue: %p)", 
 						ptr->key, ptr->data.type, ptr->data.timesUsed, ptr->data.varType, ptr->data.orderParams, 
-						ptr->data.isDefined, ptr->data.scope,ptr->data.value.ptrTS,pom);
+						ptr->data.isDefined, ptr->data.isDeclared, ptr->data.scope,ptr->data.value.ptrTS,pom);
 				}
 			}
 			

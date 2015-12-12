@@ -717,9 +717,13 @@ case I_NEQ:
 #include <stdlib.h>
 #include "ial.h"
 
+//#define DEBUG 1
+
 TError interpret(tInstList *L)
 {
-	printf("Interpret\n");
+  #ifdef DEBUG
+	fprintf(stderr, "Interpret\n");
+  #endif
 	printElementsOfList(*L);
 	listFirst(L);
 	tInstruct *ins;
@@ -737,7 +741,9 @@ TError interpret(tInstList *L)
 		
 		listNext(L);
 	}
-	printf("%s %f\n",res->key,res->data.value.d);
+  #ifdef DEBUG
+	fprintf(stderr, "%s %f\n",res->key,res->data.value.d);
+  #endif
 	return ENOP;
 }
 

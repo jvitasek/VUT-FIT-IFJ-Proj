@@ -13,6 +13,8 @@
 #include <stdlib.h>
 #include "ial.h"
 
+//#define DEBUG 1
+
 /**
  * Inicializacia zoznamu
  */
@@ -209,6 +211,7 @@ tInstruct *listGetData(tInstList *L)
 /** PRE TESTOVANIE */
 void printElementsOfList(tInstList L)
 {
+	#ifdef DEBUG
     int MaxListLength = 100;
 	tInstList TempList;
 	TempList = L;
@@ -237,4 +240,5 @@ void printElementsOfList(tInstList L)
     if (CurrListLength>=MaxListLength)
         fprintf(stderr, "\nList exceeded maximum length!");
 	fprintf(stderr, "\n-----------------\n");
+	#endif
 }

@@ -9,8 +9,8 @@
  */
 
 //#define DEBUG 1
-//#define DEBUG_SEM 1
-#define DEBUG_INST 1
+#define DEBUG_SEM 1
+//#define DEBUG_INST 1
 
 
 #include <stdio.h>
@@ -308,26 +308,10 @@ TError func(FILE *input)
 			#endif*/
 			if((tempData = htRead(funcTable, strGetStr(&attr))) != NULL)
 			{
-				if(tempData->retType == currType)
-				{
-					tData data;
-					data.type = tempData->type;
-					data.retType = tempData->retType;
-					data.timesUsed = tempData->timesUsed;
-					data.scope = -1;
-					data.isDefined = tempData->isDefined;
-					data.value.ptrTS = NULL;
-					htInsert(funcTable, strGetStr(&attr), data);
-					printf("321 %s\n",strGetStr(&attr));
-					#ifdef DEBUG_SEM
-					fprintf(stderr, "VKLADAM %s\n", strGetStr(&attr));
-					#endif
-				}
-				// redefinice/znovudeklarace
-				else
+				if(tempData->retType != currType)
 				{
 					#ifdef DEBUG_SEM
-					fprintf(stderr, "KONCIM VE FUNC: 11)\n");
+					fprintf(stderr, "Chyba: navratovy typ funkce nesouhlasi\n");
 					#endif
 					print_error(ESEM_DEF, token.line);
 				}
@@ -343,9 +327,9 @@ TError func(FILE *input)
 					data.timesUsed = 0;
 					data.scope = -1;
 					data.isDefined = 0;
+					data.isDeclared = 0;
 					data.value.ptrTS = NULL;
 					htInsert(funcTable, strGetStr(&attr), data);
-					printf("348 %s\n",strGetStr(&attr));
 					#ifdef DEBUG_SEM
 					fprintf(stderr, "VKLADAM %s\n", strGetStr(&attr));
 					#endif
@@ -387,7 +371,8 @@ TError func(FILE *input)
 				/**
 				 * pokud byla deklarovana, zapsat
 				 */
-				if((tempData = htRead(funcTable, strGetStr(&attr))) != NULL)
+				//outputSymbolTable(funcTable);
+				if((tempData = htRead(funcTable, currFunc)) != NULL)
 				{
 					tData data;
 					data.type = tempData->type;
@@ -397,7 +382,10 @@ TError func(FILE *input)
 					data.isDefined = tempData->isDefined;
 					data.value.ptrTS = tempData->value.ptrTS;
 					data.isDeclared = 1;
-					//htInsert(funcTable, strGetStr(&attr), data);
+					htInsertData(funcTable, currFunc, data);
+					#ifdef DEBUG_SEM
+					fprintf(stderr, "Upravuji %s, isDeclared: %d\n", currFunc, data.isDeclared);
+					#endif
 					//printf("400 %s\n",strGetStr(&attr));
 				}
 
@@ -572,7 +560,7 @@ TError comm_seq(FILE *input)
 				data.orderParams = tempData->orderParams;
 				data.isDefined = 1;
 				data.value.ptrTS = NULL;
-				//htInsert(funcTable, currFunc, data);
+				htInsertData(funcTable, currFunc, data);
 				//printf("576 %s\n",strGetStr(&attr));
 				#ifdef DEBUG_SEM
 				fprintf(stderr, "UPRAVUJI %s, DEFINOVANA: %d\n", currFunc, data.isDefined);
@@ -713,7 +701,7 @@ TError stmt(FILE *input)
 			//je-li podminka pravdiva, skacu za if (afterIf)
 			generateInstruction(I_IFGOTO, INT, &unie, STRING, &unie2,  DOUBLE, NULL);
 			#endif*/
-			outputSymbolTable(commTable);
+
 			#ifdef DEBUG
 			//outputSymbolTable(commTable);
 			fprintf(stderr, "stmt: expr vratilo: %d\n", error);
@@ -886,7 +874,6 @@ TError stmt(FILE *input)
 					fprintf(stderr, "KONCIM V STMT: 26)\n");
 					#endif
 					print_error(ESEM_DEF, token.line);
-					exit(ESEM_DEF);
 				}
 				// /SEMANTICKA ANALYZA
 
@@ -1150,6 +1137,7 @@ TError params(FILE *input)
 			tData *tempData;
 			if((tempData = htRead(funcTable, currFunc)) != NULL)
 			{
+				// pokud funkce jeste neni deklarovana
 				if(tempData->isDeclared != 1)
 				{
 					tData data;
@@ -1160,7 +1148,6 @@ TError params(FILE *input)
 					data.scope = 1; // nejnizsi scope nasledujiciho bloku
 					data.value.ptrTS = NULL;
 					htInsert(funcTable, strGetStr(&attr), data);
-					printf("1163 %s\n",strGetStr(&attr));
 					htInsert(paraTable, currFunc, data); // vkladani do tabulky parametru
 
 					#ifdef DEBUG_SEM
@@ -1249,7 +1236,6 @@ TError params_n(FILE *input)
 						data.scope = 1; // nejnizsi scope nasledujiciho bloku
 						data.value.ptrTS = NULL;
 						htInsert(funcTable, strGetStr(&attr), data);
-						printf("1246 %s\n",strGetStr(&attr));
 						htInsert(paraTable, currFunc, data); // vkladani do tabulky parametru
 
 						#ifdef DEBUG_SEM
@@ -1740,7 +1726,6 @@ TError init(FILE *input)
 			#endif
 			generate_inst(C_Assign,exprRes,NULL,idAssign);
 		}
-		outputSymbolTable(commTable);
 		#ifdef DEBUG
 		//outputSymbolTable(commTable);
 		fprintf(stderr, "init: expr vratilo: %d\n", error);
@@ -2078,7 +2063,6 @@ TError realtype()
 	{
 		#ifdef JARIS
 		//unie.obsah_s = malloc(sizeof(char)*strlen(strGetStr(&attr)));
-		printf("JSEM TU\n");
 		strcpy(unie.obsah_s, strGetStr(&attr));
 		generateInstruction(I_PRINT, STRING, &unie, STRING, &unie2,  DOUBLE, NULL);
 		#endif
