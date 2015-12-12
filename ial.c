@@ -305,7 +305,7 @@ tHTItem* htSearchScope(tHTable* ptrht, char *key, int scope)
  */
 void htInsert(tHTable* ptrht, char *key, tData data)
 {
-	if(ptrht) // it there is something to work with
+	/*if(ptrht) // it there is something to work with
 	{
 		tHTItem *temp = NULL; // our helper placeholder
 		int rkey = hashCode(key); // decode the key specified
@@ -381,6 +381,59 @@ void htInsert(tHTable* ptrht, char *key, tData data)
 	}
 	else // nothing to work with
 		return; // end here
+		* */
+		
+	if(ptrht != NULL)
+	{
+		tHTItem *tmp;
+		tHTItem *new;
+		tmp = htSearch(ptrht,key);
+		if(tmp != NULL)		// nasli sme hladany prvok, tak prepisem jeho obsah
+		{
+			new = malloc(sizeof(tHTItem));	// alokujeme miesto pre novu polozku
+			if(new != NULL)
+			{
+				new->data.timesUsed = data.timesUsed; // passing the data specified
+				new->data.type = data.type;
+				new->data.retType = data.retType;
+				new->data.value = data.value;
+				new->data.varType = data.varType;
+				new->data.orderParams = data.orderParams;
+				new->data.isDefined = data.isDefined;
+				new->data.isDeclared = data.isDeclared;
+				new->data.scope = data.scope;
+
+				//new->key = key;
+				new->key = malloc(sizeof(char)*strlen(key)+1);
+				strcpy(new->key, key);
+				
+				new->ptrnext = tmp->ptrnext;
+				tmp->ptrnext = new;
+			}
+		}else 				// nenasli sme
+		{
+			new = malloc(sizeof(tHTItem));	// alokujeme miesto pre novu polozku
+			if(new != NULL)
+			{
+				int index;
+				index = hashCode(key);		// zistime index do tabulky
+				new->data.timesUsed = data.timesUsed; // passing the data specified
+				new->data.type = data.type;
+				new->data.retType = data.retType;
+				new->data.value = data.value;
+				new->data.varType = data.varType;
+				new->data.orderParams = data.orderParams;
+				new->data.isDefined = data.isDefined;
+				new->data.isDeclared = data.isDeclared;
+				new->data.scope = data.scope;
+				new->key = malloc(sizeof(char)*strlen(key)+1);
+				strcpy(new->key, key);
+				new->ptrnext = (*ptrht)[index];	// nastavim ptrnext na dalsiu polozku v retazenych synonymach
+				(*ptrht)[index] = new;	// nastavim (*ptrht)[index] na novu polozku
+			}
+		}
+			
+	}
 }
 
 /**

@@ -318,6 +318,7 @@ TError func(FILE *input)
 					data.isDefined = tempData->isDefined;
 					data.value.ptrTS = NULL;
 					htInsert(funcTable, strGetStr(&attr), data);
+					printf("321 %s\n",strGetStr(&attr));
 					#ifdef DEBUG_SEM
 					fprintf(stderr, "VKLADAM %s\n", strGetStr(&attr));
 					#endif
@@ -344,6 +345,7 @@ TError func(FILE *input)
 					data.isDefined = 0;
 					data.value.ptrTS = NULL;
 					htInsert(funcTable, strGetStr(&attr), data);
+					printf("348 %s\n",strGetStr(&attr));
 					#ifdef DEBUG_SEM
 					fprintf(stderr, "VKLADAM %s\n", strGetStr(&attr));
 					#endif
@@ -395,7 +397,8 @@ TError func(FILE *input)
 					data.isDefined = tempData->isDefined;
 					data.value.ptrTS = tempData->value.ptrTS;
 					data.isDeclared = 1;
-					htInsert(funcTable, strGetStr(&attr), data);
+					//htInsert(funcTable, strGetStr(&attr), data);
+					//printf("400 %s\n",strGetStr(&attr));
 				}
 
 
@@ -455,7 +458,8 @@ TError par_def_list(FILE *input)
 			data.scope = tempData->scope;
 			data.orderParams = currOrder;
 			data.value.ptrTS = NULL;
-			htInsert(funcTable, strGetStr(&attr), data);
+			//htInsert(funcTable, strGetStr(&attr), data);
+			//printf("462 %s\n",strGetStr(&attr));
 			#ifdef DEBUG_SEM
 			//fprintf(stderr, "UPRAVUJI %s, POCET PARAMS: %d\n", currFunc, currOrder);
 			#endif
@@ -568,7 +572,8 @@ TError comm_seq(FILE *input)
 				data.orderParams = tempData->orderParams;
 				data.isDefined = 1;
 				data.value.ptrTS = NULL;
-				htInsert(funcTable, currFunc, data);
+				//htInsert(funcTable, currFunc, data);
+				//printf("576 %s\n",strGetStr(&attr));
 				#ifdef DEBUG_SEM
 				fprintf(stderr, "UPRAVUJI %s, DEFINOVANA: %d\n", currFunc, data.isDefined);
 				#endif
@@ -708,7 +713,7 @@ TError stmt(FILE *input)
 			//je-li podminka pravdiva, skacu za if (afterIf)
 			generateInstruction(I_IFGOTO, INT, &unie, STRING, &unie2,  DOUBLE, NULL);
 			#endif*/
-
+			outputSymbolTable(commTable);
 			#ifdef DEBUG
 			//outputSymbolTable(commTable);
 			fprintf(stderr, "stmt: expr vratilo: %d\n", error);
@@ -1155,6 +1160,7 @@ TError params(FILE *input)
 					data.scope = 1; // nejnizsi scope nasledujiciho bloku
 					data.value.ptrTS = NULL;
 					htInsert(funcTable, strGetStr(&attr), data);
+					printf("1163 %s\n",strGetStr(&attr));
 					htInsert(paraTable, currFunc, data); // vkladani do tabulky parametru
 
 					#ifdef DEBUG_SEM
@@ -1243,6 +1249,7 @@ TError params_n(FILE *input)
 						data.scope = 1; // nejnizsi scope nasledujiciho bloku
 						data.value.ptrTS = NULL;
 						htInsert(funcTable, strGetStr(&attr), data);
+						printf("1246 %s\n",strGetStr(&attr));
 						htInsert(paraTable, currFunc, data); // vkladani do tabulky parametru
 
 						#ifdef DEBUG_SEM
@@ -1733,6 +1740,7 @@ TError init(FILE *input)
 			#endif
 			generate_inst(C_Assign,exprRes,NULL,idAssign);
 		}
+		outputSymbolTable(commTable);
 		#ifdef DEBUG
 		//outputSymbolTable(commTable);
 		fprintf(stderr, "init: expr vratilo: %d\n", error);

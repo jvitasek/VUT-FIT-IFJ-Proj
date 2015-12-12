@@ -638,7 +638,7 @@ TError find_rule(ruleType rule)
 			// int + int
 			else if (stack.top->idType == Tint && stack.top->Lptr->Lptr->idType == Tint)
 			{
-				outputSymbolTable(*localTable);
+				//outputSymbolTable(*localTable);
 				// string newVar;
 				// strInit(&newVar);
 				// generate_variable(&newVar,counteerVar);
