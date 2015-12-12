@@ -197,8 +197,6 @@ TError parse(FILE *input)
 	fprintf(stderr, "parse: func_n vratilo: %d\n", error);
 	#endif
 
-	outputSymbolTable(funcTable);
-
 	/**
 	 * smazani tabulky symbolu
 	 */
@@ -385,7 +383,6 @@ TError func(FILE *input)
 					tData data;
 					data.type = tempData->type;
 					data.retType = tempData->retType;
-					printf("vkladam retType: %d\n", tempData->retType);
 					data.timesUsed = tempData->timesUsed;
 					data.scope = tempData->scope;
 					data.isDefined = tempData->isDefined;
@@ -568,6 +565,7 @@ TError comm_seq(FILE *input)
 				data.timesUsed = tempData->timesUsed+1;
 				data.scope = tempData->scope;
 				data.orderParams = tempData->orderParams;
+				data.retType = tempData->retType;
 				data.isDefined = 1;
 				data.value.ptrTS = NULL;
 				htInsertData(funcTable, currFunc, data);
@@ -1157,7 +1155,6 @@ TError params(FILE *input)
 					data.scope = 1; // nejnizsi scope nasledujiciho bloku
 					data.value.ptrTS = NULL;
 					data.retType = tempData->retType;
-					printf("vkladam retType: %d\n", tempData->retType);
 					htInsert(funcTable, strGetStr(&attr), data);
 					htInsert(paraTable, currFunc, data); // vkladani do tabulky parametru
 
@@ -1247,7 +1244,6 @@ TError params_n(FILE *input)
 						data.scope = 1; // nejnizsi scope nasledujiciho bloku
 						data.value.ptrTS = NULL;
 						data.retType = tempData->retType;
-						printf("vkladam retType: %d\n", tempData->retType);
 						htInsert(funcTable, strGetStr(&attr), data);
 						htInsert(paraTable, currFunc, data); // vkladani do tabulky parametru
 
