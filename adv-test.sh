@@ -87,7 +87,7 @@ else
 	echo "Test 7: ERROR, EXPECTED 0, GOT $ret" >> adv-test.out
 fi
 
-./main adv-tests/008_R1_.c
+./main adv-tests/008_R2_.c
 ret=$?
 
 if [ "$ret" -eq 2 ];

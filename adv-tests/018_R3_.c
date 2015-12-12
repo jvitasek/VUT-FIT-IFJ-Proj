@@ -1,9 +1,8 @@
-
-int foo( int a, int h );
-
-int foo( int a, int h ) {
+int foo( int b ) {
 
 }
+
+int foo( int a );
 
 int main() {
 	return foo( 5 );

@@ -987,7 +987,6 @@ TError stmt(FILE *input)
 			fprintf(stderr, "KONCIM V STMT: 29)\n");
 			#endif
 			print_error(ESEM_DEF, token.line);
-			exit(ESEM_DEF);
 		}
 		idAssign = htSearch(commTable,strGetStr(&attr));
 		currFunc = malloc(sizeof(char)*strlen(strGetStr(&attr)));
@@ -1339,7 +1338,6 @@ TError cout_term(FILE *input)
 			fprintf(stderr, "KONCIM V COUT_TERM: 39)\n");
 			#endif
 			print_error(ESEM_DEF, token.line);
-			exit(ESEM_DEF);
 		}
 		// KONEC SEMANTICKE ANALYZY
 		get_next_token(input, &attr);
@@ -1449,7 +1447,6 @@ TError cin_id_n(FILE *input)
 				fprintf(stderr, "KONCIM V CIN_ID_N: 37)\n");
 				#endif
 				print_error(ESEM_DEF, token.line);
-				exit(ESEM_DEF);
 			}
 			// KONEC SEMANTICKE ANALYZY
 			get_next_token(input, &attr);
@@ -1525,7 +1522,6 @@ TError assign(FILE *input)
 			fprintf(stderr, "KONCIM V ASSIGN: 36)\n");
 			#endif
 			print_error(ESEM_DEF, token.line);
-			exit(ESEM_DEF);
 		}
 		// KONEC SEMANTICKE ANALYZY
 
@@ -1644,7 +1640,6 @@ TError var_def(FILE *input)
 				#endif
 
 				print_error(ESEM_DEF, token.line);
-				exit(ESEM_DEF);
 			}
 			// promenna jeste neni v tabulce
 			else
@@ -1835,7 +1830,6 @@ TError terms(FILE *input)
 			#endif
 
 			print_error(ESEM_DEF, token.line);
-			exit(ESEM_DEF);
 		}
 		
 		// KONEC SEMANTICKE ANALYZY
@@ -1973,7 +1967,6 @@ TError terms_n(FILE *input)
 				#endif
 
 				print_error(ESEM_DEF, token.line);
-				exit(ESEM_DEF);
 			}
 			// KONEC SEMANTICKE ANALYZY
 			get_next_token(input, &attr);
