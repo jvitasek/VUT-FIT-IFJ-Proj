@@ -14,6 +14,7 @@
 #include <string.h>
 #include "error.h"
 #include "parser.h"
+#include "interpret.h"
 
 #define DEBUG 1
 
@@ -53,6 +54,9 @@ int main(int argc, char **argv)
 			return result;
 		break;
 	}
+	
+	int interRes = interpret(&List);
+	if(interRes != 0) printf("!!!! nastala chyba v interprete !!!!\n");
 	/**
 	 * @todo interpretace (predani tabulky symbolu a instruction listu)
 	 */

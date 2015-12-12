@@ -6,7 +6,7 @@
 * Autor:
 *       xvysta02 - Jaroslav Vystavel
 */
-
+/*
 #include <stdio.h>
 #include <stdlib.h>
 #include "ilist.h"
@@ -668,7 +668,7 @@ case I_NEQ:
 
   return 0;
   
-}
+}*/
 
 
 // int pracuj()
@@ -710,4 +710,16 @@ case I_NEQ:
 //   return 0;
   
 // }
+
+
+#include "interpret.h"
+#include <stdio.h>
+#include <stdlib.h>
+
+TError interpret(tInstList *L)
+{
+	printf("Interpret\n");
+	printElementsOfList(*L);
+	return ENOP;
+}
 
