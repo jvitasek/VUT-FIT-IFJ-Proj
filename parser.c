@@ -1001,7 +1001,6 @@ TError stmt(FILE *input)
 		idAssign = htSearch(commTable,strGetStr(&attr));
 		tempFunc = malloc(sizeof(char)*strlen(strGetStr(&attr)));
 		strcpy(tempFunc, strGetStr(&attr));
-		printf("tempFunc: %s\n", tempFunc);
 		// /SEMANTICKA ANALYZA
 
 		get_next_token(input, &attr);
