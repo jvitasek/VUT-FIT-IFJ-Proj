@@ -1,7 +1,7 @@
 /**
  * Implementace interpretu imperativniho jazyka IFJ15 *
  * 
- * ial.c  -  Zakladni algoritmy
+ * ial.c  -  Zakladni algoritmy + struktura polozek tabulky symbolu
  * 
  * Autori:
  * 			xvitas02 – Jakub Vitasek

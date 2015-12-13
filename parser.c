@@ -8,10 +8,6 @@
  * 			xvalec00 – Dusan Valecky
  */
 
-//#define DEBUG 1
-//#define DEBUG_SEM 1
-//#define DEBUG_INST 1
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -21,12 +17,6 @@
 #include "expression.h"
 #include "istack.h"
 
-//JARDA
-/*#ifdef JARIS
-#include "ilist.h"
-#include "stack.h"
-#endif*/
-
 string attr; // vytvorime si string
 int counterVar = 1;	// globalna premenna, ktora sluzi pri tvorbe pomocnych premennych na medzivypocty
 
@@ -35,27 +25,6 @@ tHTItem *exprRes = NULL;
 stack tableStack;
 tInstList List;	// zoznam instrukcii
 char *tempFunc;
-
-//JARDA
-/*#ifdef JARIS
-int currScope;
-tListOfInstr *list;
-union dat_typ_obsah unie;
-union dat_typ_obsah unie2;
-extern void *lastI;
-extern void *afterIf;
-extern void *behindFor;
-tStackP stackI;
-tStackP forstack;
-extern void *beforeFor;
-extern void *startLab = NULL;
-extern void *endOfMain = NULL;
-
-// n - jeste ne
-// a - prave se tam nachazim
-// y - uz jsem tam byl
-char *I_am_in= "n";
-#endif*/
 
 /**
  * seznam vestavenych funkci
@@ -84,37 +53,6 @@ void get_next_token(FILE *input, string *attr)
 	}
 }
 
-#ifdef JARIS
-/**
- * Vlozi novou instrukci do seznamu instrukci
- * @param instType [description]
- * @param typ1     [description]
- * @param op1      [description]
- * @param typ2     [description]
- * @param op2      [description]
- * @param typ3     [description]
- * @param op3      [description]
- */
-void generateInstruction(tInstCode instType, TypeI typ1, union dat_typ_obsah *op1, TypeI typ2, union dat_typ_obsah *op2, TypeI typ3, union dat_typ_obsah *op3)
-{
-   tInst* I = malloc(sizeof(struct tInst));
-   I = malloc(sizeof(tInst));
-   I->op1 = malloc(sizeof(iOperand));
-   I->op2 = malloc(sizeof(iOperand));
-   I->res = malloc(sizeof(iOperand));
-   
-   I->instType = instType;
-  
-   I->op1->type = typ1;
-   I->op1->obsah = *op1;
-   I->op2->type = typ2;
-   I->op2->obsah = *op2;
-   I->res->type = typ3;
-
-   listInsertLast(list, *I);
-}
-#endif
-
 /**
  * Zkontroluje, zda je vlozeny retezec klicove slovo.
  * @param  attr String lexemu.
@@ -135,9 +73,9 @@ int check_builtin(char *test)
 }
 
 /**
- * [check_builtin_params description]
- * @param func  [description]
- * @param order [description]
+ * Kontroluje pocet parametru pri volani vestavene funkce.
+ * @param func  Nazev vestavene funkce.
+ * @param order Pocet, kolik bylo vlozeno argumentu.
  */
 void check_builtin_params(char *func, int order)
 {
@@ -179,7 +117,7 @@ void check_builtin_params(char *func, int order)
 }
 
 /**
- * [fill_builtin_params description]
+ * Naplni tabulku parametru polozkami pro kontrolu vestavenych funkci.
  */
 void fill_builtin_params()
 {
@@ -272,6 +210,11 @@ void fill_builtin_params()
 	// /SORT
 }
 
+/**
+ * Vraci pozadovanych pocet parametru funkce.
+ * @param  func Nazev funkce.
+ * @return      Pozadovany pocet parametru.
+ */
 int return_param_count(char *func)
 {
 	tData *tempData;
@@ -300,11 +243,6 @@ TError parse(FILE *input)
 	currOrder = 0;
 	currOrderTerm = 0;
 	isReturn = 0;
-	//JARDA
-	/*#ifdef JARIS
-	SInitP(&stackI);
-	SInitP(&forstack);
-	#endif*/
 
 	/**
 	 * inicializace stringu s nazvem tokenu
@@ -373,12 +311,6 @@ TError parse(FILE *input)
 	{
 		return ESYN;
 	}
-	//JARDA
-	/*#ifdef JARIS
-	unie.obsah=4;
-	unie2.obsah=5;
-	generateInstruction(I_STOP, INT, &unie, INT, &unie2,  DOUBLE, NULL);
-	#endif*/
 	return error;
 }
 
@@ -464,10 +396,6 @@ TError func(FILE *input)
 			}
 			tData *tempData;
 			// funkce jiz v tabulce je
-			//JARDA
-			/*#ifdef JARIS
-			fprintf(stderr, "VYPISSSSSSS ? : %s\n",strGetStr(&attr) );
-			#endif*/
 			if((tempData = htRead(funcTable, strGetStr(&attr))) != NULL)
 			{
 				if(tempData->retType != currType)
@@ -496,29 +424,10 @@ TError func(FILE *input)
 					fprintf(stderr, "VKLADAM %s\n", strGetStr(&attr));
 					#endif
 				}
-				//JARDA
-				/*#ifdef JARIS
-				if(strcmp((strGetStr(&attr)),"main") == 0)
-				{
-					generateInstruction(I_START, INT, &unie, STRING, &unie2,  DOUBLE, NULL);
-					startLab = listGetPointerLast(list);
-					printf("startLab: %d\n",startLab );
-					I_am_in = "a";
-				}
-				else if ((I_am_in == "a") && (strcmp((strGetStr(&attr)),"main") != 0))
-				{
-					I_am_in = "y";
-					generateInstruction(I_MAIN_END, INT, &unie, STRING, &unie2,  DOUBLE, NULL);
-					endOfMain = listGetPointerLast(list);
-					printf("end of main: %d\n", endOfMain);
-				}
-				printf("VYPISSSSSSS neni : %s\n",strGetStr(&attr) );
-				#endif*/
 			}
 			currFunc = malloc(sizeof(char)*strlen(strGetStr(&attr)));
 			strcpy(currFunc, strGetStr(&attr));
 			// KONEC SEMANTICKE ANALYZY
-
 
 			get_next_token(input, &attr);
 			error = par_def_list(input);
@@ -533,7 +442,6 @@ TError func(FILE *input)
 				/**
 				 * pokud byla deklarovana, zapsat
 				 */
-				//outputSymbolTable(funcTable);
 				if((tempData = htRead(funcTable, currFunc)) != NULL)
 				{
 					tData data;
@@ -548,7 +456,6 @@ TError func(FILE *input)
 					#ifdef DEBUG_SEM
 					fprintf(stderr, "Upravuji %s, isDeclared: %d\n", currFunc, data.isDeclared);
 					#endif
-					//printf("400 %s\n",strGetStr(&attr));
 				}
 
 				#ifdef DEBUG
@@ -590,25 +497,6 @@ TError par_def_list(FILE *input)
 	{
 		get_next_token(input, &attr);
 		error = params(input);
-		/**
-		 * vlozime pocet parametru funkce
-		 */
-		tData *tempData;
-		// funkce jiz v tabulce je
-		if((tempData = htRead(funcTable, currFunc)) != NULL)
-		{
-			tData data;
-			data.type = tempData->type;
-			data.timesUsed = tempData->timesUsed;
-			data.scope = tempData->scope;
-			data.orderParams = currOrder;
-			data.value.ptrTS = NULL;
-			//htInsert(funcTable, strGetStr(&attr), data);
-			//printf("462 %s\n",strGetStr(&attr));
-			#ifdef DEBUG_SEM
-			//fprintf(stderr, "UPRAVUJI %s, POCET PARAMS: %d\n", currFunc, currOrder);
-			#endif
-		}
 		// SEMANTICKA ANALYZA
 		// pokud ma main parametry, chyba
 		if((error == ENOP) && (strcmp(currFunc, "main") == 0))
@@ -622,8 +510,6 @@ TError par_def_list(FILE *input)
 		#ifdef DEBUG
 		fprintf(stderr, "par_def_list: params vratilo: %d\n", error);
 		#endif
-		// neni potreba kontrolovat, zda pravidlo
-		// proslo na epsilon, negetujeme dalsi token
 		if(error == ENOP || error == EEMPTY)
 		{
 			error = ENOP;
@@ -723,7 +609,6 @@ TError comm_seq(FILE *input)
 				data.isDefined = 1;
 				data.value.ptrTS = NULL;
 				htInsertData(funcTable, currFunc, data);
-				//printf("576 %s\n",strGetStr(&attr));
 				#ifdef DEBUG_SEM
 				fprintf(stderr, "UPRAVUJI %s, DEFINOVANA: %d\n", currFunc, data.isDefined);
 				#endif
@@ -818,8 +703,6 @@ TError stmt_list(FILE *input)
 		#ifdef DEBUG
 		fprintf(stderr, "stmt_list: stmt_list vratilo: %d\n", error);
 		#endif
-		// neni potreba kontrolovat, zda pravidlo
-		// proslo na epsilon, negetujeme dalsi token
 		if(error == ENOP || error == EEMPTY)
 		{
 			error = ENOP;
@@ -866,33 +749,13 @@ TError stmt(FILE *input)
 			get_next_token(input, &attr);
 			error = expr(input, &attr, 1, &counterVar, &commTable, &exprRes);
 
-			//JARDA
-			/*#ifdef JARIS
-			lastI = listGetPointerLast(list);
-			unie.obsah = afterIf;
-			//je-li podminka pravdiva, skacu za if (afterIf)
-			generateInstruction(I_IFGOTO, INT, &unie, STRING, &unie2,  DOUBLE, NULL);
-			#endif*/
-
 			#ifdef DEBUG
-			//outputSymbolTable(commTable);
 			fprintf(stderr, "stmt: expr vratilo: %d\n", error);
-			fprintf(stderr, "### token po expr: %d\n", token.type);
 			#endif
 			if(error == ENOP)
 			{
 				get_next_token(input, &attr);
 				error = comm_seq(input);
-				
-				//JARDA
-				/*#ifdef JARIS
-				SPushP(&stackI, lastI);
-				afterIf = listGetPointerLast(list);
-				SPushP(&stackI, afterIf);
-				unie.obsah=afterIf;
-				//generateInstruction(I_IFGOTO, INT, &unie, STRING, &unie2,  DOUBLE, NULL);
-				#ifdef*/
-				
 				
 				#ifdef DEBUG
 				fprintf(stderr, "stmt: comm_seq vratilo: %d\n", error);
@@ -945,15 +808,6 @@ TError stmt(FILE *input)
 				get_next_token(input, &attr);
 				error = expr(input, &attr, 0, &counterVar, &commTable, &exprRes);
 				
-				//JARDA
-				/*#ifdef JARIS
-				unie.obsah=5;
-				unie2.obsah=10;
-				generateInstruction(I_SET_FOR, INT, &unie, STRING, &unie2,  DOUBLE, NULL);
-				#endif*/
-				
-				
-				
 				#ifdef DEBUG
 				fprintf(stderr, "stmt: expr vratilo: %d\n", error);
 				#endif
@@ -967,21 +821,7 @@ TError stmt(FILE *input)
 					if(error == ENOP)
 					{
 						get_next_token(input, &attr);
-						//JARDA
-						/*#ifdef JARIS
-						beforeFor = listGetPointerLast(list);
-						#endif*/
-						/*#ifdef JARIS
-						fprintf(stderr, "ADRESA ADRESA ADRESA: --------> %d\n", beforeFor);
-						#endif*/
 						error = comm_seq(input);
-						//JARDA
-						/*#ifdef JARIS
-						generateInstruction(I_FOR_GOTO, INT, &unie, STRING, &unie2,  DOUBLE, NULL);
-						SPushP(&forstack, beforeFor);
-						behindFor = listGetPointerLast(list);
-						SPushP(&forstack, behindFor);
-						#endif*/
 						#ifdef DEBUG
 						fprintf(stderr, "stmt: comm_seq vratilo: %d\n", error);
 						#endif
@@ -1055,8 +895,6 @@ TError stmt(FILE *input)
 				#ifdef DEBUG
 				fprintf(stderr, "stmt: cin_id_n vratilo: %d\n", error);
 				#endif
-				// neni potreba kontrolovat, zda pravidlo
-				// proslo na epsilon, negetujeme dalsi token
 				if(error == ENOP || error == EEMPTY)
 				{
 					if(token.type == T_Semicolon)
@@ -1081,8 +919,6 @@ TError stmt(FILE *input)
 				#ifdef DEBUG
 				fprintf(stderr, "stmt: cin_id_n vratilo: %d\n", error);
 				#endif
-				// neni potreba kontrolovat, zda pravidlo
-				// proslo na epsilon, negetujeme dalsi token
 				if(error == ENOP || error == EEMPTY)
 				{
 					if(token.type == T_Semicolon)
@@ -1323,7 +1159,7 @@ TError params(FILE *input)
 					data.scope = 1; // nejnizsi scope nasledujiciho bloku
 					data.value.ptrTS = NULL;
 					data.retType = tempData->retType;
-					htInsert(funcTable, strGetStr(&attr), data);
+					htInsert(funcTable, strGetStr(&attr), data); // vkladani do tabulky funkci
 					htInsert(paraTable, currFunc, data); // vkladani do tabulky parametru
 
 					#ifdef DEBUG_SEM
@@ -1333,9 +1169,7 @@ TError params(FILE *input)
 						strGetStr(&attr), currFunc, data.scope, data.varType, data.orderParams);
 					#endif
 				}
-
 			}
-			
 			
 			// KONEC SEMANTICKE ANALYZY
 			get_next_token(input, &attr);
@@ -1422,7 +1256,6 @@ TError params_n(FILE *input)
 							strGetStr(&attr), currFunc, data.scope, data.varType, data.orderParams);
 						#endif
 					}
-
 				}
 				
 				// /SEMANTICKE ANALYZY
@@ -1524,8 +1357,6 @@ TError cout_term(FILE *input)
 		#ifdef DEBUG
 		fprintf(stderr, "cout_term: cout_term_n vratilo: %d\n", error);
 		#endif
-		// neni potreba kontrolovat, zda pravidlo
-		// proslo na epsilon, negetujeme dalsi token
 		if(error == ENOP || error == EEMPTY)
 		{
 			error = ENOP;
@@ -1544,8 +1375,6 @@ TError cout_term(FILE *input)
 		#ifdef DEBUG
 		fprintf(stderr, "cout_term: cout_term_n vratilo: %d\n", error);
 		#endif
-		// neni potreba kontrolovat, zda pravidlo
-		// proslo na epsilon, negetujeme dalsi token
 		if(error == ENOP || error == EEMPTY)
 		{
 			error = ENOP;
@@ -1580,8 +1409,6 @@ TError cout_term_n(FILE *input)
 		#ifdef DEBUG
 		fprintf(stderr, "cout_term_n: cout_term vratilo: %d\n", error);
 		#endif
-		// neni potreba kontrolovat, zda pravidlo
-		// proslo na epsilon, negetujeme dalsi token
 		if(error == ENOP || error == EEMPTY)
 		{
 			error = ENOP;
@@ -1633,8 +1460,6 @@ TError cin_id_n(FILE *input)
 			#ifdef DEBUG
 			fprintf(stderr, "cin_id_n: cin_id_n vratilo: %d\n", error);
 			#endif
-			// neni potreba kontrolovat, zda pravidlo
-			// proslo na epsilon, negetujeme dalsi token
 			if(error == ENOP || error == EEMPTY)
 			{
 				error = ENOP;
@@ -1653,8 +1478,6 @@ TError cin_id_n(FILE *input)
 			#ifdef DEBUG
 			fprintf(stderr, "cin_id_n: cin_id_n vratilo: %d\n", error);
 			#endif
-			// neni potreba kontrolovat, zda pravidlo
-			// proslo na epsilon, negetujeme dalsi token
 			if(error == ENOP || error == EEMPTY)
 			{
 				error = ENOP;
@@ -1903,7 +1726,6 @@ TError init(FILE *input)
 			generate_inst(C_Assign,exprRes,NULL,idAssign);
 		}
 		#ifdef DEBUG
-		//outputSymbolTable(commTable);
 		fprintf(stderr, "init: expr vratilo: %d\n", error);
 		#endif
 		if(error == ENOP)
@@ -2287,11 +2109,6 @@ TError realtype()
 	// P: UNDEF
 	if(token.type == T_Doub || token.type == T_Str || token.type == T_Integ)
 	{
-		#ifdef JARIS
-		//unie.obsah_s = malloc(sizeof(char)*strlen(strGetStr(&attr)));
-		strcpy(unie.obsah_s, strGetStr(&attr));
-		generateInstruction(I_PRINT, STRING, &unie, STRING, &unie2,  DOUBLE, NULL);
-		#endif
 		currType = token.type;
 		return ENOP;
 	}

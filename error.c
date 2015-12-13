@@ -16,8 +16,9 @@
 #include "error.h"
 
 /**
- * Funkce na vypis chyby
- * @param code Kod chyby
+ * Funkce na vypis chyby a vraceni adekvatniho kodu.
+ * @param code Cislo chyby.
+ * @param line Cislo radku vyskytu chyby.
  */
 void print_error(TError code, int line) {
 	const char *error_msg[] = {
@@ -37,6 +38,7 @@ void print_error(TError code, int line) {
 		[EINT] = "ERROR: Interni chyba interpretu"
 	};
 
+	// pokud bylo specifikovano cislo radku
 	if(line != 0 && code != ENOP)
 	{
 		fprintf(stderr, "%s, LINE: %d\n", error_msg[code], line);

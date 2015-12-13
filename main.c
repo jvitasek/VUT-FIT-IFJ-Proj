@@ -16,19 +16,25 @@
 #include "parser.h"
 #include "interpret.h"
 
-//#define DEBUG 1
-
+/**
+ * HLAVNÍ FUNKCE PROGRAMU.
+ * @param  argc Počet argumentů.
+ * @param  argv Pole řetězců zadaných uživatelem.
+ * @return      Návratový typ.
+ */
 int main(int argc, char **argv)
 {
 	FILE *input;
 	listInit(&List);
 
-	if((argc < 2) || (argc > 2))		// kontrola ci bol zadany spravny pocet parametrov na prikaz. riadke
+	// kontrola ci bol zadany spravny pocet parametrov na prikaz. riadke
+	if((argc < 2) || (argc > 2))
 	{
 		print_error(ERUN_IN, 0);
 	}
 	
-	if((input = (fopen(argv[1],"r"))) == 0)		// otvorime vstupny subor na citanie
+	// otvorime vstupny subor na citanie
+	if((input = (fopen(argv[1],"r"))) == 0)
 	{
 		print_error(ERUN_IN, 0);
 	}
@@ -44,33 +50,22 @@ int main(int argc, char **argv)
 			break;
 		default:
 			// nastala chyba v prekladu
-			/**
-			 * @todo uvolneni tabulky symbolu
-			 * @todo uvolneni instruction listu
-			 */
+			htClearAll(paraTable);
+			htClearAll(funcTable);
+			htClearAll(commTable);
 			print_error(result, token.line);
 			fclose(input);
-			//strFree(&attr);
 			return result;
 		break;
 	}
 	int interRes = interpret(&List);
 	if(interRes != 0) printf("!!!! nastala chyba v interprete !!!!\n");
-	/**
-	 * @todo interpretace (predani tabulky symbolu a instruction listu)
-	 */
-	
-	/**
-	 * @todo uvolneni tabulky symbolu
-	 * @todo uvolneni instruction listu
-	 */
 
 	#ifdef DEBUG
 	printElementsOfList(List);
 	#endif
 	listDispose(&List);
 	fclose(input);		// zavre vstupny subor
-	//strFree(&attr);		// uvolni string z pamete
 	return 0;
 }
 
