@@ -32,8 +32,9 @@ typedef enum TError {
 } TError;
 
 /**
- * Funkce na vypis chyby
- * @param code Kod chyby
+ * Funkce na vypis chyby a vraceni adekvatniho kodu.
+ * @param code Cislo chyby.
+ * @param line Cislo radku vyskytu chyby.
  */
 void print_error(TError code, int line);
 

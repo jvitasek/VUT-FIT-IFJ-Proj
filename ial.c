@@ -8,9 +8,6 @@
  * 			xvidaj00 – Juraj Vida
  */
 
-
-//#define DEBUG 1
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -18,92 +15,11 @@
 
 int HTSIZE = MAX_HTSIZE;
 
-
-/**
- * -----------------------------------------------------------------------------
- * Vyhledavani podretezce v retezci - Boyer-Mooreuv algoritmus
- * -----------------------------------------------------------------------------
- **/
-
-void arrayAscii(int ascii_pole[], char *str, int length)
-{
-    int i;
-    for(i=0; i<255; i++)
-    {
-       ascii_pole[i] = length;
-    }
-    for(i=0; i<length-1; i++)
-    {
-       ascii_pole[(int)str[i]] = length-i-1;
-    }
-}
-
-void arraySearch(int search_pole[], char *search_str, int search_length)
-{
-    // pomocne pole delky
-    int pole_length[search_length+1];
-    int pozice_1;
-    int pozice_2;
-
-    // inicializace pole
-    for(pozice_1=0; pozice_1<search_length+1; pozice_1++)
-    {
-        search_pole[pozice_1] = 0;
-        pole_length[pozice_1] = 0;
-    }
-
-    // nastaveni pocatecnich pozic
-    pozice_1 = search_length;
-    pozice_2 = search_length + 1;
-    pole_length[pozice_1] = pozice_2;
-
-    //hledame opakovane podretezce v patternu
-    while(pozice_1>0)
-    {
-        // dokud nejsme na zacatku retezce - prochazeni od zadu
-        while((search_str[pozice_2-1]!=search_str[pozice_1-1]) && (pozice_2<=search_length))
-        {
-
-            if(search_pole[pozice_2] == 0)
-            {
-               search_pole[pozice_2] = pozice_2-pozice_1;
-            }
-            pozice_2 = pole_length[pozice_2];
-
-        }
-        --pozice_1;
-        --pozice_2;
-        // nastaveni nove pozice
-        pole_length[pozice_1] = pozice_2;
-    }
-
-    pozice_2 = pole_length[0];
-    for(pozice_1=0; pozice_1<=search_length; pozice_1++)
-    {
-        if(search_pole[pozice_1] == 0)
-        {
-           search_pole[pozice_1] = pozice_2;
-        }
-        if(pozice_1 == pozice_2)
-        {
-           pozice_2 = pole_length[pozice_2];
-        }
-    }
-}
-
-
-/**
- * -----------------------------------------------------------------------------
- * Razeni - algoritmus Heap sort
- * (podle opory IAL)
- * -----------------------------------------------------------------------------
- **/
-
 /**
  * Funkce proseti hromadou.
- * @param a     [description]
- * @param Left  [description]
- * @param Right [description]
+ * @param a     Retezec na protrideni.
+ * @param Left  Levy index.
+ * @param Right Pravy index.
  */
 void siftDown(char* a, int Left, int Right) {
     int j, i;
@@ -154,7 +70,7 @@ void siftDown(char* a, int Left, int Right) {
 
 /**
  * Funkce razeni hromadou heap sort.
- * @param a [description]
+ * @param a Retezec na protrideni.
  */
 void heapSort(char* a)
 {
@@ -185,17 +101,10 @@ void heapSort(char* a)
     }
 }
 
-
-/**
- * -----------------------------------------------------------------------------
- * Tabulka symbolu - tabulka s rozptylenymi polozkami
- * -----------------------------------------------------------------------------
- **/
-
 /**
  * Rozptylovaci funkce.
- * @param  key [description]
- * @return     [description]
+ * @param  key Klic polozky.
+ * @return     Poradove cislo pro umisteni polozky.
  */
 int hashCode(char *key)
 {
@@ -209,8 +118,8 @@ int hashCode(char *key)
 }
 
 /**
- * [htInit  description]
- * @param ptrht [description]
+ * Inicializuje tabulku symbolu.
+ * @param ptrht Tabulka symbolu.
  */
 void htInit(tHTable* ptrht)
 {
@@ -231,10 +140,10 @@ void htInit(tHTable* ptrht)
 }
 
 /**
- * [htSearch  description]
- * @param  ptrht [description]
- * @param  key   [description]
- * @return       [description]
+ * Najde polozku podle klice.
+ * @param  ptrht Tabulka symbolu.
+ * @param  key   Klic polozky.
+ * @return       Data polozky.
  */
 tHTItem* htSearch(tHTable* ptrht, char *key)
 {
@@ -251,6 +160,13 @@ tHTItem* htSearch(tHTable* ptrht, char *key)
 		return NULL; // end here, haven't found anything
 }
 
+/**
+ * Najde polozku podle klice a poradi.
+ * @param  ptrht Tabulka symbolu.
+ * @param  key   Klic polozky.
+ * @param  order Poradi.
+ * @return       Data polozky.
+ */
 tHTItem* htSearchOrder(tHTable* ptrht, char *key, int order)
 {
 	if(ptrht)
@@ -271,6 +187,13 @@ tHTItem* htSearchOrder(tHTable* ptrht, char *key, int order)
 		return NULL; // end here, haven't found anything
 }
 
+/**
+ * Najde polozku podle klice a cisla ramce.
+ * @param  ptrht Tabulka symbolu.
+ * @param  key   Klic polozky.
+ * @param  scope Cislo ramce.
+ * @return       Data polozky.
+ */
 tHTItem* htSearchScope(tHTable* ptrht, char *key, int scope)
 {
 	if(ptrht)
@@ -298,10 +221,10 @@ tHTItem* htSearchScope(tHTable* ptrht, char *key, int scope)
 }
 
 /**
- * [htInsert  description]
- * @param ptrht [description]
- * @param key   [description]
- * @param data  [description]
+ * Vlozi data, pokud polozku s klicem najde, vlozi synonymum.
+ * @param ptrht Tabulka symbolu.
+ * @param key   Klic polozky.
+ * @param data  Data polozky.
  */
 void htInsert(tHTable* ptrht, char *key, tData data)
 {		
@@ -359,10 +282,10 @@ void htInsert(tHTable* ptrht, char *key, tData data)
 }
 
 /**
- * Prepise data na zadanem klici
- * @param ptrht [description]
- * @param key   [description]
- * @param data  [description]
+ * Prepise data na zadane polozce.
+ * @param ptrht Tabulka symbolu.
+ * @param key   Klic polozky.
+ * @param data  Data polozky.
  */
 void htInsertData(tHTable *ptrht, char *key, tData data)
 {
@@ -445,10 +368,10 @@ void htInsertData(tHTable *ptrht, char *key, tData data)
 }
 
 /**
- * [htRead  description]
- * @param  ptrht [description]
- * @param  key   [description]
- * @return       [description]
+ * Najde data polozky.
+ * @param  ptrht Tabulka symbolu.
+ * @param  key   Klic polozky.
+ * @return       Data polozky.
  */
 tData* htRead(tHTable* ptrht, char *key)
 {
@@ -467,6 +390,13 @@ tData* htRead(tHTable* ptrht, char *key)
 	return NULL; // end here, let us know we found nothing
 }
 
+/**
+ * Najde data polozky podle klice a poradi.
+ * @param  ptrht Tabulka symbolu.
+ * @param  key   Klic polozky.
+ * @param  scope Poradi.
+ * @return       Data polozky.
+ */
 tData* htReadOrder(tHTable* ptrht, char *key, int order)
 {
 
@@ -484,6 +414,13 @@ tData* htReadOrder(tHTable* ptrht, char *key, int order)
 	return NULL; // end here, let us know we found nothing
 }
 
+/**
+ * Najde data polozky podle klice a cisla ramce.
+ * @param  ptrht Tabulka symbolu.
+ * @param  key   Klic polozky.
+ * @param  scope Cislo ramce.
+ * @return       Data polozky.
+ */
 tData* htReadScope(tHTable* ptrht, char *key, int scope)
 {
 
@@ -515,9 +452,9 @@ tData* htReadScope(tHTable* ptrht, char *key, int scope)
 }
 
 /**
- * [htDelete  description]
- * @param ptrht [description]
- * @param key   [description]
+ * Zrusi polozku v tabulce symbolu.
+ * @param ptrht Tabulka symbolu.
+ * @param key 	Klic polozky.
  */
 void htDelete(tHTable* ptrht, char *key)
 {
@@ -547,8 +484,8 @@ void htDelete(tHTable* ptrht, char *key)
 }
 
 /**
- * [htClearAll  description]
- * @param ptrht [description]
+ * Zrusi celou tabulku symbolu.
+ * @param ptrht Tabulka symbolu.
  */
 void htClearAll(tHTable* ptrht)
 {
@@ -649,68 +586,68 @@ string substr(string s, int i, int n)
  */
 int find(string s, string search)
 {
-	// chyba v pripade nenalezeni
-	int error = -1;
+	// // chyba v pripade nenalezeni
+	// int error = -1;
 
-	// pokud v substringu nic neni, konec
-    if(length(search) == 0)
-    {
-        return 0;
-    }
+	// // pokud v substringu nic neni, konec
+ //    if(length(search) == 0)
+ //    {
+ //        return 0;
+ //    }
 
-    // pomocne pole
-    int ascii_arr[255];
-    int search_arr[length(search)+1];
+ //    // pomocne pole
+ //    int ascii_arr[255];
+ //    int search_arr[length(search)+1];
 
-    char *searchStr = strGetStr(&search);
-    int searchLength = length(search);
-    char *strStr = strGetStr(&s);
-    int strLength = length(s);
+ //    char *searchStr = strGetStr(&search);
+ //    int searchLength = length(search);
+ //    char *strStr = strGetStr(&s);
+ //    int strLength = length(s);
 
-    // pole musi byt inicializovana
-    arrayAscii(ascii_arr, searchStr, searchLength);
-    arraySearch(search_arr, searchStr, searchLength);
+ //    // pole musi byt inicializovana
+ //    arrayAscii(ascii_arr, searchStr, searchLength);
+ //    arraySearch(search_arr, searchStr, searchLength);
 
-    // kontrola velikosti obou poli - zda je mozny regulerni vysledek
-    if((strLength <= 0) || (searchLength <= 0) || (strLength < searchLength))
-    {
-       return error;
-    }
-    else
-    {
-       // pocatecni pozice
-       int strPozice    = 0;
-       int searchPozice = searchLength-1;
+ //    // kontrola velikosti obou poli - zda je mozny regulerni vysledek
+ //    if((strLength <= 0) || (searchLength <= 0) || (strLength < searchLength))
+ //    {
+ //       return error;
+ //    }
+ //    else
+ //    {
+ //       // pocatecni pozice
+ //       int strPozice    = 0;
+ //       int searchPozice = searchLength-1;
 
-       while(strPozice <= strLength - searchLength)
-       {
-            // while - dokud je legalni pozice
-            while(searchStr[searchPozice] == strStr[strPozice+searchPozice])
-            {
-                // dokud jsou stejne znaky
-                if(searchPozice == 0)
-                {
-                  // jsme na konci retezce - return pozice - +1 (je pocitano od jednicky)
-                  return strPozice+1;
-                }
-                // jinak se snizi pozice
-                searchPozice--;
-            }
-            //posuneme pattern vuci textu dale podle vysledku - vybereme vetsi mozny posun
-            if(ascii_arr[(int)strStr[strPozice+searchLength-1]]>search_arr[searchPozice+1])
-            {
-                 strPozice += ascii_arr[(int)strStr[strPozice+searchLength-1]];
-            }
-            else
-            {
-            	strPozice += search_arr[searchPozice+1];
-            }
+ //       while(strPozice <= strLength - searchLength)
+ //       {
+ //            // while - dokud je legalni pozice
+ //            while(searchStr[searchPozice] == strStr[strPozice+searchPozice])
+ //            {
+ //                // dokud jsou stejne znaky
+ //                if(searchPozice == 0)
+ //                {
+ //                  // jsme na konci retezce - return pozice - +1 (je pocitano od jednicky)
+ //                  return strPozice+1;
+ //                }
+ //                // jinak se snizi pozice
+ //                searchPozice--;
+ //            }
+ //            //posuneme pattern vuci textu dale podle vysledku - vybereme vetsi mozny posun
+ //            if(ascii_arr[(int)strStr[strPozice+searchLength-1]]>search_arr[searchPozice+1])
+ //            {
+ //                 strPozice += ascii_arr[(int)strStr[strPozice+searchLength-1]];
+ //            }
+ //            else
+ //            {
+ //            	strPozice += search_arr[searchPozice+1];
+ //            }
 
-            searchPozice = searchLength-1;  // posun na konec stringu
-       }
-    }
+ //            searchPozice = searchLength-1;  // posun na konec stringu
+ //       }
+ //    }
 
-    return error;
+ //    return error;
 }
 
 /**
@@ -738,8 +675,7 @@ void outputSymbolTable(tHTable* ptrht)
 		printf ("%i:", i);
 		tHTItem *ptr = malloc(sizeof(tHTItem));
 		ptr = (*ptrht)[i];
-		//strcpy(ptr, (*ptrht)[i]);
-		
+
 		while ( ptr != NULL ) {
 			if(ptr->data.varType == T_Integ)
 			{
@@ -758,13 +694,6 @@ void outputSymbolTable(tHTable* ptrht)
 				printf (" (%s, dT: %d, tU: %d, vT: %d, rT: %d, oP: %d, isDef: %d, isDec: %d, sc: %d)", 
 					ptr->key, ptr->data.type, ptr->data.timesUsed, ptr->data.varType, ptr->data.retType, ptr->data.orderParams, 
 					ptr->data.isDefined, ptr->data.isDeclared, ptr->data.scope);
-				/**
-				 * zakomentovany kod nize haze segfault kvuli ptr->data.value.ptrTS
-				 */
-				// printf (" (%s, dT: %d, tU: %d, vT: %d, rT: %d, oP: %d, isDef: %d, isDec: %d, sc: %d, value: %s)", 
-				// 		ptr->key, ptr->data.type, ptr->data.timesUsed, ptr->data.varType, ptr->data.retType, ptr->data.orderParams, 
-				// 		ptr->data.isDefined, ptr->data.isDeclared, ptr->data.scope,(char*)ptr->data.value.ptrTS);
-				
 			}
 			else
 			{
@@ -796,7 +725,6 @@ void outputSymbolTable(tHTable* ptrht)
 			}
 			
 			ptr = ptr->ptrnext;
-			//strcpy(ptr, ptr->ptrnext);
 		}
 		printf ("\n");
 	}

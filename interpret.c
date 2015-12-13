@@ -1287,23 +1287,3 @@ if(viceFci == TRUE)
 
   return ENOP;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

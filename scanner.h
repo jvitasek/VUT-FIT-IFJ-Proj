@@ -7,6 +7,9 @@
  * 			xvidaj00 - Juraj Vida
  */
 
+#ifndef SCANNER_H
+#define SCANNER_H
+
 #include <stdio.h>
 #include "str.h"
 
@@ -83,3 +86,4 @@ typedef struct
 
 T_Token getToken(FILE *input, string *attr, int *line);
 
+#endif

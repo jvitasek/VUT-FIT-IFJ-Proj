@@ -102,7 +102,6 @@ void generate_inst(tInstCode instCode, void *op1, void *op2, void *res)
 
 /**
  * Inicializace zasobniku.
- * @param  stack Zasobnik termu.
  * @return       ENOP v pripade uspechu.
  */
 TError stack_init()
@@ -150,7 +149,6 @@ TError stack_init()
 
 /**
  * Zruseni zasobniku.
- * @param stack 	Zasobnik termu.
  * @return error	Navratova hodnota chyby.
  */
 TError stack_dispose()
@@ -187,9 +185,10 @@ TError stack_dispose()
 }
 
 /**
- * Vrati dalsi token ze vstupu
- * @param stack 	Zasobnik termu.
- * @return error	Navratova hodnota chyby.
+ * Zruseni polozky na vrcholu zasobniku
+ * @param  item   Polozka pro ziskani ukazatele na hodnotu
+ * @param  ptrAss Zda se ma vykonat prirazeni hodnoty (musime popovat identifikator)
+ * @return        Navratova hodnota chyby.
  */
 TError stack_pop(tHTItem **item, int ptrAss)
 {
@@ -238,15 +237,14 @@ TError stack_pop(tHTItem **item, int ptrAss)
 		error = ESYN;
 		return error;
 	}
-
 	return error;
 }
 
 /**
  * Vlozeni tokenu na zasobnik.
- * @param  stack   Zasobnik termu.
- * @param  tokterm Terminal prevedeny z tokenu.
- * @return error	Navratova hodnota chyby.
+ * @param  tokterm  Terminal prevedeny z tokenu.
+ * @param  attr     Atribut tokenu.
+ * @return          Navratova hodnota chyby.
  */
 TError stack_push(int tokterm, char *attr)
 {
@@ -267,16 +265,13 @@ TError stack_push(int tokterm, char *attr)
 	tempPtr->data = malloc(sizeof(char)*strlen(attr));
 
 	tempPtr->termType = tokterm;
-	// #ifdef DEBUG
-	// 	printf("StackPush - vkladam termType: %d\n", tempPtr->termType);
-	// #endif
+
 	if (tokterm == PInt)
 	{ // jedna se o integer
 		tempPtr->idType = Tint;
 		strcpy(tempPtr->data, attr);
 		++parCount;
 
-		//outputSymbolTable(paraTable);
 		// #ifdef DEBUG_KL
 		// printf("INT----CUrrFunc...%s...ParCount...%d....\n", currentFunc, parCount);
 		// #endif
@@ -385,7 +380,6 @@ TError stack_push(int tokterm, char *attr)
 
 /**
  * Vraci terminal nejblize vrcholu zasobniku.
- * @param  stack Zasobnik termu.
  * @return       Term nejblize vrcholu.
  */
 TstackElemPtr stack_top()
@@ -463,8 +457,9 @@ TstackElemPtr stack_top()
 
 /**
  * Pridani handle na zasobnik a pushnuti tokenu.
- * @param  stack Zasobnik termu.
- * @return error	Navratova hodnota chyby.
+ * @param  tokterm Terminal na vstupu.
+ * @param  attr    Atribut tokenu.
+ * @return         Navratova hodnota chyby.
  */
 TError stack_shift(int tokterm, char *attr)
 {
@@ -528,7 +523,6 @@ TError stack_shift(int tokterm, char *attr)
 #ifdef DEBUG
 /**
  * Pomocna funkce pro vypis celeho zasobniku.
- * @param stack
  */
 void whats_in_stack()
 {
@@ -563,7 +557,7 @@ void whats_in_stack()
 /**
 * Funkce vraci index do tabulky
 * @param  tokenType	Typ tokenu.
-* @return index 		PSymbol z tokenu.
+* @return index 	PSymbol z tokenu.
 */
 int tok_to_term(int tokenType)
 {
@@ -611,19 +605,24 @@ int get_prec_symbol(int ter1, int ter2)
 
 /**
  * Funkce pro hledani pravidla pro vyrazy.
- * @param  stack 	Zasobnik termu.
- * @return error	Navratova hodnota chyby.
+ * @param  rule Jake pravidlo se ma hledat a zpracovat.
+ * @return      Navratova hodnota chyby.
  */
 TError find_rule(ruleType rule)
 {
 	TError error = ENOTFOUND;
 	TstackElemPtr tempPtr = NULL;
-	tHTItem *op1;	//operand 1
-	tHTItem *op2;	//operand 2
+
+
 	string newVar;
 	tHTItem *res;
 	tData data;
 	int cntPar = 0;
+
+	tHTItem *op1;
+	op1 = (tHTItem *) malloc(sizeof(tHTItem));
+	tHTItem *op2;
+	op2 = (tHTItem *) malloc(sizeof(tHTItem));
 
 	switch(rule)
 	{
@@ -688,15 +687,15 @@ TError find_rule(ruleType rule)
 			//	printf("###############Chyba Nonterminalu - kompatibilita?.\n"); @TODO vyresit pro ID
 			//	print_error(ESEM_TYP, token.line);
 			}
-			
+	
 			strInit(&newVar);
 			generate_variable(&newVar,counteerVar);
 			htInsert(*locTable, newVar.str,data);		// pomocna premenna na vysledok
 			res = htSearch(*locTable,newVar.str);
-			//#ifdef DEBUG_INST
+			#ifdef DEBUG_INST
 			fprintf(stderr, "\tExprAdd-------CODE:%d|OPE1 %s %d ||OPE2 %s %d ||Vysl %s\n",
 				C_Add,op1->key,op1->data.value.i,op2->key,op2->data.value.i,res->key);
-			//#endif	
+			#endif
 			generate_inst(C_Add,op1,op2,res);
 			*expRes = res;
 			
@@ -1253,11 +1252,6 @@ TError find_rule(ruleType rule)
 		break;
 
 		case FUNC_RULE:
-			//
-			// @ TODO - mozna bude chybet podminka, az budu zpracovavat parametry
-			// 
-			 
-
 			cntPar = return_param_count(currentFunc);
 			if (cntPar != parCount)
 			{
@@ -1368,10 +1362,13 @@ TError find_rule(ruleType rule)
 
 /**
  * Hlavni funkce vyrazu.
- * @param  input Soubor obsahujici vstupni kod.
- * @param  attr  String lexemu.
- * @param  count Pocitadlo potrebne pri tvorbe pomocnych premennych.
- * @return       Index do enumerace chyb.
+ * @param  input       Soubor obsahujici vstupni kod.
+ * @param  attr        String lexemu.
+ * @param  count       Pocitadlo potrebne pri tvorbe pomocnych premennych.
+ * @param  semi_or_par Zda se zpracovava vyraz ukonceny zavorkou nebo strednikem.
+ * @param  localTable  Lokalni tabulka symbolu.
+ * @param  exprRes     Struktura do ktere se ulozi vysledek vyrazu.
+ * @return             Navratova hodnota chyby.
  */
 TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **localTable, tHTItem **exprRes)
 {

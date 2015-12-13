@@ -8,6 +8,9 @@
  * 			xvalec00 – Dusan Valecky
  */
  
+#ifndef PARSER_H
+#define PARSER_H
+
 #include "ial.h"
 #include <stdbool.h>
 #include "instlist.h"
@@ -61,3 +64,5 @@ char *currFunc;
 tHTable *commTable;
 tHTable *funcTable;
 tHTable *paraTable;
+
+#endif

@@ -7,6 +7,9 @@
  * 			xvidaj00 - Juraj Vida
  */
 
+#ifndef STR_H
+#define STR_H
+
 #include <stdio.h>
 
 typedef struct
@@ -24,3 +27,5 @@ void strClear(string *s);
 char *strGetStr(string *s);
 int strGetLength(string *s);
 string toString(char *s);
+
+#endif
