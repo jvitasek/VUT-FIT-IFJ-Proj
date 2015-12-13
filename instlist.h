@@ -36,6 +36,10 @@ typedef enum
   C_Label,
   C_Not,
   C_IfGoTo,
+  C_ElseGoTo,
+  C_ForGoTo,
+  C_Start,
+  C_EndMain,
   C_GoTo,
   
   C_Ret,		// (C_Ret,op1,-,-)
@@ -73,6 +77,7 @@ void listInsertLast(tInstList *L, tInstruct I);
 void listFirst(tInstList *L);
 void listNext(tInstList *L);
 void listGoTo(tInstList *L, void *gotoInstr);
+void *listGetPointerAct(tInstList *L);
 tInstruct *listGetPointerLast(tInstList *L);
 tInstruct *listGetData(tInstList *L);
 void printElementsOfList(tInstList L);

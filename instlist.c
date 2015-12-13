@@ -151,6 +151,11 @@ void listNext(tInstList *L)
 		}
 	}
 }
+void *listGetPointerAct(tInstList *L) {
+
+  return (void*) L->Act;
+}
+
 
 /**
  * Skoci na zadanu adresu intrukcie

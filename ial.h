@@ -46,6 +46,8 @@ union tValue {
 	double d;
 	char str[100];
 	void *ptrTS;
+	void *ptrI;
+
 };
 
 /**

@@ -22,14 +22,22 @@
 #include "expression.h"
 #include "istack.h"
 
+
 //JARDA
 /*#ifdef JARIS
 #include "ilist.h"
 #include "stack.h"
 #endif*/
 
+char *I_am_in= "n";
+
+extern void *startLab = NULL;
+extern void *endOfMain = NULL;
+
 extern void * afterIf;
 extern void * else_goto;
+extern void *beforeFor = NULL;
+extern void *behindFor = NULL;
 string attr; // vytvorime si string
 int counterVar = 1;	// globalna premenna, ktora sluzi pri tvorbe pomocnych premennych na medzivypocty
 
@@ -189,9 +197,11 @@ TError parse(FILE *input)
 	}
 	// 1: <PROGRAM> -> <FUNC_N>
 	error = func_n(input);
+
 	// SEMANTICKA KONTROLA
 	tData *tempData;
 	// byla funkce main?
+
 	if(((tempData = htRead(funcTable, "main")) == NULL) && (error == ENOP))
 	{
 		#ifdef DEBUG_SEM
@@ -199,6 +209,7 @@ TError parse(FILE *input)
 		#endif
 		print_error(ESEM_DEF, 0);
 	}
+
 	// /SEMANTICKA KONTROLA
 	#ifdef DEBUG
 	fprintf(stderr, "parse: func_n vratilo: %d\n", error);
@@ -207,9 +218,10 @@ TError parse(FILE *input)
 	/**
 	 * smazani tabulky symbolu
 	 */
-	htClearAll(commTable);
-	htClearAll(funcTable);
-	htClearAll(paraTable);
+	printf("tady\n");
+	//htClearAll(commTable);
+	//htClearAll(funcTable);
+	//htClearAll(paraTable);
 
 	/**
 	 * smazani zasobniku tabulek symbolu
@@ -230,6 +242,8 @@ TError parse(FILE *input)
 	unie2.obsah=5;
 	generateInstruction(I_STOP, INT, &unie, INT, &unie2,  DOUBLE, NULL);
 	#endif*/
+
+	generate_inst(C_Stop,NULL,NULL,NULL);
 	return error;
 }
 
@@ -347,24 +361,23 @@ TError func(FILE *input)
 					fprintf(stderr, "VKLADAM %s\n", strGetStr(&attr));
 					#endif
 				}
-				//JARDA
-				/*#ifdef JARIS
+				
 				if(strcmp((strGetStr(&attr)),"main") == 0)
 				{
-					generateInstruction(I_START, INT, &unie, STRING, &unie2,  DOUBLE, NULL);
-					startLab = listGetPointerLast(list);
+					generate_inst(C_Start,NULL,NULL,NULL);
+					startLab = listGetPointerLast(&List);
 					printf("startLab: %d\n",startLab );
 					I_am_in = "a";
 				}
 				else if ((I_am_in == "a") && (strcmp((strGetStr(&attr)),"main") != 0))
 				{
 					I_am_in = "y";
-					generateInstruction(I_MAIN_END, INT, &unie, STRING, &unie2,  DOUBLE, NULL);
-					endOfMain = listGetPointerLast(list);
+					generate_inst(C_EndMain,NULL,NULL,NULL);
+					endOfMain = listGetPointerLast(&List);
 					printf("end of main: %d\n", endOfMain);
 				}
-				printf("VYPISSSSSSS neni : %s\n",strGetStr(&attr) );
-				#endif*/
+				//printf("VYPISSSSSSS neni : %s\n",strGetStr(&attr) );
+				
 			}
 			currFunc = malloc(sizeof(char)*strlen(strGetStr(&attr)));
 			strcpy(currFunc, strGetStr(&attr));
@@ -376,6 +389,7 @@ TError func(FILE *input)
 			#ifdef DEBUG
 			fprintf(stderr, "func: par_def_list vratilo: %d\n", error);
 			#endif
+
 			if(error == ENOP)
 			{
 				get_next_token(input, &attr);
@@ -421,6 +435,7 @@ TError func(FILE *input)
 	{
 		return error;
 	}
+
 	return error;
 }
 
@@ -795,7 +810,13 @@ TError stmt(FILE *input)
 		if(token.type == T_LeftParenthesis)
 		{
 			get_next_token(input, &attr);
+
 			error = var_def(input);
+			//hodnota promenne ve VAR_DEF
+			
+			// tHTItem *pomoc = idAssign;
+			// printf("pomocna  %d\n", pomoc->data.value.i );
+			
 			#ifdef DEBUG
 			fprintf(stderr, "stmt: var_def vratilo: %d\n", error);
 			#endif
@@ -804,6 +825,21 @@ TError stmt(FILE *input)
 				get_next_token(input, &attr);
 				error = expr(input, &attr, 0, &counterVar, &commTable, &exprRes);
 				
+				//boolovska hodnota vyrazu EXPR
+				// int *pomocnaFor;
+				// tData dataFor;
+				// string if_tempFor;
+				// strInit(&if_tempFor);
+
+
+				// generate_variable(&if_tempFor,pomocnaFor);
+		
+				// htInsert(commTable, if_tempFor.str,dataFor);
+				// tHTItem *pomFor = htSearch(commTable, if_tempFor.str);
+
+				// dataFor.value.i = 1;
+				// htInsert(commTable, "1",dataFor );
+				// tHTItem *pomFor2 = htSearch(commTable, "1");
 				//JARDA
 				/*#ifdef JARIS
 				unie.obsah=5;
@@ -819,13 +855,20 @@ TError stmt(FILE *input)
 				if(error == ENOP)
 				{
 					get_next_token(input, &attr);
+
 					error = assign(input);
+					//hodnota ASSIGN
+					// tHTItem *pom2Assign = idAssign;
+					// printf("LOLOLOLOLOL\n");
+					// generate_inst(C_ForGoTo,pomoc,pomFor2,pom2Assign);
+					// printf("LOLOLOLOLOL\n");
 					#ifdef DEBUG
 					fprintf(stderr, "stmt: assign vratilo: %d\n", error);
 					#endif
 					if(error == ENOP)
 					{
 						get_next_token(input, &attr);
+						
 						//JARDA
 						/*#ifdef JARIS
 						beforeFor = listGetPointerLast(list);
@@ -834,6 +877,7 @@ TError stmt(FILE *input)
 						fprintf(stderr, "ADRESA ADRESA ADRESA: --------> %d\n", beforeFor);
 						#endif*/
 						error = comm_seq(input);
+
 						//JARDA
 						/*#ifdef JARIS
 						generateInstruction(I_FOR_GOTO, INT, &unie, STRING, &unie2,  DOUBLE, NULL);
@@ -841,6 +885,7 @@ TError stmt(FILE *input)
 						behindFor = listGetPointerLast(list);
 						SPushP(&forstack, behindFor);
 						#endif*/
+						//generate_inst(C_ForGoTo,pomFor2,NULL,pomFor);
 						#ifdef DEBUG
 						fprintf(stderr, "stmt: comm_seq vratilo: %d\n", error);
 						#endif
@@ -893,6 +938,7 @@ TError stmt(FILE *input)
 	else if(token.type == T_Cin)
 	{
 		get_next_token(input, &attr);
+		printf("token 1: %s\n",strGetStr(&attr));
 		if(token.type == T_RightShift)
 		{
 			get_next_token(input, &attr);
@@ -908,8 +954,12 @@ TError stmt(FILE *input)
 					print_error(ESEM_DEF, token.line);
 				}
 				// /SEMANTICKA ANALYZA
-
+				//tady uz je attr IDcko
+				printf("token 2: %s\n",strGetStr(&attr));
+				tHTItem *cin = htSearch(commTable, strGetStr(&attr));
+				generate_inst(C_Cin, cin, NULL,NULL);
 				get_next_token(input, &attr);
+
 				error = cin_id_n(input);
 				#ifdef DEBUG
 				fprintf(stderr, "stmt: cin_id_n vratilo: %d\n", error);
@@ -1380,13 +1430,11 @@ TError cout_term(FILE *input)
 		}
 		// KONEC SEMANTICKE ANALYZY
 
-		tData *obsah;
+		tHTItem *obsah;
 		tHTItem *op1 = htSearch(commTable,strGetStr(&attr));
-		printf("attr %s\n",strGetStr(&attr) );
-		obsah = htRead(commTable, strGetStr(&attr));
-		printf("hodnota: %d\n",obsah->value.i );
-		printf("typ: %u\n",obsah->varType );
-		generate_inst(C_Cout,op1,NULL,NULL);
+		//printf("attribut %s\n",strGetStr(&attr) );
+		obsah = htSearch(commTable,strGetStr(&attr));
+		generate_inst(C_Cout,obsah,NULL,NULL);
 
 		get_next_token(input, &attr);
 		error = cout_term_n(input);
@@ -2210,6 +2258,19 @@ TError realtype()
  * Incializuje tabulku symbolu
  * @return Index do enumerace chyb.
  */
+
+ int return_param_count(char *func)
+{
+	tData *tempData;
+	int index = 1;
+
+	while((tempData = htReadOrder(paraTable, func, index)) != NULL)
+	{
+		index++;
+	}
+	return index-1;
+}
+
 TError init_table(tHTable **table)
 {
 	TError error = ENOP;

@@ -1,17 +1,44 @@
+int volej()
+{
+    cout << "pressssd";
+}
+int main()
+{
+    int bubo = 50000;
+   	cout << 90;
+    cout << "prede vsem";
+    if (5 > 3)
+    {
+    	cout << "if";
+    }
+    else
+    {
+    	cout << "else";
+    }
+    cout << "po vsem";
+    cout << bubo;
+    double lol = 4.0;
+    int vysledek  = bubo + lol;
+    return 0;
+}
 
+int vole2j()
+{
+    cout << "pressssd";
+}
 
 // localTable: main, 2, 0 
-double main()
-{
-    // stack->top: localTable
+// double main()
+// {
+//     // stack->top: localTable
 
-   	double a = 5.1;
-   	double c = 3.4;
-   	double h = a + c;
+//    	double a = 5.1;
+//    	double c = 3.4;
+//    	double h = a + c;
 
  
-    return h;
-}
+//     return h;
+// }
 
 /*double func(double a, int g)
 {
