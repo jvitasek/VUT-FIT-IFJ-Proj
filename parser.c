@@ -135,6 +135,11 @@ int check_builtin(char *test)
 	return 0;
 }
 
+/**
+ * [check_builtin_params description]
+ * @param func  [description]
+ * @param order [description]
+ */
 void check_builtin_params(char *func, int order)
 {
 	if(strcmp(func, "length") == 0)
@@ -266,6 +271,18 @@ void fill_builtin_params()
 	data.retType = 0;
 	htInsert(paraTable, "sort", data); // vkladani do tabulky parametru
 	// /SORT
+}
+
+int return_param_count(char *func)
+{
+	tData *tempData;
+	int index = 1;
+
+	while((tempData = htReadOrder(paraTable, func, index)) != NULL)
+	{
+		index++;
+	}
+	return index-1;
 }
 
 /**
