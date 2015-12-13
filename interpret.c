@@ -718,6 +718,7 @@ case I_NEQ:
 #include "ial.h"
 #include "instlist.h"
 #include <stdbool.h>
+#include <string.h>
 
 #define TRUE 1
 #define FALSE 0
@@ -768,25 +769,24 @@ if(viceFci == TRUE)
 
     switch(ins->instCode)
     {
-    case C_Assign:
-      op1 = (tHTItem*)ins->op1;
-      op2 = (tHTItem*)ins->op2;
-      res = (tHTItem*)ins->result;
-      
-
-      if(op1->data.varType == T_Doub)
-      {
-       // printf("double\n");
-        res->data.value.d = op1->data.value.d;
+      case C_Assign:
+        op1 = (tHTItem*)ins->op1;
+        op2 = (tHTItem*)ins->op2;
+        res = (tHTItem*)ins->result;
         
-      }
-      else if(op1->data.varType == T_Integ)
-      {
-       // printf("int\n");
-        res->data.value.i = op1->data.value.i;
-      }
-      
-          break;
+
+        if(op1->data.varType == T_Doub)
+        {
+         // printf("double\n");
+          res->data.value.d = op1->data.value.d;
+          
+        }
+        else if(op1->data.varType == T_Integ)
+        {
+         // printf("int\n");
+          res->data.value.i = op1->data.value.i;
+        }
+      break;
           
     case C_Add:
       op1 = (tHTItem*)ins->op1;
@@ -1269,10 +1269,11 @@ if(viceFci == TRUE)
 
         printf("Enter name: ");
         scanf("%d", &op1->data.value.i);
+      break;
 
+    default:
 
-      
-
+      break;
         
     }
     listNext(L);

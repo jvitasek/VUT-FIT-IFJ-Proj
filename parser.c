@@ -31,13 +31,13 @@
 
 char *I_am_in= "n";
 
-extern void *startLab = NULL;
-extern void *endOfMain = NULL;
+extern void *startLab;
+extern void *endOfMain;
 
 extern void * afterIf;
 extern void * else_goto;
-extern void *beforeFor = NULL;
-extern void *behindFor = NULL;
+extern void *beforeFor;
+extern void *behindFor;
 string attr; // vytvorime si string
 int counterVar = 1;	// globalna premenna, ktora sluzi pri tvorbe pomocnych premennych na medzivypocty
 
@@ -369,7 +369,7 @@ TError func(FILE *input)
 					printf("startLab: %d\n",startLab );
 					I_am_in = "a";
 				}
-				else if ((I_am_in == "a") && (strcmp((strGetStr(&attr)),"main") != 0))
+				else if ((strcmp(I_am_in, "a") == 0) && (strcmp((strGetStr(&attr)),"main") != 0))
 				{
 					I_am_in = "y";
 					generate_inst(C_EndMain,NULL,NULL,NULL);
@@ -726,7 +726,7 @@ TError stmt(FILE *input)
 
 
 
-			int *pomocna;
+			int *pomocna = NULL;
 			tData data;
 			string if_temp;
 			strInit(&if_temp);

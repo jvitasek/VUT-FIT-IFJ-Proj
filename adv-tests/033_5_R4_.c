@@ -3,7 +3,7 @@ string func( string p1, int p2, bool p3, double p4 ) {
 }
 
 int main() {
-	int x = func( "lol", true, 4, "lol" );
+	x = func( "lol", true, 4, "lol" );
 
 	if( x == "lolasd" )
 		return 0;
