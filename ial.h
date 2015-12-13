@@ -101,7 +101,6 @@ void outputSymbolTable(tHTable* ptrht);
 int length(string s);
 string concat(string s1, string s2);
 string substr(string s, int i, int n);
-int find(string s, string search);
 string sort(string s);
 
 #endif

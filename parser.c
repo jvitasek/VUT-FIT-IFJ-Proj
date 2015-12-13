@@ -2262,7 +2262,7 @@ TError realtype()
 			//printf("op1: %d\n",op1->data.value.i );
 			generate_inst(C_Cout,op1,NULL,NULL);
 	   // printf("tohgle: %d\n",cislo);	
-	}i
+	}
 		currType = token.type;
 		return ENOP;
 	}
