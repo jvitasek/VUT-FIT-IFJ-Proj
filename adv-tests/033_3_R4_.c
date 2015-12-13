@@ -1,9 +1,11 @@
-string func( string p1, int p2, bool p3, double p4 ) {
-	return concat( p1, "asd" );
+string func( string p1, int p2, double p4 ) {
+	concat( p1, "asd" );
+	return 0;
 }
 
 int main() {
-	int x = func( "lol", true, 4, true );
+	int x;
+	func( "lol", true, true );
 
 	if( x == "lolasd" )
 		return 0;

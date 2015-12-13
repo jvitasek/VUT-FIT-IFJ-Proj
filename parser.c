@@ -8,8 +8,8 @@
  * 			xvalec00 – Dusan Valecky
  */
 
-//#define DEBUG 1
-//#define DEBUG_SEM 1
+#define DEBUG 1
+#define DEBUG_SEM 1
 //#define DEBUG_INST 1
 
 
@@ -317,6 +317,7 @@ TError parse(FILE *input)
 	currOrder = 0;
 	currOrderTerm = 0;
 	isReturn = 0;
+
 	//JARDA
 	/*#ifdef JARIS
 	SInitP(&stackI);
@@ -378,7 +379,6 @@ TError parse(FILE *input)
 	/**
 	 * smazani tabulky symbolu
 	 */
-	printf("tady\n");
 	//htClearAll(commTable);
 	//htClearAll(funcTable);
 	//htClearAll(paraTable);
@@ -906,14 +906,11 @@ TError stmt(FILE *input)
 			error = expr(input, &attr, 1, &counterVar, &commTable, &exprRes);
 
 
-
-			int *pomocna = NULL;
 			tData data;
 			string if_temp;
 			strInit(&if_temp);
 
-
-			generate_variable(&if_temp,pomocna);
+			generate_variable(&if_temp,&counterVar);
 		
 			htInsert(commTable, if_temp.str,data);
 			tHTItem *pom = htSearch(commTable, if_temp.str);
