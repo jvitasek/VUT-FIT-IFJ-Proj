@@ -12,7 +12,6 @@
 //#define DEBUG_SEM 1
 //#define DEBUG_INST 1
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -758,6 +757,17 @@ TError comm_seq(FILE *input)
 		
 
 		// SEMANTICKA ANALYZA
+		/**
+		 * kontrola, zda byl return
+		 */
+		if(currScope == 0 && isReturn != 1 && error == ENOP)
+		{
+			#ifdef DEBUG_SEM
+			fprintf(stderr, "Chyba: funkce %s neobsahuje prikaz return\n", currFunc);
+			#endif
+			print_error(ERUN_UNINIT, token.line);
+		}
+		isReturn = 0;
 		--currScope; // menime scope, dekrementace
 		gStackPop(&tableStack);
 		#ifdef DEBUG
@@ -1469,7 +1479,6 @@ TError ret(FILE *input)
 		isReturn = 1;
 		get_next_token(input, &attr);
 		error = expr(input, &attr, 0, &counterVar, &commTable, &exprRes);
-		isReturn = 0;
 		#ifdef DEBUG
 		fprintf(stderr, "ret: expr vratilo: %d\n", error);
 		#endif
@@ -1917,7 +1926,7 @@ TError init(FILE *input)
 			#ifdef DEBUG_SEM
 			fprintf(stderr, "Chyba: promenna typu auto musi byt rovnou definovana\n");
 			#endif
-			print_error(ESEM_DEF, token.line);
+			print_error(ETYP, token.line);
 		}
 		error = EEMPTY;
 	}
