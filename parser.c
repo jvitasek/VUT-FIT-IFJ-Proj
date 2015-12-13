@@ -28,6 +28,8 @@
 #include "stack.h"
 #endif*/
 
+extern void * afterIf;
+extern void * else_goto;
 string attr; // vytvorime si string
 int counterVar = 1;	// globalna premenna, ktora sluzi pri tvorbe pomocnych premennych na medzivypocty
 
@@ -36,6 +38,7 @@ tHTItem *exprRes = NULL;
 stack tableStack;
 tInstList List;	// zoznam instrukcii
 char *tempFunc;
+
 
 //JARDA
 /*#ifdef JARIS
@@ -136,156 +139,6 @@ int check_builtin(char *test)
 }
 
 /**
- * [check_builtin_params description]
- * @param func  [description]
- * @param order [description]
- */
-void check_builtin_params(char *func, int order)
-{
-	if(strcmp(func, "length") == 0)
-	{
-		if(order != 1)
-		{
-			print_error(ESEM_TYP, token.line);
-		}
-	}
-	else if(strcmp(func, "substr") == 0)
-	{
-		if(order != 3)
-		{
-			print_error(ESEM_TYP, token.line);
-		}
-	}
-	else if(strcmp(func, "concat") == 0)
-	{
-		if(order != 2)
-		{
-			print_error(ESEM_TYP, token.line);
-		}
-	}
-	else if(strcmp(func, "find") == 0)
-	{
-		if(order != 2)
-		{
-			print_error(ESEM_TYP, token.line);
-		}
-	}
-	else if(strcmp(func, "sort") == 0)
-	{
-		if(order != 1)
-		{
-			print_error(ESEM_TYP, token.line);
-		}
-	}
-}
-
-/**
- * [fill_builtin_params description]
- */
-void fill_builtin_params()
-{
-	// LENGTH
-	tData data;
-	data.type = VAR;
-	data.varType = T_Str; // ulozeni typu parametru
-	data.timesUsed = 1;
-	data.orderParams = 1;
-	data.scope = 1; // nejnizsi scope nasledujiciho bloku
-	data.value.ptrTS = NULL;
-	data.retType = 0;
-	htInsert(paraTable, "length", data); // vkladani do tabulky parametru
-	// /LENGTH
-	
-	// SUBSTR
-	data.type = VAR;
-	data.varType = T_Str; // ulozeni typu parametru
-	data.timesUsed = 1;
-	data.orderParams = 1;
-	data.scope = 1; // nejnizsi scope nasledujiciho bloku
-	data.value.ptrTS = NULL;
-	data.retType = 0;
-	htInsert(paraTable, "substr", data); // vkladani do tabulky parametru
-	data.type = VAR;
-	data.varType = T_Integ; // ulozeni typu parametru
-	data.timesUsed = 1;
-	data.orderParams = 2;
-	data.scope = 1; // nejnizsi scope nasledujiciho bloku
-	data.value.ptrTS = NULL;
-	data.retType = 0;
-	htInsert(paraTable, "substr", data); // vkladani do tabulky parametru
-	data.type = VAR;
-	data.varType = T_Integ; // ulozeni typu parametru
-	data.timesUsed = 1;
-	data.orderParams = 3;
-	data.scope = 1; // nejnizsi scope nasledujiciho bloku
-	data.value.ptrTS = NULL;
-	data.retType = 0;
-	htInsert(paraTable, "substr", data); // vkladani do tabulky parametru
-	// /SUBSTR
-	
-	// CONCAT
-	data.type = VAR;
-	data.varType = T_Str; // ulozeni typu parametru
-	data.timesUsed = 1;
-	data.orderParams = 1;
-	data.scope = 1; // nejnizsi scope nasledujiciho bloku
-	data.value.ptrTS = NULL;
-	data.retType = 0;
-	htInsert(paraTable, "concat", data); // vkladani do tabulky parametru
-	data.type = VAR;
-	data.varType = T_Str; // ulozeni typu parametru
-	data.timesUsed = 1;
-	data.orderParams = 2;
-	data.scope = 1; // nejnizsi scope nasledujiciho bloku
-	data.value.ptrTS = NULL;
-	data.retType = 0;
-	htInsert(paraTable, "concat", data); // vkladani do tabulky parametru
-	// /CONCAT
-	
-	// FIND
-	data.type = VAR;
-	data.varType = T_Str; // ulozeni typu parametru
-	data.timesUsed = 1;
-	data.orderParams = 1;
-	data.scope = 1; // nejnizsi scope nasledujiciho bloku
-	data.value.ptrTS = NULL;
-	data.retType = 0;
-	htInsert(paraTable, "find", data); // vkladani do tabulky parametru
-	data.type = VAR;
-	data.varType = T_Str; // ulozeni typu parametru
-	data.timesUsed = 1;
-	data.orderParams = 2;
-	data.scope = 1; // nejnizsi scope nasledujiciho bloku
-	data.value.ptrTS = NULL;
-	data.retType = 0;
-	htInsert(paraTable, "find", data); // vkladani do tabulky parametru
-	// /FIND
-	
-	// SORT
-	data.type = VAR;
-	data.varType = T_Str; // ulozeni typu parametru
-	data.timesUsed = 1;
-	data.orderParams = 1;
-	data.scope = 1; // nejnizsi scope nasledujiciho bloku
-	data.value.ptrTS = NULL;
-	data.retType = 0;
-	htInsert(paraTable, "sort", data); // vkladani do tabulky parametru
-	// /SORT
-}
-
-int return_param_count(char *func)
-{
-	tData *tempData;
-	int index = 1;
-
-	while((tempData = htReadOrder(paraTable, func, index)) != NULL)
-	{
-		index++;
-	}
-	return index-1;
-}
-
-/**
  * Hlavni funkce parseru. Simuluje pravidlo 1.
  * @param  input Soubor obsahujici vstupni kod.
  * @param  attr  String lexemu.
@@ -321,10 +174,7 @@ TError parse(FILE *input)
 	init_table(&funcTable);
 	init_table(&paraTable);
 
-	/**
-	 * naplneni parametru pro builtin funkce
-	 */
-	fill_builtin_params();
+	
 
 	/**
 	 * inicializace zasobniku tabulek symbolu
@@ -665,6 +515,20 @@ TError dec_or_def(FILE *input)
 	#endif
 	if(error == ENOP)
 	{
+		/**
+		 * kontrola, zda funkce nebyla podruhe definovana
+		 */
+		tData *tempData;
+		if((tempData = htRead(funcTable, currFunc)) != NULL)
+		{
+			if((tempData->isDefined == 1) && (tempData->timesUsed > 1) && (strcmp(currFunc, "main") != 0))
+			{
+				#ifdef DEBUG_SEM
+				fprintf(stderr, "Chyba: funkce %s byla vicekrat definovana\n", strGetStr(&attr));
+				#endif
+				print_error(ESEM_DEF, token.line);
+			}
+		}
 		return error;
 	}
 	else if(error == ESYN)
@@ -694,30 +558,18 @@ TError comm_seq(FILE *input)
 	// 19: <COMM_SEQ> -> { <STMT_LIST> }
 	if(token.type == T_LeftBrace)
 	{
+		// SEMANTICKA ANALYZA
 		/**
-		 * kontrola, zda funkce nebyla podruhe definovana
+		 * zapiseme, ze funkce byla definovana
 		 */
 		tData *tempData;
 		if((tempData = htRead(funcTable, currFunc)) != NULL)
 		{
-			/**
-			 * zjistime, jestli nejde o redefinici
-			 */
-			if((tempData->isDefined == 1) && (strcmp(currFunc, "main") != 0) && (currScope == 0))
-			{
-				#ifdef DEBUG_SEM
-				fprintf(stderr, "Chyba: funkce %s byla vicekrat definovana\n", currFunc);
-				#endif
-				print_error(ESEM_DEF, token.line);
-			}
-			/**
-			 * zapiseme, ze funkce byla definovana
-			 */
 			if(tempData->type == FUNC)
 			{
 				tData data;
 				data.type = tempData->type;
-				data.timesUsed = tempData->timesUsed;
+				data.timesUsed = tempData->timesUsed+1;
 				data.scope = tempData->scope;
 				data.orderParams = tempData->orderParams;
 				data.retType = tempData->retType;
@@ -730,6 +582,7 @@ TError comm_seq(FILE *input)
 				#endif
 			}
 		}
+
 		// SEMANTICKA ANALYZA
 		if(tableStack.top->table != NULL)
 		{
@@ -856,13 +709,24 @@ TError stmt(FILE *input)
 			get_next_token(input, &attr);
 			error = expr(input, &attr, 1, &counterVar, &commTable, &exprRes);
 
-			//JARDA
-			/*#ifdef JARIS
-			lastI = listGetPointerLast(list);
-			unie.obsah = afterIf;
-			//je-li podminka pravdiva, skacu za if (afterIf)
-			generateInstruction(I_IFGOTO, INT, &unie, STRING, &unie2,  DOUBLE, NULL);
-			#endif*/
+
+
+			int *pomocna;
+			tData data;
+			string if_temp;
+			strInit(&if_temp);
+
+
+			generate_variable(&if_temp,pomocna);
+		
+			htInsert(commTable, if_temp.str,data);
+			tHTItem *pom = htSearch(commTable, if_temp.str);
+
+			data.value.i = 0;
+			htInsert(commTable, "1",data );
+			tHTItem *pom2 = htSearch(commTable, "1");
+
+			generate_inst(C_IfGoTo,pom2,NULL,pom);
 
 			#ifdef DEBUG
 			//outputSymbolTable(commTable);
@@ -871,9 +735,14 @@ TError stmt(FILE *input)
 			#endif
 			if(error == ENOP)
 			{
+
 				get_next_token(input, &attr);
+
 				error = comm_seq(input);
-				
+				afterIf = listGetPointerLast(&List);
+				data.value.ptrI=listGetPointerLast(&List);
+				printf("adresa posledni : %p\n", data.value.ptrI);
+				printf("afterIf : %p\n", data.value.ptrI);
 				//JARDA
 				/*#ifdef JARIS
 				SPushP(&stackI, lastI);
@@ -883,7 +752,7 @@ TError stmt(FILE *input)
 				//generateInstruction(I_IFGOTO, INT, &unie, STRING, &unie2,  DOUBLE, NULL);
 				#ifdef*/
 				
-				
+				generate_inst(C_ElseGoTo, pom2,NULL,pom);
 				#ifdef DEBUG
 				fprintf(stderr, "stmt: comm_seq vratilo: %d\n", error);
 				#endif
@@ -891,9 +760,9 @@ TError stmt(FILE *input)
 				{
 					get_next_token(input, &attr);
 					error = if_n(input);
+					else_goto = listGetPointerLast(&List);
 					#ifdef DEBUG
 					fprintf(stderr, "stmt: if_n: %d\n", error);
-					fprintf(stderr, "po if_n mam token: %d\n", token.type);
 					#endif
 					if(error == ENOP)
 					{
@@ -920,7 +789,7 @@ TError stmt(FILE *input)
 		}
 	}
 	// 23: <STMT> -> for( <VAR_DEF> <EXPR> <ASSIGN> ) <COMM_SEQ>
-	if(token.type == T_For)
+	else if(token.type == T_For)
 	{
 		get_next_token(input, &attr);
 		if(token.type == T_LeftParenthesis)
@@ -1005,7 +874,7 @@ TError stmt(FILE *input)
 		}
 	}
 	// 24: <STMT> -> <COMM_SEQ>
-	if((error = comm_seq(input)) == ENOP || error == ESYN)
+	else if((error = comm_seq(input)) == ENOP || error == ESYN)
 	{
 		#ifdef DEBUG
 		fprintf(stderr, "stmt: comm_seq vratilo: %d\n", error);
@@ -1013,7 +882,7 @@ TError stmt(FILE *input)
 		return error;
 	}
 	// 25: <STMT> -> <VAR_DEF>
-	if((error = var_def(input)) == ENOP || error == ESYN)
+	else if((error = var_def(input)) == ENOP || error == ESYN)
 	{
 		#ifdef DEBUG
 		fprintf(stderr, "stmt: var_def vratilo: %d\n", error);
@@ -1021,7 +890,7 @@ TError stmt(FILE *input)
 		return error;
 	}
 	// 26: <STMT> -> cin >> id <CIN_ID_N>;
-	if(token.type == T_Cin)
+	else if(token.type == T_Cin)
 	{
 		get_next_token(input, &attr);
 		if(token.type == T_RightShift)
@@ -1100,7 +969,7 @@ TError stmt(FILE *input)
 		}
 	}
 	// 27: <STMT> -> cout << <COUT_TERM>;
-	if(token.type == T_Cout)
+	else if(token.type == T_Cout)
 	{
 		get_next_token(input, &attr);
 		if(token.type == T_LeftShift)
@@ -1132,7 +1001,7 @@ TError stmt(FILE *input)
 		}
 	}
 	// 28: <STMT> -> <RETURN>
-	if((error = ret(input)) == ENOP || error == ESYN)
+	else if((error = ret(input)) == ENOP || error == ESYN)
 	{
 		#ifdef DEBUG
 		fprintf(stderr, "stmt: ret vratilo: %d\n", error);
@@ -1140,11 +1009,11 @@ TError stmt(FILE *input)
 		return error;
 	}
 	// 29) <STMT> -> id <CALL_ASSIGN>
-	if(token.type == T_Id)
+	else if(token.type == T_Id)
 	{
 		// SEMANTICKA ANALYZA
 		tData *tempData;
-		if(((tempData = htRead(commTable, strGetStr(&attr))) == NULL) && (check_builtin(strGetStr(&attr)) != 1))
+		if((tempData = htRead(commTable, strGetStr(&attr))) == NULL)
 		{
 			#ifdef DEBUG_SEM
 			fprintf(stderr, "Chyba: promenna %s v leve casti prirazeni nebyla nalezena\n", strGetStr(&attr));
@@ -1510,8 +1379,18 @@ TError cout_term(FILE *input)
 			print_error(ESEM_DEF, token.line);
 		}
 		// KONEC SEMANTICKE ANALYZY
+
+		tData *obsah;
+		tHTItem *op1 = htSearch(commTable,strGetStr(&attr));
+		printf("attr %s\n",strGetStr(&attr) );
+		obsah = htRead(commTable, strGetStr(&attr));
+		printf("hodnota: %d\n",obsah->value.i );
+		printf("typ: %u\n",obsah->varType );
+		generate_inst(C_Cout,op1,NULL,NULL);
+
 		get_next_token(input, &attr);
 		error = cout_term_n(input);
+
 		#ifdef DEBUG
 		fprintf(stderr, "cout_term: cout_term_n vratilo: %d\n", error);
 		#endif
@@ -2019,16 +1898,12 @@ TError terms(FILE *input)
 		#ifdef DEBUG_SEM
 		fprintf(stderr, "volam funkci: %s, vlozeno parametru: %d, deklarovany pocet: %d\n", currFunc, currOrderTerm, currOrder);
 		#endif
-		if((currOrderTerm != currOrder) && (check_builtin(currFunc) != 1))
+		if(currOrderTerm != currOrder)
 		{
 			#ifdef DEBUG_SEM
 			fprintf(stderr, "Chyba: pocet parametru zadany pro volani funkce %s neodpovida\n", currFunc);
 			#endif
 			print_error(ESEM_TYP, token.line);
-		}
-		else if(check_builtin(currFunc) == 1)
-		{
-			check_builtin_params(currFunc, currOrderTerm);
 		}
 		currOrderTerm = 0;
 
@@ -2075,16 +1950,12 @@ TError terms(FILE *input)
 		#ifdef DEBUG_SEM
 		fprintf(stderr, "volam funkci: %s, vlozeno parametru: %d, deklarovany pocet: %d\n", currFunc, currOrderTerm, currOrder);
 		#endif
-		if((currOrderTerm != currOrder) && (check_builtin(currFunc) != 1))
+		if(currOrderTerm != currOrder)
 		{
 			#ifdef DEBUG_SEM
 			fprintf(stderr, "Chyba: pocet parametru zadany pro volani funkce %s neodpovida\n", currFunc);
 			#endif
 			print_error(ESEM_TYP, token.line);
-		}
-		else if(check_builtin(currFunc) == 1)
-		{
-			check_builtin_params(currFunc, currOrderTerm);
 		}
 		currOrderTerm = 0;
 
@@ -2107,16 +1978,12 @@ TError terms(FILE *input)
 		#ifdef DEBUG_SEM
 		fprintf(stderr, "volam funkci: %s, vlozeno parametru: %d, deklarovany pocet: %d\n", currFunc, currOrderTerm, currOrder);
 		#endif
-		if((currOrderTerm != currOrder) && (check_builtin(currFunc) != 1))
+		if(currOrderTerm != currOrder)
 		{
 			#ifdef DEBUG_SEM
 			fprintf(stderr, "Chyba: pocet parametru zadany pro volani funkce %s neodpovida\n", currFunc);
 			#endif
 			print_error(ESEM_TYP, token.line);
-		}
-		else if(check_builtin(currFunc) == 1)
-		{
-			check_builtin_params(currFunc, currOrderTerm);
 		}
 		currOrderTerm = 0;
 		error = EEMPTY;
@@ -2278,11 +2145,61 @@ TError realtype()
 	// P: UNDEF
 	if(token.type == T_Doub || token.type == T_Str || token.type == T_Integ)
 	{
-		#ifdef JARIS
+		
 		//unie.obsah_s = malloc(sizeof(char)*strlen(strGetStr(&attr)));
-		strcpy(unie.obsah_s, strGetStr(&attr));
-		generateInstruction(I_PRINT, STRING, &unie, STRING, &unie2,  DOUBLE, NULL);
-		#endif
+		//strcpy(unie.obsah_s, );
+			if(token.type == T_Str)
+			{
+			tData data;
+			data.varType = T_Str;
+			strcpy(data.value.str, strGetStr(&attr));
+			printf("data: %s\n",data.value.str );
+			
+			htInsert(commTable, strGetStr(&attr),data);
+
+			tHTItem *op1 = htSearch(commTable, strGetStr(&attr));
+			printf("op1: %s\n",op1->data.value.str );
+			generate_inst(C_Cout,op1,NULL,NULL);
+	    	
+	}
+	else if(token.type == T_Integ)
+		{
+			tData data;
+			data.varType = T_Int;
+			int cislo = atoi(strGetStr(&attr));
+			
+			data.value.i =cislo;
+			//printf("data: %d\n",data.value.i );
+			
+			htInsert(commTable, strGetStr(&attr),data);
+
+			tHTItem *op1 = htSearch(commTable,strGetStr(&attr) );
+			//printf("op1: %d\n",op1->data.value.i );
+			generate_inst(C_Cout,op1,NULL,NULL);
+	   // printf("tohgle: %d\n",cislo);	
+	}
+		
+		else if(token.type == T_Doub)
+		{
+			tData data;
+			data.varType = T_Double;
+			int cislo = atof(strGetStr(&attr));
+			
+			data.value.d =cislo;
+			//printf("data: %d\n",data.value.i );
+			
+			htInsert(commTable, strGetStr(&attr),data);
+
+			tHTItem *op1 = htSearch(commTable,strGetStr(&attr) );
+			//printf("op1: %d\n",op1->data.value.i );
+			generate_inst(C_Cout,op1,NULL,NULL);
+	   // printf("tohgle: %d\n",cislo);	
+	}
+
+		
+			//strcpy(data.value.str,strGetStr(&attr
+		//generateInstruction(I_PRINT, STRING, &unie, STRING, &unie2,  DOUBLE, NULL);
+		
 		currType = token.type;
 		return ENOP;
 	}

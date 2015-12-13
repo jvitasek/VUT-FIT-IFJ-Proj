@@ -716,44 +716,176 @@ case I_NEQ:
 #include <stdio.h>
 #include <stdlib.h>
 #include "ial.h"
+#include "instList.h"
 
-#define DEBUG 1
-
+void * afterIf;
+void * else_goto;
 TError interpret(tInstList *L)
 {
-  #ifdef DEBUG
-	fprintf(stderr, "Interpret\n");
-	printElementsOfList(*L);
-  #endif
-	listFirst(L);
-	tInstruct *ins;
-	tHTItem *op1;
-	tHTItem *op2;
-	tHTItem *res;
-	while(1)
-	{
-		ins = listGetData(L);
-		if(ins == NULL) break;
-		op1 = (tHTItem*)ins->op1;
-		op2 = (tHTItem*)ins->op2;
-		res = (tHTItem*)ins->result;
-		if(ins->instCode == C_Assign)
-		{
-			res->data.value.d = op1->data.value.d;
-		}else if(ins->instCode == C_Add)
-		{
-			res->data.value.d = op1->data.value.d + op2->data.value.d;
-		}
-    else if(ins->instCode == C_Sub)
+  printf("Interpret\n");
+  printElementsOfList(*L);
+  listFirst(L);
+  tInstruct *ins;
+  tHTItem *op1;
+  tHTItem *op2;
+  tHTItem *res;
+  while(1)
+  {
+    ins = listGetData(L);
+    if(ins == NULL) break;
+    switch(ins->instCode)
     {
-      res->data.value.d = op1->data.value.d - op2->data.value.d;
+    case C_Assign:
+      op1 = (tHTItem*)ins->op1;
+      op2 = (tHTItem*)ins->op2;
+      res = (tHTItem*)ins->result;
+      
+
+      if(op1->data.varType == T_Doub)
+      {
+       // printf("double\n");
+        res->data.value.d = op1->data.value.d;
+        
+      }
+      else if(op1->data.varType == T_Integ)
+      {
+       // printf("int\n");
+        res->data.value.i = op1->data.value.i;
+      }
+      
+          break;
+          
+    case C_Add:
+      op1 = (tHTItem*)ins->op1;
+      op2 = (tHTItem*)ins->op2;
+      res = (tHTItem*)ins->result;
+
+      if((op1->data.varType == T_Doub) && (op2->data.varType == T_Doub))
+      {
+
+        res->data.value.d = op1->data.value.d + op2->data.value.d;
+      }
+      else if((op1->data.varType == T_Integ) && (op2->data.varType == T_Integ))
+      {
+        res->data.value.i = op1->data.value.i + op2->data.value.i;
+      }
+      else if((op1->data.varType == T_Integ) && (op2->data.varType == T_Doub))
+      {
+        res->data.value.d = op1->data.value.i + op2->data.value.d;
+      }
+      else if((op1->data.varType == T_Doub) && (op2->data.varType == T_Integ))
+      {
+        res->data.value.d = op1->data.value.d + op2->data.value.i;
+      }
+      //nekompatibilni typy
+      else
+      {
+        return ESEM_TYP;
+      }
+      
+      break;
+
+    case C_Sub:
+      op1 = (tHTItem*)ins->op1;
+      op2 = (tHTItem*)ins->op2;
+      res = (tHTItem*)ins->result;
+
+     // printf("%u", op1->data.varType );
+       //printf("%u", op2->data.varType );
+      if((op1->data.varType == T_Doub) && (op2->data.varType == T_Doub))
+      {
+         //printf("AAAHOJ\n");
+        res->data.value.d = op1->data.value.d - op2->data.value.d;
+      }
+      else if((op1->data.varType == T_Integ) && (op2->data.varType == T_Integ))
+      {
+        res->data.value.i = op1->data.value.i - op2->data.value.i;
+      }
+      else if((op1->data.varType == T_Integ) && (op2->data.varType == T_Doub))
+      {
+        //printf("AHOJ\n");
+        res->data.value.d = ((double) op1->data.value.i) - op2->data.value.d;
+      }
+      else if((op1->data.varType == T_Doub) && (op2->data.varType == T_Integ))
+      {
+        //printf("AHOJ\n");
+        res->data.value.d = op1->data.value.d - op2->data.value.i;
+      }
+      
+      //nekompatibilni typy
+      else
+      {
+        return ESEM_TYP;
+      }
+      
+      break;
+    case C_Cout:
+      op1 = (tHTItem*)ins->op1;
+
+      //printf("tady\n");
+      if(op1->data.varType == T_Str)
+        {
+          printf("%s\n",op1->data.value.str);
+        }
+      else if(op1->data.varType == T_Int)
+        {
+          printf("%d\n",op1->data.value.i);
+        }
+      else if(op1->data.varType == T_Double)
+        {
+          printf("%f\n",op1->data.value.d);
+        }
+      break;
+
+    case C_IfGoTo:
+      op1 = (tHTItem*)ins->op1;
+      op2 = (tHTItem*)ins->op2;
+      res = (tHTItem*)ins->result;
+      printf("jednicka : %d\n", op1->data.value.i);
+      
+      if(op1->data.value.i == 0) 
+      {
+        //printf("adresa %p",*(op1->data.value.ptrI));
+        listGoTo(L, afterIf);
+      } 
+
+
+      break;
+
+    case C_ElseGoTo:
+      op1 = (tHTItem*)ins->op1;
+      op2 = (tHTItem*)ins->op2;
+      res = (tHTItem*)ins->result;
+    if(op1->data.value.i != 0)
+      {listGoTo(L, else_goto );}
+
+    break;
+        
     }
-		
-		listNext(L);
-	}
-  #ifdef DEBUG
-	fprintf(stderr, "%s %f\n",res->key,res->data.value.d);
-  #endif
-	return ENOP;
+    listNext(L);
+  //  printf("%s %d\n",res->key,res->data.value.i);
+  //  printf("%s %f\n",res->key,res->data.value.d);
+  }
+
+  return ENOP;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
