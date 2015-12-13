@@ -8,8 +8,8 @@
  * 			xvalec00 – Dusan Valecky
  */
 
-#define DEBUG 1
-//#define DEBUG_SEM 1
+//#define DEBUG 1
+#define DEBUG_SEM 1
 //#define DEBUG_INST 1
 
 
@@ -510,20 +510,6 @@ TError dec_or_def(FILE *input)
 	#endif
 	if(error == ENOP)
 	{
-		/**
-		 * kontrola, zda funkce nebyla podruhe definovana
-		 */
-		tData *tempData;
-		if((tempData = htRead(funcTable, currFunc)) != NULL)
-		{
-			if((tempData->isDefined == 1) && (tempData->timesUsed > 1) && (strcmp(currFunc, "main") != 0))
-			{
-				#ifdef DEBUG_SEM
-				fprintf(stderr, "Chyba: funkce %s byla vicekrat definovana\n", strGetStr(&attr));
-				#endif
-				print_error(ESEM_DEF, token.line);
-			}
-		}
 		return error;
 	}
 	else if(error == ESYN)
@@ -553,18 +539,30 @@ TError comm_seq(FILE *input)
 	// 19: <COMM_SEQ> -> { <STMT_LIST> }
 	if(token.type == T_LeftBrace)
 	{
-		// SEMANTICKA ANALYZA
 		/**
-		 * zapiseme, ze funkce byla definovana
+		 * kontrola, zda funkce nebyla podruhe definovana
 		 */
 		tData *tempData;
 		if((tempData = htRead(funcTable, currFunc)) != NULL)
 		{
+			/**
+			 * zjistime, jestli nejde o redefinici
+			 */
+			if((tempData->isDefined == 1) && (strcmp(currFunc, "main") != 0) && (currScope == 0))
+			{
+				#ifdef DEBUG_SEM
+				fprintf(stderr, "Chyba: funkce %s byla vicekrat definovana\n", currFunc);
+				#endif
+				print_error(ESEM_DEF, token.line);
+			}
+			/**
+			 * zapiseme, ze funkce byla definovana
+			 */
 			if(tempData->type == FUNC)
 			{
 				tData data;
 				data.type = tempData->type;
-				data.timesUsed = tempData->timesUsed+1;
+				data.timesUsed = tempData->timesUsed;
 				data.scope = tempData->scope;
 				data.orderParams = tempData->orderParams;
 				data.retType = tempData->retType;
@@ -577,7 +575,6 @@ TError comm_seq(FILE *input)
 				#endif
 			}
 		}
-
 		// SEMANTICKA ANALYZA
 		if(tableStack.top->table != NULL)
 		{

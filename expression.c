@@ -18,7 +18,7 @@
 //#include "ilist.h"
 
 //#define DEBUG 1
-#define DEBUG_INST 1
+//#define DEBUG_INST 1
 #define DEBUG_KL 1
 
 int *counteerVar;	// sluzi pri tvorbe pomocnych premennych
