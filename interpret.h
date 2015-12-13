@@ -1,7 +1,7 @@
 /**
 * Implementace interpretu imperativniho jazyka IFJ15 *
 * 
-* interpret.c  
+* interpret.h
 * 
 * Autor:
 *       xvidaj00 - Juraj Vida

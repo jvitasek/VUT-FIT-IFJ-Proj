@@ -13,8 +13,10 @@
 
 #define STR_LEN 8
 
-/*
- * Funkcia vytvara novy retazec.
+/**
+ * [strInit description]
+ * @param  s [description]
+ * @return   [description]
  */
 int strInit(string *s)
 {
@@ -29,8 +31,11 @@ int strInit(string *s)
 	return 0;
 }
 
-/*
- * Funkcia pridava znak na koniec retazca.
+/**
+ * [strAppend description]
+ * @param  s [description]
+ * @param  c [description]
+ * @return   [description]
  */
 int strAppend(string *s, char c)
 {
@@ -49,14 +54,20 @@ int strAppend(string *s, char c)
 	return 0;
 }
 
-/*
- * Funkcia uvolnuje retazec z pamete.
+/**
+ * [strFree description]
+ * @param s [description]
  */
 void strFree(string *s)
 {
 	free(s->str);
 }
 
+/**
+ * [toString description]
+ * @param  s [description]
+ * @return   [description]
+ */
 string toString(char *s)
 {
 	string result;
@@ -70,8 +81,9 @@ string toString(char *s)
 	return result;
 }
 
-/*
- * Funkcia maze obsah retazca.
+/**
+ * [strClear description]
+ * @param s [description]
  */
 void strClear(string *s)
 {
@@ -79,19 +91,22 @@ void strClear(string *s)
 	s->length = 0;
 }
 
-/*
- * Funkcia vracia textovu cast retazca.
+/**
+ * [strGetStr description]
+ * @param  s [description]
+ * @return   [description]
  */
 char *strGetStr(string *s)
 {
 	return s->str;
 }
 
-/*
- * Funkcia vracia dlzku retazca.
+/**
+ * [strGetLength description]
+ * @param  s [description]
+ * @return   [description]
  */
 int strGetLength(string *s)
 {
 	return s->length;
 }
-
