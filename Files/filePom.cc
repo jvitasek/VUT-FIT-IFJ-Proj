@@ -1,14 +1,31 @@
 
 
 // localTable: main, 2, 0 
+double main()
+{
+    // stack->top: localTable
+   	double a = 5.1;
+   	double c = 3.4;
+   	double h = a + c;
+
+ 
+    return h;
+}
+
+/*double func(double a, int g)
+{
+
+}
+
 int main()
 {
     // stack->top: localTable
-   	double bubo = 6.9 + 4.1;
-
+    double bubo = 6.9;
+    bubo = 5.3 + 6.9;
  
-    return bubo;
-}
+ 
+    return 5;
+}*/
 
 
 
