@@ -818,7 +818,7 @@ TError stmt(FILE *input)
 			htInsert(commTable, if_temp.str,data);
 			tHTItem *pom = htSearch(commTable, if_temp.str);
 
-			data.value.i = 0;
+			data.value.i = 1;
 			htInsert(commTable, "1",data );
 			tHTItem *pom2 = htSearch(commTable, "1");
 
