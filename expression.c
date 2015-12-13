@@ -1067,31 +1067,42 @@ TError find_rule(ruleType rule)
 			/**
 			 * kontrola typove kompatibility @TODO - pro porovnavani toho bude vic !!!!!!!!!
 			 */
-			// // string * cokoli jineho
-			// if ((stack.top->idType == Tstring && stack.top->Lptr->Lptr->idType != Tstring) || 
-			// 	(stack.top->idType != Tstring && stack.top->Lptr->Lptr->idType == Tstring))
+			// string < cokoli jineho
+			if ((stack.top->idType == Tstring && stack.top->Lptr->Lptr->idType != Tstring) || 
+				(stack.top->idType != Tstring && stack.top->Lptr->Lptr->idType == Tstring))
+			{
+				print_error(ESEM_TYP, token.line);
+			}
+
+			/**
+			 * 3AC
+			 */
+			// //tHTItem *op2;	//operand 2
+			// stack_pop(&op2,1);	
+			// stack_pop(NULL,0);	//znamienko
+			
+			// //tHTItem *op1;	//operand 1			
+			// stack_pop(&op1,1);
+			// stack_pop(NULL,0);	//znamienko
+
+			// strInit(&newVar);
+			// generate_variable(&newVar,counteerVar);
+			// htInsert(*locTable, newVar.str,data);		// pomocna premenna na vysledok
+			// res = htSearch(*locTable,newVar.str);
+			
+			// printf("TERMTYPE ve LESSGREAT_RULE: %d\n", stack.top->Lptr->termType);
+			// switch (stack.top->Lptr->termType)
 			// {
-			// 	print_error(ESEM_TYP, token.line);
+			// 	case PEqual: generate_inst(C_Equal,op1,op2,res); break;
+			// 	case PNotEq: generate_inst(C_NotEqual,op1,op2,res); break;
+			// 	case PLessEq: generate_inst(C_LessEq,op1,op2,res); break;
+			// 	case PGreatEq: generate_inst(C_GreaterEq,op1,op2,res); break;
+			// 	case PGreat: generate_inst(C_Greater,op1,op2,res); break;
+			// 	case PLess: generate_inst(C_Less,op1,op2,res); break;
+			// 	default: fprintf(stderr, "CHYBA LESSGREAT_RULE termType!!!\n"); break;
 			// }
-			// // int * double
-			// else if (stack.top->idType == Tint && stack.top->Lptr->Lptr->idType == Tdouble)
-			// {
-			// 	#ifdef DEBUG
-			// 	printf("--Op1 == int, op2 == double.--\n");
-			// 	#endif
-			// }
-			// // double * int
-			// else if (stack.top->idType == Tdouble && stack.top->Lptr->Lptr->idType == Tint)
-			// {
-			// 	#ifdef DEBUG
-			// 	printf("--Op1 == double, op2 == int.--\n");
-			// 	#endif
-			// }
-			// else 
-			// {
-			// 	printf("###############Chyba Nonterminalu - kompatibilita?.\n"); @TODO vyresit pro ID
-			//	print_error(ESEM_TYP, token.line);
-			// }	
+
+			// *expRes = res;
 			
 			// nejdrive se zbavim: < E (<, >, <=, >=) E (4x pop)
 			stack_pop(NULL,0);
@@ -1110,82 +1121,6 @@ TError find_rule(ruleType rule)
 			}
 			#ifdef DEBUG
 			 	printf("Pravidlo LESSGREAT_RULE po pop a push\n");
-				whats_in_stack();
-			#endif
-
-			error = ENOP;
-		break;
-
-		case EQ_RULE:		// E -> E == E, E -> E != E
-			if ((stack.top->termType != PNonTerm) || 
-				(stack.top->Lptr->Lptr->termType != PNonTerm))
-			{
-				#ifdef DEBUG
-				fprintf(stderr, "Chyba pravidla pro porovnavani ( ==, != ).\n");
-				#endif
-				error = ESYN;
-				return error;
-			}
-
-			/**
-			 * @todo 3AC, Ilist
-			 */
-			
-			// //false
-			// unie.obsah=4;
-			// unie2.obsah=5;
-			// generateInstruction(I_LE, INT, &unie, INT,&unie2, INT, NULL);
-			// //true
-			// unie.obsah=4;
-			// unie2.obsah=5;
-			// generateInstruction(I_GE, INT, &unie, INT,&unie2, INT, NULL);
-			
-			/**
-			 * kontrola typove kompatibility @TODO - pro porovnavani toho bude vic !!!!!!!!!
-			 */
-			// // string * cokoli jineho
-			// if ((stack.top->idType == Tstring && stack.top->Lptr->Lptr->idType != Tstring) || 
-			// 	(stack.top->idType != Tstring && stack.top->Lptr->Lptr->idType == Tstring))
-			// {
-			// 	print_error(ESEM_TYP, token.line);
-			// }
-			// // int * double
-			// else if (stack.top->idType == Tint && stack.top->Lptr->Lptr->idType == Tdouble)
-			// {
-			// 	#ifdef DEBUG
-			// 	printf("--Op1 == int, op2 == double.--\n");
-			// 	#endif
-			// }
-			// // double * int
-			// else if (stack.top->idType == Tdouble && stack.top->Lptr->Lptr->idType == Tint)
-			// {
-			// 	#ifdef DEBUG
-			// 	printf("--Op1 == double, op2 == int.--\n");
-			// 	#endif
-			// }
-			// else 
-			// {
-			// 	printf("###############Chyba Nonterminalu - kompatibilita?.\n"); @TODO vyresit pro ID
-			//	print_error(ESEM_TYP, token.line);
-			// }
-			
-			// nejdrive se zbavim: < E (==, !=) E (4x pop)
-			stack_pop(NULL,0);
-			stack_pop(NULL,0);
-			stack_pop(NULL,0);
-			stack_pop(NULL,0);
-
-			// pushnu neterminal na zasobnik
-			if ((error = stack_push(PNonTerm, "PNonTerm")) != ENOP)
-			{
-				#ifdef DEBUG
-				fprintf(stderr, "Chyba pri StackPush.\n");
-				#endif
-				
-				return error;
-			}
-			#ifdef DEBUG
-			 	printf("Pravidlo EQ_RULE po pop a push\n");
 				whats_in_stack();
 			#endif
 
@@ -1687,15 +1622,9 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 						case PGreat:
 						case PLessEq:
 						case PGreatEq:
-							if ((error = find_rule(LESSGREAT_RULE)) != ENOP)
-							{
-								stack_dispose();
-								return error;
-							}
-						break;
 						case PEqual:
 						case PNotEq:
-							if ((error = find_rule(EQ_RULE)) != ENOP)
+							if ((error = find_rule(LESSGREAT_RULE)) != ENOP)
 							{
 								stack_dispose();
 								return error;
@@ -2006,15 +1935,9 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 						case PGreat:
 						case PLessEq:
 						case PGreatEq:
-							if ((error = find_rule(LESSGREAT_RULE)) != ENOP)
-							{
-								stack_dispose();
-								return error;
-							}
-						break;
 						case PEqual:
 						case PNotEq:
-							if ((error = find_rule(EQ_RULE)) != ENOP)
+							if ((error = find_rule(LESSGREAT_RULE)) != ENOP)
 							{
 								stack_dispose();
 								return error;
@@ -2141,7 +2064,6 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 
 		} while(!((tempStack->termType == PDollar) && (tokterm == PDollar)));
 	}
-	//printf("PARCOUNT NA KONCIIIIIIIIIIII: %d\n", parCount);
 
 	stack_dispose();
 

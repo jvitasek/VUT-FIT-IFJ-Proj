@@ -56,7 +56,6 @@ typedef enum ruleType {
 	MUL_RULE,	// E -> E * E
 	DIV_RULE,	// E -> E / E
 	LESSGREAT_RULE, // E -> E > E, E -> E >= E, ...
-	EQ_RULE,		// E -> E == E, E -> E != E
 	PAR_RULE,	// E -> (E)
 	ID_E_RULE,	// E -> i ... i pro string, int, double
 	FUNC_RULE	// E -> f(E) ... @todo f(E,E) ...
