@@ -623,6 +623,7 @@ TError find_rule(ruleType rule)
 	string newVar;
 	tHTItem *res;
 	tData data;
+	int cntPar = 0;
 
 	switch(rule)
 	{
@@ -1321,6 +1322,13 @@ TError find_rule(ruleType rule)
 			// @ TODO - mozna bude chybet podminka, az budu zpracovavat parametry
 			// 
 			 
+
+			cntPar = return_param_count(currentFunc);
+			if (cntPar != parCount)
+			{
+				print_error(ESEM_TYP, token.line);
+			}
+
 			// jedná se o: <f() - 4x pop
 			if (stack.top->Lptr->termType == PLeftP &&	stack.top->Lptr->Lptr->termType == PIdFun)
 			{

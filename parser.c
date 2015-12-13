@@ -325,7 +325,6 @@ TError parse(FILE *input)
 	 * naplneni parametru pro builtin funkce
 	 */
 	fill_builtin_params();
-	outputSymbolTable(paraTable);
 
 	/**
 	 * inicializace zasobniku tabulek symbolu
