@@ -454,7 +454,9 @@ TError func(FILE *input)
 				{
 					generate_inst(C_Start,NULL,NULL,NULL);
 					startLab = listGetPointerLast(&List);
-					printf("startLab: %d\n",startLab );
+					#ifdef DEBUG_INST
+					fprintf(stderr, "startLab: %d\n", startLab);
+					#endif
 					I_am_in = "a";
 				}
 				else if ((strcmp(I_am_in, "a") == 0) && (strcmp((strGetStr(&attr)),"main") != 0))
@@ -462,9 +464,10 @@ TError func(FILE *input)
 					I_am_in = "y";
 					generate_inst(C_EndMain,NULL,NULL,NULL);
 					endOfMain = listGetPointerLast(&List);
-					printf("end of main: %d\n", endOfMain);
+					#ifdef DEBUG_INST
+					fprintf(stderr, "end of main: %d\n", endOfMain);
+					#endif
 				}
-				//printf("VYPISSSSSSS neni : %s\n",strGetStr(&attr) );
 			}
 			currFunc = malloc(sizeof(char)*strlen(strGetStr(&attr)));
 			strcpy(currFunc, strGetStr(&attr));
@@ -833,8 +836,10 @@ TError stmt(FILE *input)
 				error = comm_seq(input);
 				afterIf = listGetPointerLast(&List);
 				data.value.ptrI=listGetPointerLast(&List);
-				printf("adresa posledni : %p\n", data.value.ptrI);
-				printf("afterIf : %p\n", data.value.ptrI);
+				#ifdef DEBUG_INST
+				fprintf(stderr, "adresa posledni : %p\n", data.value.ptrI);
+				fprintf(stderr, "afterIf : %p\n", data.value.ptrI);
+				#endif
 				generate_inst(C_ElseGoTo, pom2,NULL,pom);
 				#ifdef DEBUG
 				fprintf(stderr, "stmt: comm_seq vratilo: %d\n", error);
@@ -965,7 +970,9 @@ TError stmt(FILE *input)
 	if(token.type == T_Cin)
 	{
 		get_next_token(input, &attr);
-		printf("token 1: %s\n",strGetStr(&attr));
+		#ifdef DEBUG_INST
+		fprintf(stderr, "token 1: %s\n",strGetStr(&attr));
+		#endif
 		if(token.type == T_RightShift)
 		{
 			get_next_token(input, &attr);
@@ -982,7 +989,9 @@ TError stmt(FILE *input)
 				}
 				// /SEMANTICKA ANALYZA
 				//tady uz je attr IDcko
-				printf("token 2: %s\n",strGetStr(&attr));
+				#ifdef DEBUG_INST
+				fprintf(stderr, "token 2: %s\n",strGetStr(&attr));
+				#endif
 				tHTItem *cin = htSearch(commTable, strGetStr(&attr));
 				generate_inst(C_Cin, cin, NULL,NULL);
 				get_next_token(input, &attr);
@@ -2221,12 +2230,16 @@ TError realtype()
 			tData data;
 			data.varType = T_Str;
 			strcpy(data.value.str, strGetStr(&attr));
-			printf("data: %s\n",data.value.str );
+			#ifdef DEBUG_INST
+			fprintf(stderr, "data: %s\n",data.value.str );
+			#endif
 			
 			htInsert(commTable, strGetStr(&attr),data);
 
 			tHTItem *op1 = htSearch(commTable, strGetStr(&attr));
-			printf("op1: %s\n",op1->data.value.str );
+			#ifdef DEBUG_INST
+			fprintf(stderr, "op1: %s\n",op1->data.value.str );
+			#endif
 			generate_inst(C_Cout,op1,NULL,NULL);
 	    	
 	}
