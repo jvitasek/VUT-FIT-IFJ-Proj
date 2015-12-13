@@ -717,7 +717,7 @@ case I_NEQ:
 #include <stdlib.h>
 #include "ial.h"
 
-//#define DEBUG 1
+#define DEBUG 1
 
 TError interpret(tInstList *L)
 {
@@ -744,6 +744,10 @@ TError interpret(tInstList *L)
 		{
 			res->data.value.d = op1->data.value.d + op2->data.value.d;
 		}
+    else if(ins->instCode == C_Sub)
+    {
+      res->data.value.d = op1->data.value.d - op2->data.value.d;
+    }
 		
 		listNext(L);
 	}

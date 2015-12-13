@@ -18,8 +18,8 @@
 //#include "ilist.h"
 
 //#define DEBUG 1
-#define DEBUG_INST 1
-#define DEBUG_KL 1
+//#define DEBUG_INST 1
+//#define DEBUG_KL 1
 
 int *counteerVar;	// sluzi pri tvorbe pomocnych premennych
 Tstack stack;
@@ -691,13 +691,18 @@ TError find_rule(ruleType rule)
 			generate_variable(&newVar,counteerVar);
 			htInsert(*locTable, newVar.str,data);		// pomocna premenna na vysledok
 			res = htSearch(*locTable,newVar.str);
-			#ifdef DEBUG_INST
+			//#ifdef DEBUG_INST
 			fprintf(stderr, "\tExprAdd-------CODE:%d|OPE1 %s %d ||OPE2 %s %d ||Vysl %s\n",
 				C_Add,op1->key,op1->data.value.i,op2->key,op2->data.value.i,res->key);
-			#endif	
+			//#endif	
 			generate_inst(C_Add,op1,op2,res);
 			*expRes = res;
 			
+			// #ifdef DEBUG_INST
+			// fprintf(stderr, "\tExprSub-------CODE:%d|OPE1 %s %d ||OPE2 %s %d ||Vysl %s\n",
+			// 	C_Sub,op1->key,op1->data.value.i,op2->key,op2->data.value.i,res->key);
+			// #endif	
+
 			// nejdrive se zbavim: < E + E (4x pop)
 			/*stack_pop(NULL,0);			
 			stack_pop(NULL,0);			
@@ -753,10 +758,11 @@ TError find_rule(ruleType rule)
 			//tHTItem *op2;	//operand 2
 			stack_pop(&op2,1);	
 			stack_pop(NULL,0);	//znamienko
-			
+			//printf("OP2: %s\n", op2->key);
 			//tHTItem *op1;	//operand 1			
 			stack_pop(&op1,1);
 			stack_pop(NULL,0);	//znamienko
+			//printf("OP1: %s\n", op1->key);
 			// double - int
 			if ((stack.top->idType == Tdouble && stack.top->Lptr->Lptr->idType == Tint) ||
 				(stack.top->idType == Tint && stack.top->Lptr->Lptr->idType == Tdouble))
@@ -787,17 +793,17 @@ TError find_rule(ruleType rule)
 			//	printf("###############Chyba Nonterminalu - kompatibilita?.\n"); @TODO vyresit pro ID
 			//	print_error(ESEM_TYP, token.line);
 			}	
-			
 			strInit(&newVar);
 			generate_variable(&newVar,counteerVar);
 			htInsert(*locTable, newVar.str,data);		// pomocna premenna na vysledok
 			res = htSearch(*locTable,newVar.str);
 			#ifdef DEBUG_INST
-			fprintf(stderr, "\tExprSub-------CODE:%d|OPE1 %s %d ||OPE2 %s %d ||Vysl %s\n",
-				C_Sub,op1->key,op1->data.value.i,op2->key,op2->data.value.i,res->key);
-			#endif	
+			fprintf(stderr, "\tExprSub-------CODE:%d |OPE1 %d ||OPE2 %s %d ||Vysl %s\n",
+				C_Sub, op1->data.value.i, op2->key, op2->data.value.i, res->key);
+			#endif
 			generate_inst(C_Sub,op1,op2,res);
-			*expRes = res;	
+			*expRes = res;
+
 			
 			// nejdrive se zbavim: < E - E (4x pop)
 			// stack_pop(NULL,0);
@@ -1628,10 +1634,10 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 					}
 
 					get_next_token(input, attr);
-					if(token.type == T_Id){
-						idName = realloc(idName,sizeof(char)*strlen(attr->str)+1);
-						strcpy(idName,attr->str);
-					}
+					// if(token.type == T_Id){
+					// 	idName = realloc(idName,sizeof(char)*strlen(attr->str)+1);
+					// 	strcpy(idName,attr->str);
+					// }
 				break;
 				case great:
 					#ifdef DEBUG
