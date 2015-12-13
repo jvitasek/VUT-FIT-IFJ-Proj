@@ -717,7 +717,7 @@ case I_NEQ:
 #include <stdlib.h>
 #include "ial.h"
 
-#define DEBUG 1
+//#define DEBUG 1
 
 TError interpret(tInstList *L)
 {

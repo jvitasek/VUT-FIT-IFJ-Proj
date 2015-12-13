@@ -8,7 +8,7 @@
  * 			xvalec00 – Dusan Valecky
  */
 
-//#define DEBUG 1
+#define DEBUG 1
 //#define DEBUG_SEM 1
 //#define DEBUG_INST 1
 
@@ -741,6 +741,7 @@ TError stmt(FILE *input)
 					error = if_n(input);
 					#ifdef DEBUG
 					fprintf(stderr, "stmt: if_n: %d\n", error);
+					fprintf(stderr, "po if_n mam token: %d\n", token.type);
 					#endif
 					if(error == ENOP)
 					{
@@ -767,7 +768,7 @@ TError stmt(FILE *input)
 		}
 	}
 	// 23: <STMT> -> for( <VAR_DEF> <EXPR> <ASSIGN> ) <COMM_SEQ>
-	else if(token.type == T_For)
+	if(token.type == T_For)
 	{
 		get_next_token(input, &attr);
 		if(token.type == T_LeftParenthesis)
@@ -852,7 +853,7 @@ TError stmt(FILE *input)
 		}
 	}
 	// 24: <STMT> -> <COMM_SEQ>
-	else if((error = comm_seq(input)) == ENOP || error == ESYN)
+	if((error = comm_seq(input)) == ENOP || error == ESYN)
 	{
 		#ifdef DEBUG
 		fprintf(stderr, "stmt: comm_seq vratilo: %d\n", error);
@@ -860,7 +861,7 @@ TError stmt(FILE *input)
 		return error;
 	}
 	// 25: <STMT> -> <VAR_DEF>
-	else if((error = var_def(input)) == ENOP || error == ESYN)
+	if((error = var_def(input)) == ENOP || error == ESYN)
 	{
 		#ifdef DEBUG
 		fprintf(stderr, "stmt: var_def vratilo: %d\n", error);
@@ -868,7 +869,7 @@ TError stmt(FILE *input)
 		return error;
 	}
 	// 26: <STMT> -> cin >> id <CIN_ID_N>;
-	else if(token.type == T_Cin)
+	if(token.type == T_Cin)
 	{
 		get_next_token(input, &attr);
 		if(token.type == T_RightShift)
@@ -947,7 +948,7 @@ TError stmt(FILE *input)
 		}
 	}
 	// 27: <STMT> -> cout << <COUT_TERM>;
-	else if(token.type == T_Cout)
+	if(token.type == T_Cout)
 	{
 		get_next_token(input, &attr);
 		if(token.type == T_LeftShift)
@@ -979,7 +980,7 @@ TError stmt(FILE *input)
 		}
 	}
 	// 28: <STMT> -> <RETURN>
-	else if((error = ret(input)) == ENOP || error == ESYN)
+	if((error = ret(input)) == ENOP || error == ESYN)
 	{
 		#ifdef DEBUG
 		fprintf(stderr, "stmt: ret vratilo: %d\n", error);
@@ -987,7 +988,7 @@ TError stmt(FILE *input)
 		return error;
 	}
 	// 29) <STMT> -> id <CALL_ASSIGN>
-	else if(token.type == T_Id)
+	if(token.type == T_Id)
 	{
 		// SEMANTICKA ANALYZA
 		tData *tempData;
