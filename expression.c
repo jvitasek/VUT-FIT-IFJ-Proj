@@ -193,6 +193,7 @@ TError stack_dispose()
  */
 TError stack_pop(tHTItem **item, int ptrAss)
 {
+	printf("ZACATEK POPU\n");
 	TError error = ENOP;
 	#ifdef DEBUG
 		printf("StackPop in progress.\n");
@@ -238,7 +239,7 @@ TError stack_pop(tHTItem **item, int ptrAss)
 		error = ESYN;
 		return error;
 	}
-
+	printf("KONEC POPU\n");
 	return error;
 }
 
@@ -625,9 +626,12 @@ TError find_rule(ruleType rule)
 	tData data;
 	int cntPar = 0;
 
+
+
 	switch(rule)
 	{
 		case ADD_RULE:	// E -> E + E
+			fprintf(stderr, "ADD_RULE\n");
 			if ((stack.top->termType != PNonTerm) || 
 				(stack.top->Lptr->Lptr->termType != PNonTerm))
 			{
@@ -688,15 +692,17 @@ TError find_rule(ruleType rule)
 			//	printf("###############Chyba Nonterminalu - kompatibilita?.\n"); @TODO vyresit pro ID
 			//	print_error(ESEM_TYP, token.line);
 			}
-			
+	
 			strInit(&newVar);
 			generate_variable(&newVar,counteerVar);
 			htInsert(*locTable, newVar.str,data);		// pomocna premenna na vysledok
 			res = htSearch(*locTable,newVar.str);
-			//#ifdef DEBUG_INST
+			#ifdef DEBUG_INST
+			printf("SEM TO DOJDE\n");
 			fprintf(stderr, "\tExprAdd-------CODE:%d|OPE1 %s %d ||OPE2 %s %d ||Vysl %s\n",
 				C_Add,op1->key,op1->data.value.i,op2->key,op2->data.value.i,res->key);
-			//#endif	
+			#endif
+			printf("SEM UZ NEEEE\n");	
 			generate_inst(C_Add,op1,op2,res);
 			*expRes = res;
 			
@@ -730,6 +736,7 @@ TError find_rule(ruleType rule)
 		break;
 
 		case SUB_RULE:	// E -> E - E
+			fprintf(stderr, "SUB_RULE\n");
 			if ((stack.top->termType != PNonTerm) || 
 				(stack.top->Lptr->Lptr->termType != PNonTerm))
 			{
@@ -831,6 +838,7 @@ TError find_rule(ruleType rule)
 		break;
 
 		case MUL_RULE:	// E -> E * E
+			fprintf(stderr, "MUL_RULE\n");
 			if ((stack.top->termType != PNonTerm) || 
 				(stack.top->Lptr->Lptr->termType != PNonTerm))
 			{
@@ -933,6 +941,7 @@ TError find_rule(ruleType rule)
 		break;
 
 		case DIV_RULE:	// E -> E / E
+			fprintf(stderr, "DIV_RULE\n");
 			if ((stack.top->termType != PNonTerm) || 
 				(stack.top->Lptr->Lptr->termType != PNonTerm))
 			{
@@ -1050,6 +1059,7 @@ TError find_rule(ruleType rule)
 		break;
 
 		case LESSGREAT_RULE: // E -> E > E, E -> E >= E, ...
+			fprintf(stderr, "LESS_RULE\n");
 			if ((stack.top->termType != PNonTerm) || 
 				(stack.top->Lptr->Lptr->termType != PNonTerm))
 			{
@@ -1128,6 +1138,7 @@ TError find_rule(ruleType rule)
 		break;
 
 		case PAR_RULE:	// E -> (E)
+			fprintf(stderr, "PAR_RULE\n");
 			if (stack.top->Lptr->termType != PNonTerm ||
 				stack.top->Lptr->Lptr->termType != PLeftP)
 			{
@@ -1164,6 +1175,7 @@ TError find_rule(ruleType rule)
 		break;
 
 		case ID_E_RULE:	// E -> i ... i pro string, int, double
+			fprintf(stderr, "ID_RULE\n");
 			if ((tempPtr = malloc(sizeof(struct TstackElem))) == NULL)
 			{
 				
@@ -1256,6 +1268,7 @@ TError find_rule(ruleType rule)
 			//
 			// @ TODO - mozna bude chybet podminka, az budu zpracovavat parametry
 			// 
+			fprintf(stderr, "FUNC_RULE\n");
 			 
 
 			cntPar = return_param_count(currentFunc);
