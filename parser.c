@@ -9,7 +9,7 @@
  */
 
 //#define DEBUG 1
-//#define DEBUG_SEM 1
+#define DEBUG_SEM 1
 //#define DEBUG_INST 1
 
 
@@ -764,6 +764,20 @@ TError comm_seq(FILE *input)
 		fprintf(stderr, "POPPUJU na %d\n", token.line);
 		#endif
 		commTable = tableStack.top->table;
+
+		/**
+		 * kontrola, zda byl return
+		 */
+		printf("currScope: %d\n", currScope);
+		printf("isReturn: %d\n", isReturn);
+		if(currScope == 0 && isReturn != 1)
+		{
+			#ifdef DEBUG_SEM
+			fprintf(stderr, "Chyba: funkce %s neobsahuje prikaz return\n", currFunc);
+			#endif
+			print_error(ERUN_UNINIT, token.line);
+		}
+		isReturn = 0;
 		// /SEMANTICKA ANALYZA
 		if(error == ENOP || error == EEMPTY)
 		{
@@ -1469,7 +1483,6 @@ TError ret(FILE *input)
 		isReturn = 1;
 		get_next_token(input, &attr);
 		error = expr(input, &attr, 0, &counterVar, &commTable, &exprRes);
-		isReturn = 0;
 		#ifdef DEBUG
 		fprintf(stderr, "ret: expr vratilo: %d\n", error);
 		#endif
