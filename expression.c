@@ -1626,7 +1626,12 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 						stack_dispose();
 						return error;
 					}
+
 					get_next_token(input, attr);
+					if(token.type == T_Id){
+						idName = realloc(idName,sizeof(char)*strlen(attr->str)+1);
+						strcpy(idName,attr->str);
+					}
 				break;
 				case great:
 					#ifdef DEBUG
