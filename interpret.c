@@ -737,16 +737,27 @@ TError interpret(tInstList *L)
 		res = (tHTItem*)ins->result;
 		if(ins->instCode == C_Assign)
 		{
+
 			res->data.value.d = op1->data.value.d;
-		}else if(ins->instCode == C_Add)
+		}
+    else if(ins->instCode == C_Add)
 		{
+
 			res->data.value.d = op1->data.value.d + op2->data.value.d;
 		}
     else if(ins->instCode == C_Sub)
     {
       res->data.value.d = op1->data.value.d - op2->data.value.d;
     }
-		
+    else if(ins->instCode == C_Mul)
+    {
+      res->data.value.d = op1->data.value.d * op2->data.value.d;
+    }
+    else if(ins->instCode == C_Div)
+    {
+      res->data.value.d = op1->data.value.d / op2->data.value.d;
+    }
+
 		listNext(L);
 	}
   #ifdef DEBUG
