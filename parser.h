@@ -21,6 +21,9 @@ TError parse(FILE *input); // P: 1
 // POM. FUNKCE
 void get_next_token(FILE *input, string *attr);
 int check_builtin(char *test);
+void check_builtin_params(char *func, int order);
+void fill_builtin_params();
+int return_param_count(char *func);
 TError init_table(tHTable **table);
 
 // PRAVIDLA

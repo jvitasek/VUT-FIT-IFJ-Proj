@@ -136,6 +136,156 @@ int check_builtin(char *test)
 }
 
 /**
+ * [check_builtin_params description]
+ * @param func  [description]
+ * @param order [description]
+ */
+void check_builtin_params(char *func, int order)
+{
+	if(strcmp(func, "length") == 0)
+	{
+		if(order != 1)
+		{
+			print_error(ESEM_TYP, token.line);
+		}
+	}
+	else if(strcmp(func, "substr") == 0)
+	{
+		if(order != 3)
+		{
+			print_error(ESEM_TYP, token.line);
+		}
+	}
+	else if(strcmp(func, "concat") == 0)
+	{
+		if(order != 2)
+		{
+			print_error(ESEM_TYP, token.line);
+		}
+	}
+	else if(strcmp(func, "find") == 0)
+	{
+		if(order != 2)
+		{
+			print_error(ESEM_TYP, token.line);
+		}
+	}
+	else if(strcmp(func, "sort") == 0)
+	{
+		if(order != 1)
+		{
+			print_error(ESEM_TYP, token.line);
+		}
+	}
+}
+
+/**
+ * [fill_builtin_params description]
+ */
+void fill_builtin_params()
+{
+	// LENGTH
+	tData data;
+	data.type = VAR;
+	data.varType = T_Str; // ulozeni typu parametru
+	data.timesUsed = 1;
+	data.orderParams = 1;
+	data.scope = 1; // nejnizsi scope nasledujiciho bloku
+	data.value.ptrTS = NULL;
+	data.retType = 0;
+	htInsert(paraTable, "length", data); // vkladani do tabulky parametru
+	// /LENGTH
+	
+	// SUBSTR
+	data.type = VAR;
+	data.varType = T_Str; // ulozeni typu parametru
+	data.timesUsed = 1;
+	data.orderParams = 1;
+	data.scope = 1; // nejnizsi scope nasledujiciho bloku
+	data.value.ptrTS = NULL;
+	data.retType = 0;
+	htInsert(paraTable, "substr", data); // vkladani do tabulky parametru
+	data.type = VAR;
+	data.varType = T_Integ; // ulozeni typu parametru
+	data.timesUsed = 1;
+	data.orderParams = 2;
+	data.scope = 1; // nejnizsi scope nasledujiciho bloku
+	data.value.ptrTS = NULL;
+	data.retType = 0;
+	htInsert(paraTable, "substr", data); // vkladani do tabulky parametru
+	data.type = VAR;
+	data.varType = T_Integ; // ulozeni typu parametru
+	data.timesUsed = 1;
+	data.orderParams = 3;
+	data.scope = 1; // nejnizsi scope nasledujiciho bloku
+	data.value.ptrTS = NULL;
+	data.retType = 0;
+	htInsert(paraTable, "substr", data); // vkladani do tabulky parametru
+	// /SUBSTR
+	
+	// CONCAT
+	data.type = VAR;
+	data.varType = T_Str; // ulozeni typu parametru
+	data.timesUsed = 1;
+	data.orderParams = 1;
+	data.scope = 1; // nejnizsi scope nasledujiciho bloku
+	data.value.ptrTS = NULL;
+	data.retType = 0;
+	htInsert(paraTable, "concat", data); // vkladani do tabulky parametru
+	data.type = VAR;
+	data.varType = T_Str; // ulozeni typu parametru
+	data.timesUsed = 1;
+	data.orderParams = 2;
+	data.scope = 1; // nejnizsi scope nasledujiciho bloku
+	data.value.ptrTS = NULL;
+	data.retType = 0;
+	htInsert(paraTable, "concat", data); // vkladani do tabulky parametru
+	// /CONCAT
+	
+	// FIND
+	data.type = VAR;
+	data.varType = T_Str; // ulozeni typu parametru
+	data.timesUsed = 1;
+	data.orderParams = 1;
+	data.scope = 1; // nejnizsi scope nasledujiciho bloku
+	data.value.ptrTS = NULL;
+	data.retType = 0;
+	htInsert(paraTable, "find", data); // vkladani do tabulky parametru
+	data.type = VAR;
+	data.varType = T_Str; // ulozeni typu parametru
+	data.timesUsed = 1;
+	data.orderParams = 2;
+	data.scope = 1; // nejnizsi scope nasledujiciho bloku
+	data.value.ptrTS = NULL;
+	data.retType = 0;
+	htInsert(paraTable, "find", data); // vkladani do tabulky parametru
+	// /FIND
+	
+	// SORT
+	data.type = VAR;
+	data.varType = T_Str; // ulozeni typu parametru
+	data.timesUsed = 1;
+	data.orderParams = 1;
+	data.scope = 1; // nejnizsi scope nasledujiciho bloku
+	data.value.ptrTS = NULL;
+	data.retType = 0;
+	htInsert(paraTable, "sort", data); // vkladani do tabulky parametru
+	// /SORT
+}
+
+int return_param_count(char *func)
+{
+	tData *tempData;
+	int index = 1;
+
+	while((tempData = htReadOrder(paraTable, func, index)) != NULL)
+	{
+		index++;
+	}
+	return index-1;
+}
+
+/**
  * Hlavni funkce parseru. Simuluje pravidlo 1.
  * @param  input Soubor obsahujici vstupni kod.
  * @param  attr  String lexemu.
@@ -170,6 +320,12 @@ TError parse(FILE *input)
 	init_table(&commTable);
 	init_table(&funcTable);
 	init_table(&paraTable);
+
+	/**
+	 * naplneni parametru pro builtin funkce
+	 */
+	fill_builtin_params();
+	outputSymbolTable(paraTable);
 
 	/**
 	 * inicializace zasobniku tabulek symbolu
@@ -510,20 +666,6 @@ TError dec_or_def(FILE *input)
 	#endif
 	if(error == ENOP)
 	{
-		/**
-		 * kontrola, zda funkce nebyla podruhe definovana
-		 */
-		tData *tempData;
-		if((tempData = htRead(funcTable, currFunc)) != NULL)
-		{
-			if((tempData->isDefined == 1) && (tempData->timesUsed > 1) && (strcmp(currFunc, "main") != 0))
-			{
-				#ifdef DEBUG_SEM
-				fprintf(stderr, "Chyba: funkce %s byla vicekrat definovana\n", strGetStr(&attr));
-				#endif
-				print_error(ESEM_DEF, token.line);
-			}
-		}
 		return error;
 	}
 	else if(error == ESYN)
@@ -553,18 +695,30 @@ TError comm_seq(FILE *input)
 	// 19: <COMM_SEQ> -> { <STMT_LIST> }
 	if(token.type == T_LeftBrace)
 	{
-		// SEMANTICKA ANALYZA
 		/**
-		 * zapiseme, ze funkce byla definovana
+		 * kontrola, zda funkce nebyla podruhe definovana
 		 */
 		tData *tempData;
 		if((tempData = htRead(funcTable, currFunc)) != NULL)
 		{
+			/**
+			 * zjistime, jestli nejde o redefinici
+			 */
+			if((tempData->isDefined == 1) && (strcmp(currFunc, "main") != 0) && (currScope == 0))
+			{
+				#ifdef DEBUG_SEM
+				fprintf(stderr, "Chyba: funkce %s byla vicekrat definovana\n", currFunc);
+				#endif
+				print_error(ESEM_DEF, token.line);
+			}
+			/**
+			 * zapiseme, ze funkce byla definovana
+			 */
 			if(tempData->type == FUNC)
 			{
 				tData data;
 				data.type = tempData->type;
-				data.timesUsed = tempData->timesUsed+1;
+				data.timesUsed = tempData->timesUsed;
 				data.scope = tempData->scope;
 				data.orderParams = tempData->orderParams;
 				data.retType = tempData->retType;
@@ -577,7 +731,6 @@ TError comm_seq(FILE *input)
 				#endif
 			}
 		}
-
 		// SEMANTICKA ANALYZA
 		if(tableStack.top->table != NULL)
 		{
@@ -992,7 +1145,7 @@ TError stmt(FILE *input)
 	{
 		// SEMANTICKA ANALYZA
 		tData *tempData;
-		if((tempData = htRead(commTable, strGetStr(&attr))) == NULL)
+		if(((tempData = htRead(commTable, strGetStr(&attr))) == NULL) && (check_builtin(strGetStr(&attr)) != 1))
 		{
 			#ifdef DEBUG_SEM
 			fprintf(stderr, "Chyba: promenna %s v leve casti prirazeni nebyla nalezena\n", strGetStr(&attr));
@@ -1867,12 +2020,16 @@ TError terms(FILE *input)
 		#ifdef DEBUG_SEM
 		fprintf(stderr, "volam funkci: %s, vlozeno parametru: %d, deklarovany pocet: %d\n", currFunc, currOrderTerm, currOrder);
 		#endif
-		if(currOrderTerm != currOrder)
+		if((currOrderTerm != currOrder) && (check_builtin(currFunc) != 1))
 		{
 			#ifdef DEBUG_SEM
 			fprintf(stderr, "Chyba: pocet parametru zadany pro volani funkce %s neodpovida\n", currFunc);
 			#endif
 			print_error(ESEM_TYP, token.line);
+		}
+		else if(check_builtin(currFunc) == 1)
+		{
+			check_builtin_params(currFunc, currOrderTerm);
 		}
 		currOrderTerm = 0;
 
@@ -1919,12 +2076,16 @@ TError terms(FILE *input)
 		#ifdef DEBUG_SEM
 		fprintf(stderr, "volam funkci: %s, vlozeno parametru: %d, deklarovany pocet: %d\n", currFunc, currOrderTerm, currOrder);
 		#endif
-		if(currOrderTerm != currOrder)
+		if((currOrderTerm != currOrder) && (check_builtin(currFunc) != 1))
 		{
 			#ifdef DEBUG_SEM
 			fprintf(stderr, "Chyba: pocet parametru zadany pro volani funkce %s neodpovida\n", currFunc);
 			#endif
 			print_error(ESEM_TYP, token.line);
+		}
+		else if(check_builtin(currFunc) == 1)
+		{
+			check_builtin_params(currFunc, currOrderTerm);
 		}
 		currOrderTerm = 0;
 
@@ -1947,12 +2108,16 @@ TError terms(FILE *input)
 		#ifdef DEBUG_SEM
 		fprintf(stderr, "volam funkci: %s, vlozeno parametru: %d, deklarovany pocet: %d\n", currFunc, currOrderTerm, currOrder);
 		#endif
-		if(currOrderTerm != currOrder)
+		if((currOrderTerm != currOrder) && (check_builtin(currFunc) != 1))
 		{
 			#ifdef DEBUG_SEM
 			fprintf(stderr, "Chyba: pocet parametru zadany pro volani funkce %s neodpovida\n", currFunc);
 			#endif
 			print_error(ESEM_TYP, token.line);
+		}
+		else if(check_builtin(currFunc) == 1)
+		{
+			check_builtin_params(currFunc, currOrderTerm);
 		}
 		currOrderTerm = 0;
 		error = EEMPTY;
