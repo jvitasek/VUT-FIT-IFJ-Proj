@@ -13,10 +13,9 @@
 #include <stdlib.h>
 #include "ial.h"
 
-//#define DEBUG 1
-
-/**
- * Inicializacia zoznamu
+/**	
+ * [listInit description]
+ * @param L [description]
  */
 void listInit(tInstList *L)
 {
@@ -29,7 +28,8 @@ void listInit(tInstList *L)
 }
 
 /**
- * Rusenie zoznamu
+ * [listDispose description]
+ * @param L [description]
  */
 void listDispose(tInstList *L)
 {
@@ -48,7 +48,9 @@ void listDispose(tInstList *L)
 }
 
 /**
- * Vlozi novy prvok na koniec zoznamu
+ * [listInsertLast description]
+ * @param L [description]
+ * @param I [description]
  */
 void listInsertLast(tInstList *L, tInstruct I)
 {
@@ -73,7 +75,8 @@ void listInsertLast(tInstList *L, tInstruct I)
 }
 
 /**
- * Nastavi aktivitu zoznamu na jeho prvy prvok
+ * [listFirst description]
+ * @param L [description]
  */
 void listFirst(tInstList *L)
 {
@@ -83,9 +86,8 @@ void listFirst(tInstList *L)
 	}
 }
 
-
 /**
- * Zrusi prvy prvok zoznamu
+ * 
  */
  /*
 void listDeleteFirst(tInstList *L)
@@ -139,7 +141,8 @@ void listPostInsert(tInstList *L, tInstCode instCode, void *op1, void *op2, void
 }*/
 
 /**
- * Posunie aktivitu na dalsi prvok
+ * [listNext description]
+ * @param L [description]
  */
 void listNext(tInstList *L)
 {
@@ -153,7 +156,9 @@ void listNext(tInstList *L)
 }
 
 /**
- * Skoci na zadanu adresu intrukcie
+ * [listGoTo description]
+ * @param L         [description]
+ * @param gotoInstr [description]
  */
 void listGoTo(tInstList *L, void *gotoInstr)
 {
@@ -164,7 +169,9 @@ void listGoTo(tInstList *L, void *gotoInstr)
 }
 
 /**
- * Funkcia vracia ukazatel na poslednu instrukciu
+ * [listGetPointerLast description]
+ * @param  L [description]
+ * @return   [description]
  */
 tInstruct *listGetPointerLast(tInstList *L)
 {
@@ -184,7 +191,9 @@ tInstruct *listGetPointerLast(tInstList *L)
 }
 
 /**
- * Funkcia vracia aktivnu instrukciu
+ * [listGetData description]
+ * @param  L [description]
+ * @return   [description]
  */
 tInstruct *listGetData(tInstList *L)
 {
@@ -203,12 +212,10 @@ tInstruct *listGetData(tInstList *L)
 	}
 }
 
-
-
-
-
-
-/** PRE TESTOVANIE */
+/**
+ * [printElementsOfList description]
+ * @param L [description]
+ */
 void printElementsOfList(tInstList L)
 {
     int MaxListLength = 100;

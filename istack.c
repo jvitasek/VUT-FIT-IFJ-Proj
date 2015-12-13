@@ -12,7 +12,6 @@
 * -----------------------------------------------------------------------------
 **/
 
-//#define DEBUG 1
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -20,7 +19,11 @@
 #include "error.h"
 #include "istack.h"
 
-
+/**
+ * [gStackInit description]
+ * @param  stack [description]
+ * @return       [description]
+ */
 TError gStackInit(stack *stack)
 {
 	TError error = ENOP;
