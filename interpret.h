@@ -7,7 +7,7 @@
 *       xvysta02 - Jaroslav Vystavel
 */
 
-#include "instList.h"
+#include "instlist.h"
 #include "error.h"
 
 TError interpret(tInstList *L);

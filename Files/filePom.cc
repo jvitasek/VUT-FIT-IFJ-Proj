@@ -4,7 +4,7 @@
 int main()
 {
     // stack->top: localTable
-   	double bubo = 6.9 + 4.1;
+   	double bubo = 6 + 4 + 8;
 
  
     return bubo;

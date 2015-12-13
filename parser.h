@@ -10,7 +10,7 @@
  
 #include "ial.h"
 #include <stdbool.h>
-#include "instList.h"
+#include "instlist.h"
 
 extern tInstList List;
 #define BUILTIN 5

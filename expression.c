@@ -18,8 +18,8 @@
 //#include "ilist.h"
 
 //#define DEBUG 1
-//#define DEBUG_INST 1
-//#define DEBUG_KL 1
+#define DEBUG_INST 1
+#define DEBUG_KL 1
 
 int *counteerVar;	// sluzi pri tvorbe pomocnych premennych
 Tstack stack;
@@ -691,7 +691,10 @@ TError find_rule(ruleType rule)
 			generate_variable(&newVar,counteerVar);
 			htInsert(*locTable, newVar.str,data);		// pomocna premenna na vysledok
 			res = htSearch(*locTable,newVar.str);
-			
+			#ifdef DEBUG_INST
+			fprintf(stderr, "\tExprAdd-------CODE:%d|OPE1 %s %d ||OPE2 %s %d ||Vysl %s\n",
+				C_Add,op1->key,op1->data.value.i,op2->key,op2->data.value.i,res->key);
+			#endif	
 			generate_inst(C_Add,op1,op2,res);
 			*expRes = res;
 			
@@ -789,7 +792,10 @@ TError find_rule(ruleType rule)
 			generate_variable(&newVar,counteerVar);
 			htInsert(*locTable, newVar.str,data);		// pomocna premenna na vysledok
 			res = htSearch(*locTable,newVar.str);
-			
+			#ifdef DEBUG_INST
+			fprintf(stderr, "\tExprSub-------CODE:%d|OPE1 %s %d ||OPE2 %s %d ||Vysl %s\n",
+				C_Sub,op1->key,op1->data.value.i,op2->key,op2->data.value.i,res->key);
+			#endif	
 			generate_inst(C_Sub,op1,op2,res);
 			*expRes = res;	
 			
@@ -888,7 +894,10 @@ TError find_rule(ruleType rule)
 			generate_variable(&newVar,counteerVar);
 			htInsert(*locTable, newVar.str,data);		// pomocna premenna na vysledok
 			res = htSearch(*locTable,newVar.str);
-			
+			#ifdef DEBUG_INST
+			fprintf(stderr, "\tExprMul-------CODE:%d|OPE1 %s %d ||OPE2 %s %d ||Vysl %s\n",
+				C_Mul,op1->key,op1->data.value.i,op2->key,op2->data.value.i,res->key);
+			#endif	
 			generate_inst(C_Mul,op1,op2,res);
 			*expRes = res;
 
@@ -1002,7 +1011,10 @@ TError find_rule(ruleType rule)
 			generate_variable(&newVar,counteerVar);
 			htInsert(*locTable, newVar.str,data);		// pomocna premenna na vysledok
 			res = htSearch(*locTable,newVar.str);
-			
+			#ifdef DEBUG_INST
+			fprintf(stderr, "\tExprDiv-------CODE:%d|OPE1 %s %d ||OPE2 %s %d ||Vysl %s\n",
+				C_Div,op1->key,op1->data.value.i,op2->key,op2->data.value.i,res->key);
+			#endif			
 			generate_inst(C_Div,op1,op2,res);
 			*expRes = res;
 			
@@ -1234,7 +1246,7 @@ TError find_rule(ruleType rule)
 				tHTItem *op1 = htSearch(*locTable,tempPtr->data);
 				tHTItem *res = htSearch(*locTable,newVar.str);
 				#ifdef DEBUG_INST
-				fprintf(stderr, "\tExprInt CODE:%d|OPE1 %s %d ||Vysl %s\n",C_Assign,op1->key,op1->data.value.i,res->key);
+				fprintf(stderr, "\tExpr-ID-E-Int CODE:%d|OPE1 %s %d ||Vysl %s\n",C_Assign,op1->key,op1->data.value.i,res->key);
 				#endif
 		
 				generate_inst(C_Assign,op1,NULL,res);
@@ -1250,7 +1262,7 @@ TError find_rule(ruleType rule)
 				tHTItem *op1 = htSearch(*locTable,tempPtr->data);
 				tHTItem *res = htSearch(*locTable,newVar.str);
 				#ifdef DEBUG_INST
-				fprintf(stderr, "\tExprDoub CODE:%d|OPE1 %s %f ||Vysl %s\n",C_Assign,op1->key,op1->data.value.d,res->key);
+				fprintf(stderr, "\tExpr-ID-E-Doub CODE:%d|OPE1 %s %f ||Vysl %s\n",C_Assign,op1->key,op1->data.value.d,res->key);
 				#endif
 		
 				generate_inst(C_Assign,op1,NULL,res);
@@ -1266,7 +1278,7 @@ TError find_rule(ruleType rule)
 				tHTItem *op1 = htSearch(*locTable,tempPtr->data);
 				tHTItem *res = htSearch(*locTable,newVar.str);
 				#ifdef DEBUG_INST
-				fprintf(stderr, "\tExprStr CODE:%d|OPE1 %s %s ||Vysl %s\n",C_Assign,op1->key,op1->data.value.str,res->key);
+				fprintf(stderr, "\tExpr-ID-E-Str CODE:%d|OPE1 %s %s ||Vysl %s\n",C_Assign,op1->key,op1->data.value.str,res->key);
 				#endif
 		
 				generate_inst(C_Assign,op1,NULL,res);
@@ -1514,10 +1526,14 @@ TError expr(FILE *input, string *attr, int semi_or_par, int *count, tHTable **lo
 							}
 							tData *tmpData;
 							//outputSymbolTable(funcTable);
+							#ifdef DEBUG_SEM
 							printf("currFunc: %s\n", currentFunc);
+							#endif
 							if((tmpData = htRead(funcTable, currFunc)) != NULL)
 							{
+								#ifdef DEBUG_SEM
 								printf("--TempData->retType: %d, tmpData->retType: %d\n", tempData->retType, tmpData->retType);
+								#endif
 								if (tempData->retType != tmpData->retType)
 								{
 									print_error(ESEM_TYP, token.line);
